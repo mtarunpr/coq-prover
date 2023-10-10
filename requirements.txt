@@ -1,0 +1,5 @@
+alectryon
+joblib
+openai
+python-dotenv
+tenacity

@@ -160,21 +160,21 @@ with open("stderr.txt", "w") as f:
             # Now that we have a valid lemma, we can use it to complete the proof
             print("PROOF USING LEMMA")
             # Convert sentences to Coq code
-            proof_with_lemma = ""
+            proof_using_lemma = ""
             i = 0
             for sentence in annotated_proof_sentences:
                 if i == first_error_idx:
-                    proof_with_lemma += (
+                    proof_using_lemma += (
                         "apply " + lemma_with_proof.split(" ")[1] + ".\n"
                     )
                 else:
-                    proof_with_lemma += sentence.contents + "\n"
+                    proof_using_lemma += sentence.contents + "\n"
                 i += 1
-            print(proof_with_lemma)
+            print(proof_using_lemma)
             print()
 
             print("ANNOTATED PROOF USING LEMMA")
-            full_coq_code = lemma_with_proof + "\n\n" + theorem + "\n" + proof_with_lemma
+            full_coq_code = lemma_with_proof + "\n\n" + theorem + "\n" + proof_using_lemma
             annotated_proof_sentences, first_error_idx = annotate_and_fetch_error(
                 full_coq_code
             )

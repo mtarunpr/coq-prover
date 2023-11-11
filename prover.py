@@ -30,24 +30,24 @@ def ask(messages, model):
     return response.choices[0].message.content
 
 
-def prove_theorem(theorem, model):
+def prove_theorem(context, theorem, model):
     messages = [
         {
             "role": "system",
-            "content": "You are an automated theorem prover that can prove theorems in Coq. Your entire response must be valid Coq code. You are allowed to explain your reasoning, but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions and other environment variables), and your response must be a valid Coq proof of that theorem. Do not include the theorem statement in your proof. Your response must begin with the keyword 'Proof.' and end with the keyword 'Qed.'",
+            "content": "You are an automated theorem prover that can prove theorems in Coq. Your entire response must be valid Coq code. You are allowed to explain your reasoning, but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions and other environment variables), and your response must be a valid Coq proof of that theorem. Do not include the theorem statement in your proof. Your response must begin with the keyword 'Proof.' and end with the keyword 'Qed.' Remember: do not add any other text besides Coq code (not even markdown)",
         },
-        {"role": "user", "content": theorem},
+        {"role": "user", "content": context + "\n\n" + theorem},
     ]
     return ask(messages, model)
 
 
-def prove_lemma(proof_state, model, prev_attempt_with_error=None):
+def prove_lemma(context, proof_state, model, prev_attempt_with_error=None):
     messages = [
         {
             "role": "system",
-            "content": "You are an automated theorem prover that can prove lemmas in Coq. Your entire response must be valid Coq code. You are allowed to explain your reasoning, but only in comments inside the Coq code. The following message will consist of a proof state (hypotheses followed by the goal), and your response must be a valid Coq lemma whose statement contains the hypotheses and the conclusion, along with a valid proof of that goal. Your response must be in this format: Lemma <lemma_name> : <lemma_statement>. Proof. <proof>. Qed.",
+            "content": "You are an automated theorem prover that can prove lemmas in Coq. Your entire response must be valid Coq code. You are allowed to explain your reasoning, but only in comments inside the Coq code. The following message will consist of a proof state (hypotheses followed by the goal), and your response must be a valid Coq lemma whose statement contains the hypotheses and the conclusion, along with a valid proof of that goal. Your response must be in this format: Lemma <lemma_name> : <lemma_statement>. Proof. <proof>. Qed. Remember: do not add any other text besides Coq code (not even markdown)",
         },
-        {"role": "user", "content": proof_state},
+        {"role": "user", "content": context + "\n\n" + proof_state},
     ]
     if prev_attempt_with_error is not None:
         prev_attempt, error = prev_attempt_with_error
@@ -72,19 +72,23 @@ def annotate_and_fetch_error(theorem_with_proof):
         if not isinstance(step, Sentence):
             continue
         if len(step.messages) > 0:
-            if first_error_idx == -1:
+            if first_error_idx == -1 and not any(
+                "deprecated" in message.contents for message in step.messages
+                ):
                 first_error_idx = i
         annotated_proof_sentences.append(step)
-        print(i, step)
         i += 1
     print()
     return annotated_proof_sentences, first_error_idx
 
 
+with open("context.v", "r") as f:
+    context = f.read()
 with open("theorem.v", "r") as f:
     theorem = f.read()
 
 proof = prove_theorem(
+    context,
     theorem,
     MODEL,
 )
@@ -93,18 +97,24 @@ proof = prove_theorem(
 with open("stderr.txt", "w") as f:
     with redirect_stderr(f):
         print("COQ PROOF")
-        print(theorem + "\n" + proof)
+        print(context + "\n" + theorem + "\n" + proof)
         print()
 
-        print("ANNOTATED PROOF")
         annotated_proof_sentences, first_error_idx = annotate_and_fetch_error(
-            theorem + "\n" + proof
+            context + "\n" + theorem + "\n" + proof
         )
 
         # If there is an error, extract the proof state before the error
         # and try to prove that goal separately as a lemma
         if first_error_idx != -1:
             prev_sentence = annotated_proof_sentences[first_error_idx - 1]
+            error_message = (
+                    annotated_proof_sentences[first_error_idx]
+                    .messages[0]
+                    .contents
+                )
+            print(f"ERROR MESSAGE (SENTENCE #{first_error_idx})")
+            print(error_message)
             proof_state = ""
             for hypothesis in prev_sentence.goals[0].hypotheses:
                 proof_state += (
@@ -115,26 +125,33 @@ with open("stderr.txt", "w") as f:
             print("PROOF STATE")
             print(proof_state)
             print()
-            lemma_with_proof = prove_lemma(proof_state, MODEL)
+            lemma_with_proof = (
+                context + "\n\n" + prove_lemma(context, proof_state, MODEL)
+            )
             print("GPT PROOF OF LEMMA")
             print(lemma_with_proof)
             print()
 
             # Check if lemma's proof is valid
-            print("ANNOTATED LEMMA")
             annotated_lemma_sentences, first_error_idx_lemma = annotate_and_fetch_error(
                 lemma_with_proof
             )
             if first_error_idx_lemma != -1:
                 print("LEMMA PROOF IS INVALID. TRYING AGAIN...")
+                error_message = (
+                    annotated_lemma_sentences[first_error_idx_lemma]
+                    .messages[0]
+                    .contents
+                )
+                print(f"ERROR MESSAGE (SENTENCE #{first_error_idx})")
+                print(error_message)
                 lemma_with_proof = prove_lemma(
+                    context,
                     proof_state,
                     MODEL,
                     (
                         lemma_with_proof,
-                        annotated_lemma_sentences[first_error_idx_lemma]
-                        .messages[0]
-                        .contents,
+                        error_message,
                     ),
                 )
                 print("GPT PROOF OF LEMMA - ATTEMPT 2")
@@ -142,7 +159,6 @@ with open("stderr.txt", "w") as f:
                 print()
 
                 # Check if attempt 2 lemma's proof is valid
-                print("ANNOTATED LEMMA - ATTEMPT 2")
                 (
                     annotated_lemma_sentences,
                     first_error_idx_lemma,
@@ -173,8 +189,9 @@ with open("stderr.txt", "w") as f:
             print(proof_using_lemma)
             print()
 
-            print("ANNOTATED PROOF USING LEMMA")
-            full_coq_code = lemma_with_proof + "\n\n" + theorem + "\n" + proof_using_lemma
+            full_coq_code = (
+                lemma_with_proof + "\n\n" + theorem + "\n" + proof_using_lemma
+            )
             annotated_proof_sentences, first_error_idx = annotate_and_fetch_error(
                 full_coq_code
             )
@@ -185,7 +202,7 @@ with open("stderr.txt", "w") as f:
                 exit(1)
             else:
                 print("PROOF IS VALID")
-                with open('proof.v', 'w') as f:
+                with open("proof.v", "w") as f:
                     f.write(full_coq_code)
         else:
             print("PROOF IS VALID")

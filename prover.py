@@ -1,5 +1,5 @@
 import openai
-from alectryon.serapi import annotate, Sentence
+from alectryon.serapi import annotate, Sentence, Text
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from joblib import Memory
 from contextlib import redirect_stderr
@@ -59,19 +59,18 @@ def prove_using_gpt(context, theorem_or_lemma, model, prev_attempt_with_error=No
 def annotate_and_fetch_error(context, theorem_with_proof):
     first_error_idx = -1
     annotated_proof = annotate([context + "\n\n" + theorem_with_proof])
-    annotated_proof_sentences = []
+    # A Fragment is a Sentence (proof step) or a Text (comment)
+    annotated_proof_fragments = []
     i = 0
     for step in annotated_proof[0]:
-        if not isinstance(step, Sentence):
-            continue
-        if len(step.messages) > 0:
+        if isinstance(step, Sentence) and len(step.messages) > 0:
             if first_error_idx == -1 and not any(
                 "deprecated" in message.contents for message in step.messages
             ):
                 first_error_idx = i
-        annotated_proof_sentences.append(step)
+        annotated_proof_fragments.append(step)
         i += 1
-    return annotated_proof_sentences, first_error_idx
+    return annotated_proof_fragments, first_error_idx
 
 
 def proof_state_to_lemma(lemma_name, hypotheses, conclusion):
@@ -103,7 +102,7 @@ def recursively_prove_lemma(
         proof = prove_using_gpt(context, lemma, MODEL)
     # Otherwise, try to prove the lemma again using the previous attempt's error message
     else:
-        print(f"ERROR MESSAGE IN LEMMA PROOF (SENTENCE #{prev_attempt_error_idx})")
+        print(f"ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #{prev_attempt_error_idx})")
         print(prev_attempt_error_message)
         print()
         print(f"LEMMA PROOF IS INVALID. TRYING AGAIN... (ATTEMPT {depth})")
@@ -125,13 +124,13 @@ def recursively_prove_lemma(
     print()
 
     # Check if lemma's proof is valid
-    annotated_lemma_sentences, first_error_idx = annotate_and_fetch_error(
+    annotated_proof_fragments, first_error_idx = annotate_and_fetch_error(
         context, lemma_with_proof
     )
 
     # If invalid, try again recursively
     if first_error_idx != -1:
-        error_message = annotated_lemma_sentences[first_error_idx].messages[0].contents
+        error_message = annotated_proof_fragments[first_error_idx].messages[0].contents
         return recursively_prove_lemma(
             context,
             lemma,
@@ -160,16 +159,20 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
     print()
 
     # Check if proof is valid and get error index if any
-    annotated_proof_sentences, first_error_idx = annotate_and_fetch_error(
+    annotated_proof_fragments, first_error_idx = annotate_and_fetch_error(
         context, theorem + "\n" + proof
     )
 
     # If there is an error, extract the proof state before the error
     # and try to prove that goal separately as a lemma
     if first_error_idx != -1:
-        prev_sentence = annotated_proof_sentences[first_error_idx - 1]
-        error_message = annotated_proof_sentences[first_error_idx].messages[0].contents
-        print(f"ERROR MESSAGE IN THEOREM PROOF (SENTENCE #{first_error_idx})")
+        # Get the closest Sentence before the error (but note that some proof fragments may be Texts, not Sentences)
+        for i in range(first_error_idx - 1, -1, -1):
+            if isinstance(annotated_proof_fragments[i], Sentence):
+                prev_sentence = annotated_proof_fragments[i]
+                break
+        error_message = annotated_proof_fragments[first_error_idx].messages[0].contents
+        print(f"ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #{first_error_idx})")
         print(error_message)
         print()
 
@@ -191,20 +194,23 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         # Now that we have a valid lemma, we can use it to complete the proof
         # Convert sentences to Coq code
         proof_using_lemma = ""
-        i = 0
-        for sentence in annotated_proof_sentences:
+        for i, sentence in enumerate(annotated_proof_fragments):
             if i == first_error_idx:
                 proof_using_lemma += (
-                    "apply (@" + lemma.split("Lemma ")[1].split(" ")[0] + " " + lemma_args + ").\n"
+                    "apply (@"
+                    + lemma.split("Lemma ")[1].split(" ")[0]
+                    + " "
+                    + lemma_args
+                    + ").\n"
                 )
                 goal_count_at_error_line = len(sentence.goals)
                 still_in_same_goal = True
             elif i > first_error_idx:
                 # If this line is trying to prove the same goal as the line that caused the error,
                 # skip it
-                if len(sentence.goals) >= goal_count_at_error_line:
+                if isinstance(sentence, Text) or len(sentence.goals) >= goal_count_at_error_line:
                     if still_in_same_goal:
-                        pass
+                        continue
                     else:
                         proof_using_lemma += sentence.contents + "\n"
                 # The first time the number of goals drops below the number of goals at the error line,
@@ -213,9 +219,12 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
                     still_in_same_goal = False
             else:
                 proof_using_lemma += sentence.contents + "\n"
-            i += 1
         # Only keep proof (and discard theorem statement, etc. before it)
-        proof_using_lemma = "Proof.\n" + proof_using_lemma.split("Proof.")[-1].split("Qed.")[0] + "\nQed."
+        proof_using_lemma = (
+            "Proof.\n"
+            + proof_using_lemma.split("Proof.")[-1].split("Qed.")[0]
+            + "\nQed."
+        )
 
         return check_theorem_proof_and_maybe_reprove_using_lemmas(
             context + "\n" + lemma_with_proof, theorem, proof_using_lemma, depth + 1

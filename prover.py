@@ -8,7 +8,7 @@ import os
 
 load_dotenv()
 
-memory = Memory("cachegpt")
+memory = Memory("cachegpt", verbose=0)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 MODEL = "gpt-4"
@@ -32,27 +32,13 @@ def ask(messages, model):
     return response.choices[0].message.content
 
 
-def prove_theorem_using_gpt(context, theorem, model):
+def prove_using_gpt(context, theorem_or_lemma, model, prev_attempt_with_error=None):
     messages = [
         {
             "role": "system",
-            "content": "You are an automated theorem prover that can prove theorems in Coq. Your entire response must be valid Coq code. You should explain your reasoning (what the proof steps are attempting to do), but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions, imports, etc.), and your response must be a valid Coq proof of that theorem. Do not include the theorem statement in your proof. Your response must be in this format: ```coq\n Proof.\n<proof>. Qed.\n```. Remember: do not add any other text besides Coq code and do not repeat the theorem statement or any imports, definitions, lemmas, etc. provided in the prompt.",
+            "content": "You are an automated theorem prover that can prove theorems and lemmas in Coq. Your entire response must be valid Coq code. You should explain your reasoning (what the proof steps are attempting to do), but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions, imports, etc.), and your response must be a valid Coq proof of that theorem. Your response must be in this format: ```coq\n Proof.\n<proof>. Qed.\n```. Remember: do not add any other text besides Coq code and do not repeat any imports, definitions, lemmas, etc. provided in the prompt.",
         },
-        {"role": "user", "content": context + "\n\n" + theorem},
-    ]
-    # Get proof from inside the Coq code
-    response = ask(messages, model)
-    proof_contents = response.split("Proof.")[1].split("Qed.")[0]
-    return "Proof.\n" + proof_contents + "\nQed."
-
-
-def prove_lemma_using_gpt(context, proof_state, model, prev_attempt_with_error=None):
-    messages = [
-        {
-            "role": "system",
-            "content": "You are an automated theorem prover that can prove lemmas in Coq. Your entire response must be valid Coq code. You should explain your reasoning (what the proof steps are attempting to do), but only in comments inside the Coq code. The following message will consist of a proof state (hypotheses followed by the goal), and your response must be a valid Coq lemma whose statement contains the hypotheses and the conclusion, along with a valid proof of that goal. Your response must be in this format: ```coq\n Lemma <lemma_name> : <lemma_statement>.\n Proof.\n<proof>. Qed.\n```. Remember: do not add any other text besides Coq code and do not repeat any imports, definitions, lemmas, etc. provided in the prompt.",
-        },
-        {"role": "user", "content": context + "\n\n" + proof_state},
+        {"role": "user", "content": context + "\n\n" + theorem_or_lemma},
     ]
     if prev_attempt_with_error is not None:
         prev_attempt, error = prev_attempt_with_error
@@ -66,8 +52,8 @@ def prove_lemma_using_gpt(context, proof_state, model, prev_attempt_with_error=N
             },
         ]
     response = ask(messages, model)
-    lemma_with_proof_contents = response.split("Lemma ")[1].split("Qed.")[0]
-    return "Lemma " + lemma_with_proof_contents + "\nQed."
+    proof_contents = response.split("Proof.")[1].split("Qed.")[0]
+    return "Proof.\n" + proof_contents + "\nQed."
 
 
 def annotate_and_fetch_error(context, theorem_with_proof):
@@ -88,9 +74,20 @@ def annotate_and_fetch_error(context, theorem_with_proof):
     return annotated_proof_sentences, first_error_idx
 
 
+def proof_state_to_lemma(lemma_name, hypotheses, conclusion):
+    lemma = f"Lemma {lemma_name} : "
+    if len(hypotheses) > 0:
+        for hypothesis in hypotheses:
+            lemma += (
+                "forall " + " ".join(hypothesis.names) + " : " + hypothesis.type + ", "
+            )
+    lemma += conclusion + ".\n"
+    return lemma
+
+
 def recursively_prove_lemma(
     context,
-    proof_state,
+    lemma,
     depth=0,
     prev_attempt_lemma_with_proof=None,
     prev_attempt_error_message=None,
@@ -103,15 +100,17 @@ def recursively_prove_lemma(
 
     # If this is the first attempt, try to prove the lemma
     if depth == 0:
-        lemma_with_proof = prove_lemma_using_gpt(context, proof_state, MODEL)
+        proof = prove_using_gpt(context, lemma, MODEL)
     # Otherwise, try to prove the lemma again using the previous attempt's error message
     else:
-        print(f"ERROR MESSAGE (SENTENCE #{prev_attempt_error_idx})")
+        print(f"ERROR MESSAGE IN LEMMA PROOF (SENTENCE #{prev_attempt_error_idx})")
         print(prev_attempt_error_message)
+        print()
         print(f"LEMMA PROOF IS INVALID. TRYING AGAIN... (ATTEMPT {depth})")
-        lemma_with_proof = prove_lemma_using_gpt(
+        print()
+        proof = prove_using_gpt(
             context,
-            proof_state,
+            lemma,
             MODEL,
             (
                 prev_attempt_lemma_with_proof,
@@ -120,6 +119,7 @@ def recursively_prove_lemma(
         )
 
     # Print the lemma's proof
+    lemma_with_proof = lemma + "\n" + proof
     print("GPT PROOF OF LEMMA")
     print(lemma_with_proof)
     print()
@@ -134,7 +134,7 @@ def recursively_prove_lemma(
         error_message = annotated_lemma_sentences[first_error_idx].messages[0].contents
         return recursively_prove_lemma(
             context,
-            proof_state,
+            lemma,
             depth + 1,
             lemma_with_proof,
             error_message,
@@ -143,6 +143,7 @@ def recursively_prove_lemma(
     # Otherwise, return the lemma's proof
     else:
         print("LEMMA IS VALID")
+        print()
         return lemma_with_proof
 
 
@@ -155,7 +156,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         exit(1)
 
     print(f"ATTEMPTED COQ PROOF (LEMMAS USED: {depth})")
-    print(context + "\n" + theorem + "\n" + proof)
+    print(context + "\n\n" + theorem + "\n\n" + proof)
     print()
 
     # Check if proof is valid and get error index if any
@@ -168,18 +169,24 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
     if first_error_idx != -1:
         prev_sentence = annotated_proof_sentences[first_error_idx - 1]
         error_message = annotated_proof_sentences[first_error_idx].messages[0].contents
-        print(f"ERROR MESSAGE (SENTENCE #{first_error_idx})")
+        print(f"ERROR MESSAGE IN THEOREM PROOF (SENTENCE #{first_error_idx})")
         print(error_message)
-        proof_state = ""
-        for hypothesis in prev_sentence.goals[0].hypotheses:
-            proof_state += ", ".join(hypothesis.names) + " : " + hypothesis.type + "\n"
-        proof_state += "------------------\n"
-        proof_state += prev_sentence.goals[0].conclusion
-        print("PROOF STATE")
-        print(proof_state)
         print()
 
-        lemma_with_proof = recursively_prove_lemma(context, proof_state)
+        lemma = proof_state_to_lemma(
+            "helper_lemma_" + str(depth),
+            prev_sentence.goals[0].hypotheses,
+            prev_sentence.goals[0].conclusion,
+        )
+        # String containing a space-separated list of hypothesis names, passed when applying the lemma
+        lemma_args = " ".join(
+            [
+                " ".join(hypothesis.names)
+                for hypothesis in prev_sentence.goals[0].hypotheses
+            ]
+        )
+
+        lemma_with_proof = recursively_prove_lemma(context, lemma)
 
         # Now that we have a valid lemma, we can use it to complete the proof
         # Convert sentences to Coq code
@@ -188,11 +195,27 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         for sentence in annotated_proof_sentences:
             if i == first_error_idx:
                 proof_using_lemma += (
-                    "apply " + lemma_with_proof.split("Lemma ")[1].split(" ")[0] + ".\n"
+                    "apply (@" + lemma.split("Lemma ")[1].split(" ")[0] + " " + lemma_args + ").\n"
                 )
+                goal_count_at_error_line = len(sentence.goals)
+                still_in_same_goal = True
+            elif i > first_error_idx:
+                # If this line is trying to prove the same goal as the line that caused the error,
+                # skip it
+                if len(sentence.goals) >= goal_count_at_error_line:
+                    if still_in_same_goal:
+                        pass
+                    else:
+                        proof_using_lemma += sentence.contents + "\n"
+                # The first time the number of goals drops below the number of goals at the error line,
+                # we know that we've reached the end of the what our helper lemma has taken care of
+                else:
+                    still_in_same_goal = False
             else:
                 proof_using_lemma += sentence.contents + "\n"
             i += 1
+        # Only keep proof (and discard theorem statement, etc. before it)
+        proof_using_lemma = "Proof.\n" + proof_using_lemma.split("Proof.")[-1].split("Qed.")[0] + "\nQed."
 
         return check_theorem_proof_and_maybe_reprove_using_lemmas(
             context + "\n" + lemma_with_proof, theorem, proof_using_lemma, depth + 1
@@ -200,7 +223,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
 
     # Otherwise, our proof is valid, so return the entire code
     else:
-        full_coq_code = context + "\n" + theorem + "\n" + proof
+        full_coq_code = context + "\n\n" + theorem + "\n\n" + proof
         return full_coq_code
 
 
@@ -209,7 +232,7 @@ with open("context.v", "r") as f:
 with open("theorem.v", "r") as f:
     theorem = f.read()
 
-proof = prove_theorem_using_gpt(
+proof = prove_using_gpt(
     context,
     theorem,
     MODEL,

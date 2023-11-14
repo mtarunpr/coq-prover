@@ -64,7 +64,7 @@ def annotate_and_fetch_error(context, theorem_with_proof):
     i = 0
     for step in annotated_proof[0]:
         if isinstance(step, Sentence) and len(step.messages) > 0:
-            if first_error_idx == -1 and not any(
+            if first_error_idx == -1 and not all(
                 "deprecated" in message.contents for message in step.messages
             ):
                 first_error_idx = i
@@ -130,7 +130,11 @@ def recursively_prove_lemma(
 
     # If invalid, try again recursively
     if first_error_idx != -1:
-        error_message = annotated_proof_fragments[first_error_idx].messages[0].contents
+        # Get first non-"deprecated" error message
+        for message in annotated_proof_fragments[first_error_idx].messages:
+            if "deprecated" not in message.contents:
+                error_message = message.contents
+                break
         return recursively_prove_lemma(
             context,
             lemma,
@@ -154,7 +158,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         print("MAX THEOREM ERROR COUNT REACHED. GIVING UP.")
         exit(1)
 
-    print(f"ATTEMPTED COQ PROOF (LEMMAS USED: {depth})")
+    print(f"ATTEMPTED THEOREM PROOF (LEMMAS USED: {depth})")
     print(context + "\n\n" + theorem + "\n\n" + proof)
     print()
 
@@ -171,7 +175,11 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
             if isinstance(annotated_proof_fragments[i], Sentence):
                 prev_sentence = annotated_proof_fragments[i]
                 break
-        error_message = annotated_proof_fragments[first_error_idx].messages[0].contents
+        # Get first non-"deprecated" error message
+        for message in annotated_proof_fragments[first_error_idx].messages:
+            if "deprecated" not in message.contents:
+                error_message = message.contents
+                break
         print(f"ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #{first_error_idx})")
         print(error_message)
         print()

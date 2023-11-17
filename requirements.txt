@@ -3,3 +3,4 @@ joblib
 openai
 python-dotenv
 tenacity
+toposort

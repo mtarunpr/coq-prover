@@ -5,15 +5,16 @@ from joblib import Memory
 from contextlib import redirect_stderr
 from dotenv import load_dotenv
 import os
+import re
 
 load_dotenv()
 
 memory = Memory("cachegpt", verbose=0)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-MODEL = "gpt-4"
-MAX_LEMMA_DEPTH = 2
-MAX_THEOREM_ERROR_COUNT = 5
+MODEL = "gpt-4-1106-preview"
+MAX_LEMMA_DEPTH = 5
+MAX_THEOREM_ERROR_COUNT = 20
 
 
 # Caching process ported from https://github.com/metareflection/gpt-call
@@ -92,6 +93,12 @@ def recursively_prove_lemma(
     prev_attempt_error_message=None,
     prev_attempt_error_idx=None,
 ):
+    # If a previous attempt had an error, print it
+    if prev_attempt_error_message is not None:
+        print(f"ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #{prev_attempt_error_idx})")
+        print(prev_attempt_error_message)
+        print()
+
     # Break out of recursion if we've reached the max depth
     if depth > MAX_LEMMA_DEPTH:
         print("MAX LEMMA DEPTH REACHED. GIVING UP.")
@@ -102,9 +109,6 @@ def recursively_prove_lemma(
         proof = prove_using_gpt(context, lemma, MODEL)
     # Otherwise, try to prove the lemma again using the previous attempt's error message
     else:
-        print(f"ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #{prev_attempt_error_idx})")
-        print(prev_attempt_error_message)
-        print()
         print(f"LEMMA PROOF IS INVALID. TRYING AGAIN... (ATTEMPT {depth})")
         print()
         proof = prove_using_gpt(
@@ -130,10 +134,15 @@ def recursively_prove_lemma(
 
     # If invalid, try again recursively
     if first_error_idx != -1:
+        # Get the closest Sentence before the error
+        for i in range(first_error_idx - 1, -1, -1):
+            if isinstance(annotated_proof_fragments[i], Sentence):
+                prev_sentence = annotated_proof_fragments[i]
+                break
         # Get first non-"deprecated" error message
         for message in annotated_proof_fragments[first_error_idx].messages:
             if "deprecated" not in message.contents:
-                error_message = message.contents
+                error_message = f'Error in step "{annotated_proof_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
                 break
         return recursively_prove_lemma(
             context,
@@ -170,7 +179,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
     # If there is an error, extract the proof state before the error
     # and try to prove that goal separately as a lemma
     if first_error_idx != -1:
-        # Get the closest Sentence before the error (but note that some proof fragments may be Texts, not Sentences)
+        # Get the closest Sentence before the error
         for i in range(first_error_idx - 1, -1, -1):
             if isinstance(annotated_proof_fragments[i], Sentence):
                 prev_sentence = annotated_proof_fragments[i]
@@ -178,7 +187,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         # Get first non-"deprecated" error message
         for message in annotated_proof_fragments[first_error_idx].messages:
             if "deprecated" not in message.contents:
-                error_message = message.contents
+                error_message = f'Error in step "{annotated_proof_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
                 break
         print(f"ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #{first_error_idx})")
         print(error_message)
@@ -202,7 +211,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         # Now that we have a valid lemma, we can use it to complete the proof
         # Convert sentences to Coq code
         proof_using_lemma = ""
-        for i, sentence in enumerate(annotated_proof_fragments):
+        for i, fragment in enumerate(annotated_proof_fragments):
             if i == first_error_idx:
                 proof_using_lemma += (
                     "apply (@"
@@ -211,22 +220,27 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
                     + lemma_args
                     + ").\n"
                 )
-                goal_count_at_error_line = len(sentence.goals)
                 still_in_same_goal = True
             elif i > first_error_idx:
                 # If this line is trying to prove the same goal as the line that caused the error,
                 # skip it
-                if isinstance(sentence, Text) or len(sentence.goals) >= goal_count_at_error_line:
+                if isinstance(fragment, Text) or not re.match(
+                    r"^[\+\-\*]+$", fragment.contents
+                ):
                     if still_in_same_goal:
                         continue
                     else:
-                        proof_using_lemma += sentence.contents + "\n"
-                # The first time the number of goals drops below the number of goals at the error line,
-                # we know that we've reached the end of the what our helper lemma has taken care of
+                        proof_using_lemma += fragment.contents
+                # The first time we reach a new bullet point, we know that we've reached the end
+                # of what our helper lemma has taken care of
+                # TODO: This isn't reliable, e.g. if the proof doesn't use bullet points
+                # and simply continues to prove the next goal instead (as the proof of the following
+                # goals will have been deleted).
                 else:
+                    proof_using_lemma += fragment.contents
                     still_in_same_goal = False
             else:
-                proof_using_lemma += sentence.contents + "\n"
+                proof_using_lemma += fragment.contents
         # Only keep proof (and discard theorem statement, etc. before it)
         proof_using_lemma = (
             "Proof.\n"

@@ -4,9 +4,9 @@
 cachegpt/
 stderr.txt
 .vscode
-proof.*
-theorem.*
-context.*
+/proof.*
+/theorem.*
+/context.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

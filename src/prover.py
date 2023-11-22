@@ -75,14 +75,32 @@ def annotate_and_fetch_error(context, theorem_with_proof):
     return annotated_proof_fragments, first_error_idx
 
 
-def proof_state_to_lemma(lemma_name, hypotheses, conclusion):
-    lemma = f"Lemma {lemma_name} : "
+def create_lemma_name(lemma, suffix):
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a proof helper for Coq that can come up with descriptive names for lemmas and theorems based on the statement of the proposition. Specifically, Replace `helper_lemma` with a better, more descriptive, name for the following lemma(s) in Coq. Your entire response must be valid Coq code. Your response must be in this format: ```coq\nLemma <new_lemma_name> : <lemma_statement>.\n```.",
+        },
+        {"role": "user", "content": lemma},
+    ]
+    response = ask(messages, MODEL)
+    new_lemma_name = response.split("Lemma ")[1].split(" : ")[0]
+    return new_lemma_name + "_" + suffix
+
+
+def proof_state_to_lemma(lemma_name_suffix, hypotheses, conclusion):
+    lemma = f"Lemma helper_lemma : "
     if len(hypotheses) > 0:
         for hypothesis in hypotheses:
             lemma += (
                 "forall " + " ".join(hypothesis.names) + " : " + hypothesis.type + ", "
             )
     lemma += conclusion + ".\n"
+
+    # Replace "helper_lemma" with a better name
+    lemma_name = create_lemma_name(lemma, lemma_name_suffix)
+    lemma = lemma.replace("Lemma helper_lemma : ", f"Lemma {lemma_name} : ")
+
     return lemma
 
 
@@ -195,7 +213,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         print()
 
         lemma = proof_state_to_lemma(
-            "helper_lemma_" + str(depth),
+            str(depth),
             prev_sentence.goals[0].hypotheses,
             prev_sentence.goals[0].conclusion,
         )

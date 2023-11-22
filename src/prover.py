@@ -6,6 +6,7 @@ from contextlib import redirect_stderr
 from dotenv import load_dotenv
 import os
 import re
+import argparse
 
 load_dotenv()
 
@@ -258,24 +259,34 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(
         return full_coq_code
 
 
-with open("context.v", "r") as f:
-    context = f.read()
-with open("theorem.v", "r") as f:
-    theorem = f.read()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-e",
+        "--example",
+        help="name of example to prove",
+        required=True,
+        type=str,
+    )
+    args = parser.parse_args()
 
-proof = prove_using_gpt(
-    context,
-    theorem,
-    MODEL,
-)
+    with open(f"examples/{args.example}/context.v", "r") as f:
+        context = f.read()
+    with open(f"examples/{args.example}/theorem.v", "r") as f:
+        theorem = f.read()
 
+    proof = prove_using_gpt(
+        context,
+        theorem,
+        MODEL,
+    )
 
-with open("stderr.txt", "w") as f:
-    with redirect_stderr(f):
-        full_coq_code = check_theorem_proof_and_maybe_reprove_using_lemmas(
-            context, theorem, proof
-        )
+    with open(f"examples/{args.example}/stderr.txt", "w") as f:
+        with redirect_stderr(f):
+            full_coq_code = check_theorem_proof_and_maybe_reprove_using_lemmas(
+                context, theorem, proof
+            )
 
-        print("PROOF IS VALID")
-        with open("proof.v", "w") as f:
-            f.write(full_coq_code)
+            print("PROOF IS VALID")
+            with open(f"examples/{args.example}/proof.v", "w") as f:
+                f.write(full_coq_code)

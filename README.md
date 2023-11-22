@@ -8,13 +8,7 @@ First create a `.env` file in the root directory containing your OpenAI API key:
 OPENAI_API_KEY="sk-xxxx"
 ```
 
-Also create a `theorem.v` file containing the statement of the theorem you want to prove, along with any other Coq definitions that may be needed:
-
-```bash
-echo "Theorem thm1 : forall (n : nat), n + 0 = n." > theorem.txt
-```
-
-Lastly, install the Python dependencies:
+Also install the Python dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -22,6 +16,10 @@ pip install -r requirements.txt
 
 ## Usage
 
+To run the prover on an existing example, run the following command from the root directory:
+
 ```bash
-python prover.py
+python src/prover.py -e <example>
 ```
+
+To prove a custom theorem, create a new directory in `examples/` and add a `context.v` file containing any required context (imports, definitions, lemmas, etc.) and a `theorem.v` file containing the statement of the theorem to prove. Then run the prover on this new example.

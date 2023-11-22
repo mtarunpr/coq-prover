@@ -1,5 +1,6 @@
 import os
 from toposort import toposort_flatten
+import argparse
 
 
 def is_identifier_char(char):
@@ -102,7 +103,7 @@ def get_theorem_dependency_graph(coq_project_path):
                 theorem_name = line.split(" ")[1].split(":")[0]
                 proof = ""
                 line_index = lines.index(line)
-                for line2 in lines[line_index+1:]:
+                for line2 in lines[line_index + 1 :]:
                     proof += line2
                     if "Qed." in line2 or "Defined." in line2:
                         break
@@ -132,23 +133,46 @@ def get_ordered_theorems(coq_project_path):
     """
     Returns a topologically sorted list of theorems and lemmas in the given Coq project.
     """
-    theorem_dependency_graph, file_theorems = get_theorem_dependency_graph(coq_project_path)
+    theorem_dependency_graph, file_theorems = get_theorem_dependency_graph(
+        coq_project_path
+    )
     toposorted_theorems = toposort_flatten(theorem_dependency_graph)
     # Create pairs of theorems and their file names
     theorem_file_pairs = []
     for theorem in toposorted_theorems:
         for filename in file_theorems:
             if theorem in file_theorems[filename]:
-                theorem_file_pairs.append((theorem, filename.split("/")[-1].split(".")[0]))
+                theorem_file_pairs.append(
+                    (theorem, filename.split("/")[-1].split(".")[0])
+                )
                 break
     return theorem_file_pairs
 
 
-project_path = "/Users/mtarunpr/Code/thesis/coqgym/coq_projects/rsa"
-# print(get_file_dependency_graph(project_path))
-# print(get_ordered_files(project_path))
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-p",
+        "--path",
+        help="path to Coq project whose dependency graph to generate",
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "-f",
+        "--files",
+        help="generate file dependency graph instead of theorem dependency graph",
+        required=False,
+        action="store_true",
+        default=False,
+    )
+    args = parser.parse_args()
 
-# print(
-#     get_theorem_dependency_graph(project_path)
-# )
-print(get_ordered_theorems(project_path))
+    if args.files:
+        print("File dependency graph", get_file_dependency_graph(args.path))
+        print()
+        print("Topologically sorted files", get_ordered_files(args.path))
+    else:
+        print("Theorem dependency graph", get_theorem_dependency_graph(args.path))
+        print()
+        print("Topologically sorted theorems", get_ordered_theorems(args.path))

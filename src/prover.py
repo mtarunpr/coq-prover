@@ -1,9 +1,14 @@
+import os
+import sys
+sys.path.append(f'{os.getcwd()}/src/mcts')
+print(sys.path)
+from run_focus import run
+
 from alectryon.serapi import annotate, Sentence, Text
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from joblib import Memory
 from contextlib import redirect_stderr
 from dotenv import load_dotenv
-import os
 import re
 import argparse
 
@@ -103,8 +108,16 @@ def proof_state_to_lemma(lemma_name_suffix, hypotheses, conclusion):
 
     return lemma
 
+def recursively_prove_lemma_mcts(
+        context,
+        lemma):
+    prompt = f"```coq\n{context}{lemma}"
+    r = run(prompt)
+    new_part = r[r.index(len(prompt)):]
+    return f"{lemma}{new_part}"
 
-def recursively_prove_lemma(
+
+def recursively_prove_lemma_gpt(
     context,
     lemma,
     depth=0,
@@ -176,6 +189,9 @@ def recursively_prove_lemma(
         print("LEMMA IS VALID")
         print()
         return lemma_with_proof
+
+
+recursively_prove_lemma = recursively_prove_lemma_mcts
 
 
 def check_theorem_proof_and_maybe_reprove_using_lemmas(

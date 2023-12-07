@@ -111,6 +111,7 @@ def recursively_prove_lemma_mcts(
         context,
         lemma):
     prompt = f"```coq\n{context}{lemma}"
+    prompt = prompt.replace("Top.", "")
     r = run(prompt)
     new_part = r[r.index(len(prompt)):]
     return f"{lemma}{new_part}"

@@ -1,4 +1,3 @@
-import openai
 from alectryon.serapi import annotate, Sentence, Text
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from joblib import Memory
@@ -10,9 +9,11 @@ import argparse
 
 load_dotenv()
 
+from openai import OpenAI
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 memory = Memory("cachegpt", verbose=0)
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
 MODEL = "gpt-4-1106-preview"
 MAX_LEMMA_DEPTH = 5
 MAX_THEOREM_ERROR_COUNT = 20
@@ -22,10 +23,7 @@ MAX_THEOREM_ERROR_COUNT = 20
 @retry(wait=wait_random_exponential(min=10, max=30), stop=stop_after_attempt(25))
 def generate(messages, model):  # "gpt-3.5-turbo", "gpt-4"
     print("calling GPT... model=" + model)
-    return openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-    )
+    return client.chat.completions.create(model=model, messages=messages)
 
 
 @memory.cache

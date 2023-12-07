@@ -55,6 +55,8 @@ def prove_using_gpt(context, theorem_or_lemma, model, prev_attempt_with_error=No
     proof_contents = response.split("Proof.")[1].split("Qed.")[0]
     return "Proof.\n" + proof_contents + "\nQed."
 
+def to_ignore(message):
+    return "deprecated" in message.contents or "legacy" in message.contents
 
 def annotate_and_fetch_error(context, theorem_with_proof):
     first_error_idx = -1
@@ -65,7 +67,7 @@ def annotate_and_fetch_error(context, theorem_with_proof):
     for step in annotated_proof[0]:
         if isinstance(step, Sentence) and len(step.messages) > 0:
             if first_error_idx == -1 and not all(
-                "deprecated" in message.contents for message in step.messages
+                to_ignore(message) for message in step.messages
             ):
                 first_error_idx = i
         annotated_proof_fragments.append(step)
@@ -156,9 +158,9 @@ def recursively_prove_lemma(
             if isinstance(annotated_proof_fragments[i], Sentence):
                 prev_sentence = annotated_proof_fragments[i]
                 break
-        # Get first non-"deprecated" error message
+        # Get first error message not to be ignored
         for message in annotated_proof_fragments[first_error_idx].messages:
-            if "deprecated" not in message.contents:
+            if not to_ignore(message):
                 error_message = f'Error in step "{annotated_proof_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
                 break
         return recursively_prove_lemma(

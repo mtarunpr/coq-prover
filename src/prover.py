@@ -1,7 +1,6 @@
 import os
 import sys
 sys.path.append(f'{os.getcwd()}/src/mcts')
-print(sys.path)
 from run_focus import run
 
 from alectryon.serapi import annotate, Sentence, Text
@@ -41,7 +40,7 @@ def prove_using_gpt(context, theorem_or_lemma, model, prev_attempt_with_error=No
     messages = [
         {
             "role": "system",
-            "content": "You are an automated theorem prover that can prove theorems and lemmas in Coq. Your entire response must be valid Coq code. You should explain your reasoning (what the proof steps are attempting to do), but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions, imports, etc.), and your response must be a valid Coq proof of that theorem. Your response must be in this format: ```coq\n Proof.\n<proof>. Qed.\n```. Remember: do not add any other text besides Coq code and do not repeat any imports, definitions, lemmas, etc. provided in the prompt.",
+            "content": "You are an automated theorem prover that can prove theorems and lemmas in Coq. Your entire response must be valid Coq code. You should explain your reasoning (what the proof steps are attempting to do), but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions, imports, etc.), and your response must be a valid Coq proof of that theorem. Your response must be in this format: ```coq\n Proof.\n<proof>. Qed.\n```. Remember: do not add any other text besides Coq code and do not repeat any imports, definitions, lemmas, etc. provided in the prompt. Do NOT use Top references.",
         },
         {"role": "user", "content": context + "\n\n" + theorem_or_lemma},
     ]

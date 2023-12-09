@@ -1,0 +1,14 @@
+!! (ERROR/3) Coq raised an exception:
+     > Syntax error: '[' expected after [identref] (in [constr_eval]).
+   The offending chunk is delimited by >>>…<<< below:
+     > 0: {
+     >   context n>>>.<<<
+     > }
+   Results past this point may be unreliable.
+!! (ERROR/3) Coq raised an exception:
+     > [Focus] No such goal (0).
+   The offending chunk is delimited by >>>…<<< below:
+     > >>>0: {<<<
+     >   context n.
+     > }
+   Results past this point may be unreliable.

@@ -21,11 +21,14 @@ raw_links = soup.find_all("a", href=True)
 codes = [
     raw_link.find_all("code")
     for raw_link in raw_links
-    if "proof-engine/" in raw_link["href"]
+    if ("proof-engine/" in raw_link["href"])
+    or ("addendum/" in raw_link["href"])
+    or ("proofs/" in raw_link["href"])
 ]
+
 codes = [code[0] for code in codes if len(code) > 0]
 tactics = [code.contents for code in codes if "xref" in code["class"]]
-tactics = [tactic[0].split("(")[0].strip() for tactic in tactics]
+tactics = [tactic[0].split("(")[0].strip() for tactic in tactics if len(tactic) == 1]
 
 # Metaprogramming!????!?!!!
 fout = open("data.py", "w")

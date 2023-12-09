@@ -1,0 +1,5 @@
+!! (ERROR/3) Coq raised an exception:
+     > The reference improper was not found in the current environment.
+   The offending chunk is delimited by >>>…<<< below:
+     > >>>improper<<< Action.
+   Results past this point may be unreliable.

@@ -1,14 +1,31 @@
-class Fringe:
-    def __init__(self, goals):
-        self.goals = goals  # list of goals that all need to be proven for the fringe to be proven; note that each goal also contains a list of hypotheses
+from typing import NamedTuple
+from alectryon.core import Sentence, Goal, Hypothesis
 
 
-class Action:
-    def __init__(self, fringe_idx, tactic_idx):
-        self.fringe_idx = fringe_idx
-        self.tactic = tactic_idx
+class Action(NamedTuple):
+    fringe_idx: int
+    goal_idx: int
+    tactic_idx: int
 
 
-class State:
-    def __init__(self, fringes):
-        self.fringes = fringes  # list of fringes, where any one fringe needs to be proven for the state to be proven
+class Fringe(NamedTuple):
+    # What sequence of sentences define this fringe
+    proof: list[str]
+    # What goals (hypotheses included in goal) define this fringe
+    goals: list[Goal]
+
+    @staticmethod
+    def null_fringe() -> "Fringe":
+        return Fringe([], [])
+
+
+class State(NamedTuple):
+    """
+    The entire state we have access to at any point.
+
+    NOTE: You might wonder, where are hypotheses (i.e. named variables) stored?
+    These exist within the `Goal` struct, and thus each fringe has multiple sets
+    of variables they can apply with tactics. Better to avoid not duplicating this data.
+    """
+
+    fringes: list[Fringe]

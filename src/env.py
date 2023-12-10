@@ -1,32 +1,33 @@
 from alectryon.serapi import annotate
+from alectryon.core import Sentence, Goal, Hypothesis
 from contextlib import redirect_stderr
 from typing import Union
 from actions.tactics import TACTIC_MAP, TacticSpec
 from itertools import combinations
-
-# It seems coq errors aren't returned to the var, but bubble up to stderr
-# Simplest way to do it is just to catch it there, a little overkill but should be fine
-SCRATCH_FILE = "scratch_err.out"
+from mdp import Action, Fringe, State
 
 
-def apply_coq(proof: list[str]) -> tuple[list["alectryon.Sentence"], float]:
+def apply_coq(proof: list[str]) -> tuple[Fringe, float]:
     """
     Applies alectryon and returns the chunks and reward
     """
+    # It seems coq errors aren't returned to the var, but bubble up to stderr
+    # Simplest way to do it is just to catch it there, a little overkill but should be fine
+    SCRATCH_FILE = "scratch_err.out"
     with open(SCRATCH_FILE, "w") as f:
         with redirect_stderr(f):
-            chunks = annotate(proof)
-        with open(SCRATCH_FILE, "r") as f:
-            if len(f.read()) > 0:
-                # Compilation failed, punish our bot
-                return ([], -1)
-        if len(chunks) <= 0:
-            # Should never happen
-            return ([], -1)
-        if len(chunks[-1][0].goals) <= 0:
-            return (chunks, 1)
-        # Simplified return function: No bonus for simplifying state
-        return (chunks, 0)
+            chunks: list[list[Sentence]] = annotate(proof)
+    with open(SCRATCH_FILE, "r") as f:
+        if len(f.read()) > 0:
+            # Compilation failed, punish our bot
+            return (Fringe.null_fringe(), -1)
+    if len(chunks) <= 0:
+        # Should never happen
+        return (Fringe.null_fringe(), -1)
+    border = chunks[-1][-1]
+    fringe = Fringe(proof, border.goals[:])
+    reward = 1 if len(fringe.goals) <= 0 else 0
+    return (fringe, reward)
 
 
 class Env:
@@ -60,42 +61,26 @@ class Env:
         necessary libraries have been imported, and the opening steps of
         the proof have already been taken.
         """
-        self.statement = statement
-        self.preamble = preamble
-        self.starter_actions = starter_actions
-        self.taken_actions: list[str] = []
-        self.last_eval: list[alectryon.Sentence] = []
-        starter_proof = self.list_rep
-        (chunks, _) = apply_coq(starter_proof)
-        self.last_eval = chunks
+        self.opening_book = preamble[:] + [statement] + starter_actions[:]
+        (fringe, _) = apply_coq(self.opening_book)
+        self.state = State([fringe])
 
-    @property
-    def list_rep(self):
-        """
-        Returns the environment as a list of statements which can be
-        fed into alectryon.
-        """
-        return (
-            self.preamble[:]
-            + [self.statement]
-            + self.starter_actions[:]
-            + self.taken_actions[:]
-        )
-
-    def try_all_args(self, fringe_idx: int, tactic: TacticSpec) -> str:
+    def try_all_args(self, action: Action) -> str:
         """
         Given a tactic, bashes all possible arguments, returning the command maximizing
         reward
         """
-        # Get all the argument names we care about
-        target_goal = self.last_eval[-1][0].goals[fringe_idx]
-        hyps: list[alectryon.Hypothesis] = target_goal.hypotheses
+        # Extract the goal we're trying to prove and hypotheses
+        tactic = TACTIC_MAP[action.tactic_idx]
+        fringe = self.state.fringes[action.fringe_idx]
+        target_goal = fringe.goals[action.goal_idx]
+        hyps: list[Hypothesis] = target_goal.hypotheses
         hyp_names = ["".join(hyp.names) for hyp in hyps]
-        test_blocks: list[str] = []
         # Generate all the next sentences to test
+        test_blocks: list[str] = []
         for argc in tactic.argc_range:
             for combo in combinations(hyp_names, argc):
-                added_block = f"{fringe_idx}: " + "{\n  " + tactic.command
+                added_block = f"{action.goal_idx + 1}: " + "{\n  " + tactic.command
                 for arg_ix in range(argc):
                     added_block += " " + combo[arg_ix]
                 added_block += ".\n}"
@@ -104,35 +89,37 @@ class Env:
         max_command = ""
         max_reward = float("-inf")
         for block in test_blocks:
-            new_proof = self.list_rep + [block]
+            new_proof = fringe.proof[:] + [block]
             _, reward = apply_coq(new_proof)
             if reward > max_reward:
                 max_reward = reward
                 max_command = block
         return max_command
 
-    def make_step(self, proof: list[str]):
-        """
-        Sets the state of the environment to whatever results from applying `proof`
-        """
-
-    def step(self, fringe_idx: int, tactic_idx: int) -> (list[str], float):
+    def step(self, action: Action) -> tuple[State, float]:
         """
         Steps forward in the environment by applying a tactic to a specific fringe.
-        Returns the list of remaining goals and the reward.
+        Returns the new state and the reward.
         """
-        tactic = TACTIC_MAP[tactic_idx]
-        command = self.try_all_args(fringe_idx, tactic)
-        print(command)
+        command_with_args = self.try_all_args(action)
+        fringe = self.state.fringes[action.fringe_idx]
+        new_proof = fringe.proof[:] + [command_with_args]
+        (new_fringe, reward) = apply_coq(new_proof)
+        self.state.fringes.append(new_fringe)
+        return (self.state, reward)
 
 
-env = Env(
-    "Lemma one_min_div : forall (n:nat),(divides n 1).",
-    [
-        "Require Import Wf_nat.",
-        "Definition divides (a b:nat) := exists q:nat,a = (b*q).",
-    ],
-    ["intros.", "red.", "exists n."],
-)
-
-env.step(0, 44)
+if __name__ == "__main__":
+    # Simple example
+    env = Env(
+        "Lemma one_min_div : forall (n:nat),(divides n 1).",
+        [
+            "Require Import Wf_nat.",
+            "Definition divides (a b:nat) := exists q:nat,a = (b*q).",
+        ],
+        ["intros.", "red.", "exists n."],
+    )
+    # Apply the "auto." action
+    action = Action(0, 0, 14)
+    state, reward = env.step(action)
+    print(state, reward)

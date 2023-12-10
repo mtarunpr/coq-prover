@@ -21,11 +21,8 @@ class Fringe(NamedTuple):
 
 class State(NamedTuple):
     """
-    The entire state we have access to at any point.
-
-    NOTE: You might wonder, where are hypotheses (i.e. named variables) stored?
-    These exist within the `Goal` struct, and thus each fringe has multiple sets
-    of variables they can apply with tactics. Better to avoid not duplicating this data.
+    The entire state we have access to at any point. Consists of set of fringes,
+    which are like intermediate proof states we've been to before and may backtrack to
     """
 
     fringes: list[Fringe]

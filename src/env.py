@@ -108,6 +108,29 @@ class Env:
         self.state.fringes.append(new_fringe)
         return (self.state, reward)
 
+    def try_step(self, action: Action) -> tuple[State, float]:
+        """
+        Returns what the new state and reward would be after taking the given action,
+        without actually changing the environment at all
+        """
+        command_with_args = self.try_all_args(action)
+        fringe = self.state.fringes[action.fringe_idx]
+        new_proof = fringe.proof[:] + [command_with_args]
+        (new_fringe, reward) = apply_coq(new_proof)
+        new_state = State(self.state.fringes[:] + [new_fringe])
+        return (new_state, reward)
+
+    def clone(self) -> "Env":
+        """
+        Copies this environment into a new environment, no mutability concerns
+        """
+        new_env = Env("", [], [])
+        new_env.opening_book = self.opening_book[:]
+        new_env.state = State(
+            [Fringe(f.proof[:], f.goals[:]) for f in self.state.fringes]
+        )
+        return new_env
+
 
 if __name__ == "__main__":
     # Simple example
@@ -120,6 +143,6 @@ if __name__ == "__main__":
         ["intros.", "red.", "exists n."],
     )
     # Apply the "auto." action
-    action = Action(0, 0, 14)
+    action = Action(0, 0, 11)
     state, reward = env.step(action)
     print(state, reward)

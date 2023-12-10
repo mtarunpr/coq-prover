@@ -82,7 +82,7 @@ def create_lemma_name(lemma, suffix):
         {"role": "user", "content": lemma},
     ]
     response = ask(messages, MODEL)
-    new_lemma_name = response.split("Lemma ")[1].split(" : ")[0]
+    new_lemma_name = response.split("Lemma ")[1].split(":")[0].strip()
     return new_lemma_name + "_" + suffix
 
 

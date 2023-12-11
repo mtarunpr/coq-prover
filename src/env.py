@@ -1,13 +1,12 @@
 from alectryon.serapi import annotate
 from alectryon.core import Sentence, Hypothesis
 from contextlib import redirect_stderr
-from typing import Union
-from actions.tactics import TACTIC_MAP, TacticSpec
+from actions.tactics import TACTIC_MAP, tactic_to_idx
 from itertools import combinations
 from mdp import Action, Fringe, State, Goal
 
 
-def apply_coq(proof: list[str]) -> tuple[Fringe, float]:
+def apply_coq(proof: list[str]) -> tuple[Fringe | None, float]:
     """
     Applies alectryon and returns the chunks and reward
     """
@@ -20,10 +19,10 @@ def apply_coq(proof: list[str]) -> tuple[Fringe, float]:
     with open(SCRATCH_FILE, "r") as f:
         if len(f.read()) > 0:
             # Compilation failed, punish our bot
-            return (Fringe.null_fringe(), -1)
+            return (None, -0.02)
     if len(chunks) <= 0:
         # Should never happen
-        return (Fringe.null_fringe(), -1)
+        return (None, -1)
     border = chunks[-1][-1]
     # TODO: minor, but it may be possible for the last chunk to be a Text instead of a Sentence,
     # so we should prob extract the last Sentence
@@ -34,7 +33,7 @@ def apply_coq(proof: list[str]) -> tuple[Fringe, float]:
             for i in range(len(border.goals))
         ],
     )
-    reward = 1 if len(fringe.goals) <= 0 else 0
+    reward = 1 if len(fringe.goals) == 0 else 0.01
     return (fringe, reward)
 
 
@@ -112,29 +111,41 @@ class Env:
                 max_command = block
         return max_command
 
-    def step(self, action: Action) -> tuple[State, float]:
+    def step(self, action: Action) -> tuple[State, float, bool, bool]:
         """
         Steps forward in the environment by applying a tactic to a specific fringe.
-        Returns the new state and the reward.
+        Returns the new state, the reward, a boolean representing whether the
+        theorem has been proven, and a boolean representing whether the action
+        resulted in an error.
         """
         command_with_args = self.try_all_args(action)
         fringe = self.state.fringes[action.fringe_idx]
         new_proof = fringe.proof[:] + [command_with_args]
         (new_fringe, reward) = apply_coq(new_proof)
-        self.state.fringes.append(new_fringe)
-        return (self.state, reward)
+        if new_fringe is not None:
+            self.state.fringes.append(new_fringe)
+            done = len(new_fringe.goals) == 0
+        else:
+            done = False
+        return (self.state, reward, done, new_fringe is None)
 
-    def try_step(self, action: Action) -> tuple[State, float]:
+    def try_step(self, action: Action) -> tuple[State, float, bool, bool]:
         """
         Returns what the new state and reward would be after taking the given action,
-        without actually changing the environment at all
+        and whether the theorem will have been proven and whether the action will result in an error,
+        without actually changing the environment at all.
         """
         command_with_args = self.try_all_args(action)
         fringe = self.state.fringes[action.fringe_idx]
         new_proof = fringe.proof[:] + [command_with_args]
         (new_fringe, reward) = apply_coq(new_proof)
-        new_state = State(self.state.fringes[:] + [new_fringe])
-        return (new_state, reward)
+        new_state = (
+            State(self.state.fringes[:] + [new_fringe])
+            if new_fringe is not None
+            else self.state
+        )
+        done = len(new_fringe.goals) == 0 if new_fringe is not None else False
+        return (new_state, reward, done, new_fringe is None)
 
     def clone(self) -> "Env":
         """
@@ -159,8 +170,10 @@ if __name__ == "__main__":
         ["intros.", "red.", "exists n."],
     )
     # Apply the "auto." action
-    action = Action(0, 0, 11)
-    state, reward = env.step(action)
+    action = Action(0, 0, tactic_to_idx("auto"))
+    state, reward, _, _ = env.step(action)
+    print(f"Reward: {reward}")
+    print()
 
     for i, fringe in enumerate(state.fringes):
         print(f"FRINGE {i}")
@@ -169,6 +182,4 @@ if __name__ == "__main__":
         print("Goals:")
         for goal in fringe.goals:
             print(goal)
-        print()
-        print(f"Reward: {reward}")
         print()

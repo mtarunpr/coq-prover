@@ -30,8 +30,8 @@ class Basher:
             for env in tqdm(to_try):
                 for tactic_idx in tqdm(TACTIC_MAP):
                     action = Action(fringe_idx=depth, goal_idx=0, tactic_idx=tactic_idx)
-                    (state, reward) = env.try_step(action)
-                    if reward > 0:
+                    (state, reward, done, _) = env.try_step(action)
+                    if done:
                         solution_state = state
                         break
                     if reward < 0:

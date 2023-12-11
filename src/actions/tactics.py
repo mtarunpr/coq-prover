@@ -20,3 +20,12 @@ TACTIC_MAP = {
     )
     for (idx, command) in raw_tactics
 }
+
+def tactic_to_idx(tactic: str) -> int:
+    """
+    Given a tactic, return its index in the TACTIC_MAP
+    """
+    for (idx, spec) in TACTIC_MAP.items():
+        if spec.command == tactic:
+            return idx
+    return -1

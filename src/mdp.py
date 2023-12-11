@@ -2,8 +2,10 @@ from typing import NamedTuple
 from alectryon.core import Hypothesis
 import torch
 from sentence_transformers import SentenceTransformer
+import os
 
 embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 class Action(NamedTuple):
@@ -29,16 +31,15 @@ class Goal:
             )
         return self.embedding
 
+    def __str__(self) -> str:
+        return self.conclusion
+
 
 class Fringe(NamedTuple):
     # What sequence of sentences define this fringe
     proof: list[str]
     # What goals (hypotheses included in goal) define this fringe
     goals: list[Goal]
-
-    @staticmethod
-    def null_fringe() -> "Fringe":
-        return Fringe([], [])
 
 
 class State(NamedTuple):
@@ -48,6 +49,17 @@ class State(NamedTuple):
     """
 
     fringes: list[Fringe]
+
+    def __str__(self) -> str:
+        return "\n".join(
+            [
+                "Fringe "
+                + str(i)
+                + ": "
+                + (str(fringe.goals[0]) if len(fringe.goals) > 0 else "No goals")
+                for (i, fringe) in enumerate(self.fringes)
+            ]
+        )
 
 
 def goal_to_string(goal: Goal) -> str:

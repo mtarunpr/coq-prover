@@ -7,6 +7,10 @@ from torch.autograd import Variable
 from mdp import Action
 import numpy as np
 import os
+from data import theorems
+from env import Env
+from mdp import State
+from actions import tactics
 
 
 parser = argparse.ArgumentParser()
@@ -62,13 +66,13 @@ if args.seed:
 
 
 class GoalNetwork(nn.Module):
-    def __init__(self, goal_embedding_dim, hidden_size=128):
+    def __init__(self, goal_embedding_dim: int, hidden_size=128):
         super(GoalNetwork, self).__init__()
         self.linear1 = nn.Linear(goal_embedding_dim, hidden_size)
         self.dropout = nn.Dropout(p=0.6)
         self.linear2 = nn.Linear(hidden_size, 1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         # Given a goal embedding, output logits representing how easy the goal is to prove
         x = self.linear1(x)
         x = self.dropout(x)
@@ -78,13 +82,13 @@ class GoalNetwork(nn.Module):
 
 
 class TacticNetwork(nn.Module):
-    def __init__(self, goal_embedding_dim, num_tactics, hidden_size=128):
+    def __init__(self, goal_embedding_dim: int, num_tactics: int, hidden_size=128):
         super(TacticNetwork, self).__init__()
         self.linear1 = nn.Linear(goal_embedding_dim, hidden_size)
         self.dropout = nn.Dropout(p=0.6)
         self.linear2 = nn.Linear(hidden_size, num_tactics)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         # Given a goal embedding, output a tensor of logits representing how likely each tactic is the best tactic to use next
         x = self.linear1(x)
         x = self.dropout(x)
@@ -94,21 +98,21 @@ class TacticNetwork(nn.Module):
 
 
 class Policy(nn.Module):
-    def __init__(self, goal_embedding_dim, num_tactics):
+    def __init__(self, goal_embedding_dim: int, num_tactics: int):
         super(Policy, self).__init__()
         self.fringe_dim = 1
         self.tactic_dim = num_tactics
         self.goal_network = GoalNetwork(goal_embedding_dim)
         self.tactic_network = TacticNetwork(goal_embedding_dim, num_tactics)
 
-    def forward(self, state):
+    def forward(self, state: State):
         # Given a state, output an action
         # Compute score for each fringe by summing over the scores (logits) of its goals
         fringe_logits = []
         for fringe in state.fringes:
             goal_embeddings = torch.stack(
-                fringe.goals
-            )  # TODO: is fringe.goals a list of strings or embeddings?
+                map(lambda goal: goal.embedding, fringe.goals)
+            )
             goal_logits = self.goal_network(goal_embeddings)
             fringe_logits.append(goal_logits.sum())
         fringe_logits = torch.stack(fringe_logits)
@@ -126,18 +130,18 @@ class Policy(nn.Module):
 
         # TODO: fix this; action selection happens in select_action, so just return probs here?
 
-        return Action(fringe_idx, tactic_idx)
+        return (Action(fringe_idx, tactic_idx), fringe_probs, tactic_probs)
 
 
 class REINFORCE:
     def __init__(self, goal_embedding_dim, num_tactics):
-        self.model = Policy(goal_embedding_dim, num_tactics)
-        self.model = self.model.cuda()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=args.learning_rate)
-        self.model.train()
+        self.policy = Policy(goal_embedding_dim, num_tactics)
+        self.policy = self.policy.cuda()
+        self.optimizer = optim.Adam(self.policy.parameters(), lr=args.learning_rate)
+        self.policy.train()
 
-    def select_action(self, state):
-        probs = self.model(Variable(state).cuda())
+    def select_action(self, state: State) -> (Action, torch.Tensor, torch.Tensor):
+        probs = self.policy(state)
         action = probs.multinomial().data
         prob = probs[:, action[0, 0]].view(1, -1)
         log_prob = prob.log()
@@ -159,19 +163,21 @@ class REINFORCE:
 
         self.optimizer.zero_grad()
         loss.backward()
-        nn.utils.clip_grad_norm(self.model.parameters(), 40)
+        nn.utils.clip_grad_norm(self.policy.parameters(), 40)
         self.optimizer.step()
 
 
 def main():
-    agent = REINFORCE(256, 100)
+    agent = REINFORCE(256, len(tactics.TACTIC_MAP))
 
-    dir = 'ckpt'
-    if not os.path.exists(dir):    
+    dir = "ckpt"
+    if not os.path.exists(dir):
         os.mkdir(dir)
 
     for i_episode in range(args.num_episodes):
-        state = None # TODO: initialize state based on lemma/theorem from dataset
+        theorem, preamble = theorems.get_random_theorem()
+        env = Env(theorem, preamble)
+        state = env.state
         entropies = []
         log_probs = []
         rewards = []
@@ -179,24 +185,26 @@ def main():
             action, log_prob, entropy = agent.select_action(state)
             action = action.cpu()
 
-            next_state, reward, done = None # TODO: get next state based on what Coq returns
+            state, reward = env.step(action)
+            # We're done if the newest fringe has no goals
+            done = len(state.fringes[-1].goals) == 0
 
             entropies.append(entropy)
             log_probs.append(log_prob)
             rewards.append(reward)
-            state = torch.Tensor([next_state])
 
             if done:
                 break
 
         agent.update_parameters(rewards, log_probs, entropies, args.gamma)
 
-
         if i_episode % args.ckpt_freq == 0:
-            torch.save(agent.model.state_dict(), os.path.join(dir, 'reinforce-'+str(i_episode)+'.pkl'))
+            torch.save(
+                agent.policy.state_dict(),
+                os.path.join(dir, "reinforce-" + str(i_episode) + ".pkl"),
+            )
 
         print("Episode: {}, reward: {}".format(i_episode, np.sum(rewards)))
-	
 
 
 if __name__ == "__main__":

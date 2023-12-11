@@ -25,10 +25,18 @@ def apply_coq(proof: list[str]) -> tuple[Fringe, float]:
         # Should never happen
         return (Fringe.null_fringe(), -1)
     border = chunks[-1][-1]
+    # TODO: minor, but it may be possible for the last chunk to be a Text instead of a Sentence,
+    # so we should prob extract the last Sentence
     fringe = Fringe(proof, border.goals[:])
     reward = 1 if len(fringe.goals) <= 0 else 0
     return (fringe, reward)
 
+def pretty_print_proof(proof: list[str]) -> str:
+    """
+    Given a proof (list of strings, one per sentence), pretty prints it
+    """
+    for sentence in proof:
+        print(sentence)
 
 class Env:
     """
@@ -131,7 +139,6 @@ class Env:
         )
         return new_env
 
-
 if __name__ == "__main__":
     # Simple example
     env = Env(
@@ -145,4 +152,14 @@ if __name__ == "__main__":
     # Apply the "auto." action
     action = Action(0, 0, 11)
     state, reward = env.step(action)
-    print(state, reward)
+
+    for i, fringe in enumerate(state.fringes):
+        print(f'FRINGE {i}')
+        pretty_print_proof(fringe.proof)
+        print()
+        print("Goals:")
+        for goal in fringe.goals:
+            print(goal)
+        print()
+        print(f"Reward: {reward}")
+        print()

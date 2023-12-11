@@ -3,7 +3,7 @@ To show/test the power of our environment, this provides a "Bashing" solver
 which just tries everything until it finds a solution.
 """
 from actions.tactics import TACTIC_MAP
-from env import Env
+from env import Env, pretty_print_proof
 from mdp import Action
 from typing import Union
 from tqdm import tqdm
@@ -59,4 +59,4 @@ if __name__ == "__main__":
     # Bash it!
     basher = Basher()
     solution = basher.bash(env)
-    print(solution)
+    pretty_print_proof(solution)

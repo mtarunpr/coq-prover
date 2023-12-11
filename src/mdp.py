@@ -1,5 +1,6 @@
 from typing import NamedTuple
-from alectryon.core import Sentence, Goal, Hypothesis
+from alectryon.core import Sentence, Goal as AlectryonGoal, Hypothesis
+import torch
 
 
 class Action(NamedTuple):
@@ -7,6 +8,16 @@ class Action(NamedTuple):
     goal_idx: int
     tactic_idx: int
 
+class Goal(NamedTuple):
+    # The goal itself
+    goal: AlectryonGoal
+    # The embedding of the goal
+    embedding: torch.Tensor
+
+    def get_embedding(self):
+        if self.embedding is None:
+            self.embedding = torch.zeros(256) # TODO: replace with actual embedding function
+        return self.embedding
 
 class Fringe(NamedTuple):
     # What sequence of sentences define this fringe

@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 **/scratch_err.out
+ckpt/
 
 # C extensions
 *.so

@@ -1,10 +1,10 @@
 from alectryon.serapi import annotate
-from alectryon.core import Sentence, Goal, Hypothesis
+from alectryon.core import Sentence, Hypothesis
 from contextlib import redirect_stderr
 from typing import Union
 from actions.tactics import TACTIC_MAP, TacticSpec
 from itertools import combinations
-from mdp import Action, Fringe, State
+from mdp import Action, Fringe, State, Goal
 
 
 def apply_coq(proof: list[str]) -> tuple[Fringe, float]:
@@ -27,9 +27,16 @@ def apply_coq(proof: list[str]) -> tuple[Fringe, float]:
     border = chunks[-1][-1]
     # TODO: minor, but it may be possible for the last chunk to be a Text instead of a Sentence,
     # so we should prob extract the last Sentence
-    fringe = Fringe(proof, border.goals[:])
+    fringe = Fringe(
+        proof,
+        [
+            Goal(border.goals[i].conclusion, border.goals[i].hypotheses)
+            for i in range(len(border.goals))
+        ],
+    )
     reward = 1 if len(fringe.goals) <= 0 else 0
     return (fringe, reward)
+
 
 def pretty_print_proof(proof: list[str]) -> str:
     """
@@ -37,6 +44,7 @@ def pretty_print_proof(proof: list[str]) -> str:
     """
     for sentence in proof:
         print(sentence)
+
 
 class Env:
     """
@@ -139,6 +147,7 @@ class Env:
         )
         return new_env
 
+
 if __name__ == "__main__":
     # Simple example
     env = Env(
@@ -154,7 +163,7 @@ if __name__ == "__main__":
     state, reward = env.step(action)
 
     for i, fringe in enumerate(state.fringes):
-        print(f'FRINGE {i}')
+        print(f"FRINGE {i}")
         pretty_print_proof(fringe.proof)
         print()
         print("Goals:")

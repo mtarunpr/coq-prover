@@ -11,6 +11,7 @@ from data import theorems
 from env import Env
 from mdp import State
 from actions import tactics
+from collections import deque
 
 
 parser = argparse.ArgumentParser()
@@ -105,106 +106,108 @@ class Policy(nn.Module):
         self.goal_network = GoalNetwork(goal_embedding_dim)
         self.tactic_network = TacticNetwork(goal_embedding_dim, num_tactics)
 
+        self.fringe_log_probs = []
+        self.tactic_log_probs = []
+        self.rewards = []
+
     def forward(self, state: State):
         # Given a state, output an action
         # Compute score for each fringe by summing over the scores (logits) of its goals
         fringe_logits = []
         for fringe in state.fringes:
             goal_embeddings = torch.stack(
-                map(lambda goal: goal.embedding, fringe.goals)
+                list(map(lambda goal: goal.get_embedding(), fringe.goals))
             )
             goal_logits = self.goal_network(goal_embeddings)
             fringe_logits.append(goal_logits.sum())
+
         fringe_logits = torch.stack(fringe_logits)
-        fringe_probs = F.softmax(fringe_logits)
+        fringe_probs = F.softmax(fringe_logits, dim=0)  # TODO: check dim
 
         # Sample a fringe based on fringe_scores
         fringe_idx = fringe_probs.multinomial(1).data[0]
 
         # Compute scores for each tactic (based on the 0th goal in the sampled fringe)
-        tactic_scores = self.tactic_network(state.fringes[fringe_idx].goals[0])
-        tactic_probs = F.softmax(tactic_scores)
+        tactic_scores = self.tactic_network(
+            state.fringes[fringe_idx].goals[0].get_embedding()
+        )
+        tactic_probs = F.softmax(tactic_scores, dim=0)  # TODO: check dim
 
         # Sample a tactic based on tactic_scores
         tactic_idx = tactic_probs.multinomial(1).data[0]
 
-        # TODO: fix this; action selection happens in select_action, so just return probs here?
+        # TODO: might have to fix indexing here
+        self.fringe_log_probs.append(fringe_probs[fringe_idx].log())
+        self.tactic_log_probs.append(tactic_probs[tactic_idx].log())
 
-        return (Action(fringe_idx, tactic_idx), fringe_probs, tactic_probs)
+        return Action(fringe_idx.item(), 0, tactic_idx.item())
 
 
 class REINFORCE:
     def __init__(self, goal_embedding_dim, num_tactics):
         self.policy = Policy(goal_embedding_dim, num_tactics)
-        self.policy = self.policy.cuda()
         self.optimizer = optim.Adam(self.policy.parameters(), lr=args.learning_rate)
         self.policy.train()
 
-    def select_action(self, state: State) -> (Action, torch.Tensor, torch.Tensor):
-        probs = self.policy(state)
-        action = probs.multinomial().data
-        prob = probs[:, action[0, 0]].view(1, -1)
-        log_prob = prob.log()
-        entropy = -(probs * probs.log()).sum()
+    def finish_episode(self):
+        R = 0
+        policy_loss = []
+        returns = deque()
+        eps = np.finfo(np.float32).eps.item()
+        for r in self.policy.rewards[::-1]:
+            R = r + args.gamma * R
+            returns.appendleft(R)
+        returns = torch.tensor(returns)
+        returns = (returns - returns.mean()) / (returns.std() + eps)
 
-        return action[0], log_prob, entropy
-
-    def update_parameters(self, rewards, log_probs, entropies, gamma):
-        R = torch.zeros(1, 1)
-        loss = 0
-        for i in reversed(range(len(rewards))):
-            R = gamma * R + rewards[i]
-            loss = (
-                loss
-                - (log_probs[i] * (Variable(R).expand_as(log_probs[i])).cuda()).sum()
-                - (0.0001 * entropies[i].cuda()).sum()
-            )
-        loss = loss / len(rewards)
+        for log_prob, R in zip(self.policy.fringe_log_probs, returns):
+            policy_loss.append((-log_prob * R).unsqueeze(0))
 
         self.optimizer.zero_grad()
-        loss.backward()
-        nn.utils.clip_grad_norm(self.policy.parameters(), 40)
+        policy_loss = torch.cat(policy_loss).sum()
+        policy_loss.backward()
         self.optimizer.step()
+
+        self.policy.rewards.clear()
+        self.policy.fringe_log_probs.clear()
+        self.policy.tactic_log_probs.clear()
 
 
 def main():
-    agent = REINFORCE(256, len(tactics.TACTIC_MAP))
+    agent = REINFORCE(768, len(tactics.TACTIC_MAP))
 
-    dir = "ckpt"
-    if not os.path.exists(dir):
-        os.mkdir(dir)
+    ckpt_dir = "ckpt"
+    if not os.path.exists(ckpt_dir):
+        os.mkdir(ckpt_dir)
 
     for i_episode in range(args.num_episodes):
+        ep_reward = 0
         theorem, preamble = theorems.get_random_theorem()
         env = Env(theorem, preamble)
         state = env.state
-        entropies = []
-        log_probs = []
-        rewards = []
         for t in range(args.max_steps):
-            action, log_prob, entropy = agent.select_action(state)
-            action = action.cpu()
+            action = agent.policy(state)
 
             state, reward = env.step(action)
             # We're done if the newest fringe has no goals
             done = len(state.fringes[-1].goals) == 0
 
-            entropies.append(entropy)
-            log_probs.append(log_prob)
-            rewards.append(reward)
+            agent.policy.rewards.append(reward)
+            ep_reward += reward
 
             if done:
                 break
 
-        agent.update_parameters(rewards, log_probs, entropies, args.gamma)
+        agent.finish_episode()
 
         if i_episode % args.ckpt_freq == 0:
             torch.save(
                 agent.policy.state_dict(),
-                os.path.join(dir, "reinforce-" + str(i_episode) + ".pkl"),
+                os.path.join(ckpt_dir, "reinforce-" + str(i_episode) + ".pkl"),
             )
 
-        print("Episode: {}, reward: {}".format(i_episode, np.sum(rewards)))
+        if i_episode % args.log_interval == 0:
+            print("Episode {}\tLast reward: {:.2f}".format(i_episode, ep_reward))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,9 @@
 from typing import NamedTuple
-from alectryon.core import Sentence, Goal as AlectryonGoal, Hypothesis
+from alectryon.core import Hypothesis
 import torch
+from sentence_transformers import SentenceTransformer
+
+embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
 
 class Action(NamedTuple):
@@ -8,16 +11,24 @@ class Action(NamedTuple):
     goal_idx: int
     tactic_idx: int
 
-class Goal(NamedTuple):
-    # The goal itself
-    goal: AlectryonGoal
-    # The embedding of the goal
+
+class Goal:
+    conclusion: str
+    hypotheses: list[Hypothesis]
     embedding: torch.Tensor
+
+    def __init__(self, conclusion: str, hypotheses: list[Hypothesis]):
+        self.conclusion = conclusion
+        self.hypotheses = hypotheses
+        self.embedding = None
 
     def get_embedding(self):
         if self.embedding is None:
-            self.embedding = torch.zeros(256) # TODO: replace with actual embedding function
+            self.embedding = torch.from_numpy(
+                embedding_model.encode(goal_to_string(self))
+            )
         return self.embedding
+
 
 class Fringe(NamedTuple):
     # What sequence of sentences define this fringe
@@ -37,3 +48,16 @@ class State(NamedTuple):
     """
 
     fringes: list[Fringe]
+
+
+def goal_to_string(goal: Goal) -> str:
+    """
+    Converts a Goal to a string with all hypotheses as well as conclusion
+    """
+
+    goal_string = ""
+    for hypothesis in goal.hypotheses:
+        goal_string += ", ".join(hypothesis.names) + " : " + hypothesis.type + "\n"
+    goal_string += "------------------\n"
+    goal_string += goal.conclusion
+    return goal_string

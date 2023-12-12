@@ -4,9 +4,10 @@ from contextlib import redirect_stderr
 from actions.tactics import TACTIC_MAP, tactic_to_idx
 from itertools import combinations
 from mdp import Action, Fringe, State, Goal
+from typing import Optional
 
 
-def apply_coq(proof: list[str]) -> tuple[Fringe | None, float]:
+def apply_coq(proof: list[str]) -> tuple[Optional[Fringe], float]:
     """
     Applies alectryon and returns the chunks and reward
     """

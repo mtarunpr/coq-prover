@@ -79,6 +79,8 @@ class Env:
         """
         self.opening_book = preamble[:] + [statement] + starter_actions[:]
         (fringe, _) = apply_coq(self.opening_book)
+        if fringe is None:
+            raise Exception("Invalid opening book")
         self.state = State([fringe])
 
     def try_all_args(self, action: Action) -> str:

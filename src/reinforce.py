@@ -75,33 +75,37 @@ if args.seed:
 class GoalNetwork(nn.Module):
     def __init__(self, goal_embedding_dim: int, hidden_size=128):
         super(GoalNetwork, self).__init__()
-        self.linear1 = nn.Linear(goal_embedding_dim, hidden_size)
-        self.dropout = nn.Dropout(p=0.6)
-        self.linear2 = nn.Linear(hidden_size, 1)
+        self.sequential = nn.Sequential(
+            nn.Linear(goal_embedding_dim, 2 * hidden_size),
+            nn.Dropout(p=0.6),
+            nn.ReLU(),
+            nn.Linear(2 * hidden_size, hidden_size),
+            nn.Dropout(p=0.6),
+            nn.ReLU(),
+            nn.Linear(hidden_size, 1),
+        )
 
     def forward(self, x: torch.Tensor):
         # Given a goal embedding, output logits representing how easy the goal is to prove
-        x = self.linear1(x)
-        x = self.dropout(x)
-        x = F.relu(x)
-        action_scores = self.linear2(x)
-        return action_scores
+        return self.sequential(x)
 
 
 class TacticNetwork(nn.Module):
     def __init__(self, goal_embedding_dim: int, num_tactics: int, hidden_size=128):
         super(TacticNetwork, self).__init__()
-        self.linear1 = nn.Linear(goal_embedding_dim, hidden_size)
-        self.dropout = nn.Dropout(p=0.6)
-        self.linear2 = nn.Linear(hidden_size, num_tactics)
+        self.sequential = nn.Sequential(
+            nn.Linear(goal_embedding_dim, 2 * hidden_size),
+            nn.Dropout(p=0.6),
+            nn.ReLU(),
+            nn.Linear(2 * hidden_size, hidden_size),
+            nn.Dropout(p=0.6),
+            nn.ReLU(),
+            nn.Linear(hidden_size, num_tactics),
+        )
 
     def forward(self, x: torch.Tensor):
         # Given a goal embedding, output a tensor of logits representing how likely each tactic is the best tactic to use next
-        x = self.linear1(x)
-        x = self.dropout(x)
-        x = F.relu(x)
-        action_scores = self.linear2(x)
-        return action_scores
+        return self.sequential(x)
 
 
 class Policy(nn.Module):

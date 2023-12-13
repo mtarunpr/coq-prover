@@ -1,3 +1,6 @@
+from data import parse_txt
+all_data = parse_txt.get_all_theorems('./data/txt files/')
+
 import argparse
 import torch
 import torch.nn as nn
@@ -193,7 +196,8 @@ def main():
 
     for i_episode in range(args.num_episodes):
         ep_reward = 0
-        theorem, preamble = theorems.get_random_theorem()
+        t = np.random.choice(all_data)
+        theorem, preamble = t.get_random_state(), t.preamble
         if args.render or i_episode % args.log_interval == 0:
             print("EPISODE {}: {}".format(i_episode, theorem))
         env = Env(theorem, preamble)

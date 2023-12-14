@@ -97,6 +97,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
             while line[end_index] != ":":
                 end_index += 1
             curr_name = line[index: end_index]
+            curr_name = curr_name.strip()
 
             continue
 
@@ -139,9 +140,9 @@ def get_all_theorems(path):
 
     return theorems
 
-# T = get_all_theorems('./txt files/')
+T = get_all_theorems('./txt files/')
 
-# for t in T:
-#     pprint(t.statement)
+for t in T:
+    pprint(t.name)
 
 # pprint(T[-10].preamble)

@@ -10,12 +10,17 @@ class Theorem:
     statement: str
     steps: list[str]
     preamble: list[str]
+    
+    # Given a preamble, we want to get a list of all facts, definitions, fixed points, theorems, lemmas, etc
+    # We just want the name 
+    keywords: list[str]
 
-    def __init__(self, name: str, statement:str, steps: list[str], preamble: list[str]):
+    def __init__(self, name: str, statement:str, steps: list[str], preamble: list[str], keywords: list[str]):
         self.name = name
         self.statement = statement
         self.steps = steps
         self.preamble = preamble
+        self.keywords = keywords
 
     def __str__(self):
         curr_str = self.name
@@ -43,9 +48,10 @@ IMPORT_KEYS = ['missing', 'tactics', 'division', 'euclide', 'permutation', 'powe
 
 
 import_strings = {}
+keywords_map = {}
 
 # Gets data from one file
-def parse_file(file_name: str, import_strings, file_key, theorems, path):
+def parse_file(file_name: str, import_strings, file_key, theorems, path, keywords_map):
     
     print("PARSING " + file_name)
     making_theorem = False
@@ -55,6 +61,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
     curr_file = []
     file = open(path + file_name, 'r')
     preamble = []
+    curr_keywords = []
 
     # Get all lines
     Lines = file.readlines()
@@ -69,6 +76,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
             key = line[len("Require Import") + 1: -2]
             if key in IMPORT_KEYS:
                 preamble += import_strings[key]
+                curr_keywords += keywords_map[key]
             else:
                 preamble += [line.strip()]
             continue
@@ -81,6 +89,39 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
 
         # Otherwise add the line to our data
         curr_file.append(line.strip())
+
+        if line.startswith("Fact"):
+            index = 5
+            end_index = index+1
+            while line[end_index] != ":":
+                end_index += 1
+            keyword = line[index: end_index]
+            keyword = keyword.strip()
+            curr_keywords.append(keyword)
+            # print(keyword)
+            continue
+
+        if line.startswith("Definition"):
+            index = 11
+            end_index = index + 1
+            while line[end_index] != "(":
+                end_index += 1
+            keyword = line[index: end_index]
+            keyword = keyword.strip()
+            curr_keywords.append(keyword)
+            # print(keyword)
+            continue
+
+        if line.startswith("Fixpoint"):
+            index = 9
+            end_index = index + 1
+            while line[end_index] != "(":
+                end_index += 1
+            keyword = line[index: end_index]
+            keyword = keyword.strip()
+            curr_keywords.append(keyword)
+            # print(keyword)
+            continue
 
         # Indications to start batching data to put into a block
         if line.startswith("Lemma") or line.startswith("Theorem"):
@@ -105,10 +146,11 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
         if line.startswith("Qed.") and making_theorem:
             making_theorem = False
 
-            new_theorem = Theorem(curr_name, curr_title, curr_steps, preamble)
+            new_theorem = Theorem(curr_name, curr_title, curr_steps, preamble, curr_keywords)
 
             # Add theorem and reset
             theorems.append(new_theorem)
+            curr_keywords.append(curr_name)
 
             curr_name = ""
             curr_title = ""
@@ -124,6 +166,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
     # Then we store the file as a preamble for futuree imports
     curr_file = preamble + curr_file
     import_strings[file_key] = curr_file
+    keywords_map[file_key] = curr_keywords
 
     # for theorem in theorems:
     #     print(theorem.get_random_state())
@@ -136,13 +179,13 @@ def get_all_theorems(path):
     theorems: tuple[Theorem] = []
     for i, file_name in enumerate(FILES_ORDER):
         file_key = IMPORT_KEYS[i]
-        parse_file(file_name, import_strings, file_key, theorems, path)
+        parse_file(file_name, import_strings, file_key, theorems, path, keywords_map)
 
     return theorems
 
 T = get_all_theorems('./txt files/')
 
-for t in T:
-    pprint(t.name)
+# for t in T:
+#     pprint(t.keywords)
 
 # pprint(T[-10].preamble)

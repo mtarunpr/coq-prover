@@ -38,8 +38,6 @@ Lemma mult_lemma2 : forall (n m:nat),(n*m = O)->(n=O)\/(m=O).
   simpl in H.
   right.
   assert (m <= O);try lia.
-  rewrite <- H.
-  auto with arith.
 Qed.
 
 Lemma mult_lemma3 : forall (n m:nat),(n <> O)->(m > 1)->(n < n*m).
@@ -49,10 +47,6 @@ Lemma mult_lemma3 : forall (n m:nat),(n <> O)->(m > 1)->(n < n*m).
   inversion H0.
   simpl.
   assert (O < m*n);try lia.
-  inversion H0;try lia.
-  assert (1 <= n);try lia.
-  assert (m > 1);try lia.
-  generalize (IHm H4);lia.
 Qed.
 
 Lemma mult_lemma4 : forall (n m:nat),n=n*m -> n=O \/ m=1.

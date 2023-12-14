@@ -7,11 +7,13 @@ import numpy as np
 class Theorem:
     # Theorem has name, possible set of steps, and preamble
     name: str
+    statement: str
     steps: list[str]
     preamble: list[str]
 
-    def __init__(self, name: str, steps: list[str], preamble: list[str]):
+    def __init__(self, name: str, statement:str, steps: list[str], preamble: list[str]):
         self.name = name
+        self.statement = statement
         self.steps = steps
         self.preamble = preamble
 
@@ -22,9 +24,10 @@ class Theorem:
 
         return curr_str
 
-    # Get a random data point from a theorem by randomly picking a number of steps to append to the name
+    # Get a random data point from a theorem by randomly picking a number of steps
+    # We then return these steps
     def get_random_state(self):
-        curr_state = [self.name]
+        curr_state = []
 
         if len(self.steps) > 0:
             num_states = np.random.randint(len(self.steps) + 1)
@@ -46,6 +49,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
     
     print("PARSING " + file_name)
     making_theorem = False
+    curr_name = ""
     curr_title = ""
     curr_steps = []
     curr_file = []
@@ -83,17 +87,29 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path):
             making_theorem = True
             curr_title = line.strip()
 
+            index = 0
+            if line.startswith("Lemma"):
+                index = 6
+            else:
+                index = 8
+
+            end_index = 0
+            while line[end_index] != ":":
+                end_index += 1
+            curr_name = line[index: end_index]
+
             continue
 
         # If we finish a proof, then we make all of the values into a theorem
-        if line.startswith("Qed."):
+        if line.startswith("Qed.") and making_theorem:
             making_theorem = False
 
-            new_theorem = Theorem(curr_title, curr_steps, preamble)
+            new_theorem = Theorem(curr_name, curr_title, curr_steps, preamble)
 
             # Add theorem and reset
             theorems.append(new_theorem)
 
+            curr_name = ""
             curr_title = ""
             curr_steps = []
 
@@ -126,6 +142,6 @@ def get_all_theorems(path):
 # T = get_all_theorems('./txt files/')
 
 # for t in T:
-#     pprint(t.get_random_state(''))
+#     pprint(t.statement)
 
 # pprint(T[-10].preamble)

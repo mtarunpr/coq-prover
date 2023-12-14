@@ -187,39 +187,46 @@ class Policy(nn.Module):
         tactic_idx = tactic_probs.multinomial(1).data[0]
 
         # Compute scores for each possible argument
-        arg_space = [
-            "".join(hyp.names) for hyp in state.fringes[fringe_idx].goals[0].hypotheses
-        ] + usable_identifiers
+        arg_space = (
+            [
+                "".join(hyp.names)
+                for hyp in state.fringes[fringe_idx].goals[0].hypotheses
+            ] # hypotheses
+            + usable_identifiers # previously defined definitions, theorems, etc.
+            + [""] # empty string, representing a stop token
+        )
         argument_indices = []
         argument_probs_list = []
         tactic = TACTIC_MAP[tactic_idx.item()]
-        argc = list(tactic.argc_range)[
-            -1
-        ]  # Generate the max possible number of args; we'll try all prefixes [:n] of them later
-        if len(arg_space) > 0:
-            prev_args_embeddings = torch.from_numpy(embed(tactic.command)).unsqueeze(0)
-            for _ in range(argc):
-                argument_logits = self.argument_network(
-                    goal_embedding,
+        max_argc = list(tactic.argc_range)[-1]
+
+        prev_args_embeddings = torch.from_numpy(embed(tactic.command)).unsqueeze(0)
+        for _ in range(max_argc):
+            argument_logits = self.argument_network(
+                goal_embedding,
+                prev_args_embeddings,
+                torch.stack([torch.from_numpy(embed(arg)) for arg in arg_space]),
+            )
+            argument_probs = F.softmax(argument_logits, dim=0)
+            argument_probs_list.append(argument_probs)
+
+            # Sample an argument based on argument_scores
+            argument_idx = argument_probs.multinomial(1).data[0]
+            if argument_idx.item() == len(arg_space) - 1:
+                # This is a stop token
+                break
+            argument_indices.append(argument_idx.item())
+
+            # Update prev_args_embeddings
+            prev_args_embeddings = torch.cat(
+                (
                     prev_args_embeddings,
-                    torch.stack([torch.from_numpy(embed(arg)) for arg in arg_space]),
-                )
-                argument_probs = F.softmax(argument_logits, dim=0)
-                argument_probs_list.append(argument_probs)
-
-                # Sample an argument based on argument_scores
-                argument_indices.append(argument_probs.multinomial(1).data[0])
-
-                # Update prev_args_embeddings
-                prev_args_embeddings = torch.cat(
-                    (
-                        prev_args_embeddings,
-                        torch.from_numpy(
-                            embed(arg_space[argument_indices[-1]])
-                        ).unsqueeze(0),
+                    torch.from_numpy(embed(arg_space[argument_indices[-1]])).unsqueeze(
+                        0
                     ),
-                    dim=0,
-                )
+                ),
+                dim=0,
+            )
 
         # pi(a | s) = P(fringe_idx, tactic_idx | s)
         #   = pi(fringe_idx | s) * pi(tactic_idx | fringe_idx, s) * prod_i pi(argument_indices[i] | tactic_idx, fringe_idx, s)

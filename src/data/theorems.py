@@ -16,7 +16,7 @@ theorems: list[Theorem] = [
     Theorem(
         "simple_sum2",
         "Theorem simple_sum2: forall (n : nat), n + 0 = n.",
-        ["induction n.", "simpl.", "rewrite IHn.", "reflexivity."],
+        ["induction n.", "simpl.", "reflexivity.", "simpl.", "rewrite IHn.", "reflexivity."],
         [],
         [],
     ),

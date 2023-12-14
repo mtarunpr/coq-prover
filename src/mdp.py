@@ -23,7 +23,7 @@ class Goal:
 
     def get_embedding(self):
         if self.embedding is None:
-            self.embedding = torch.from_numpy(embed(goal_to_string(self)))
+            self.embedding = embed(goal_to_string(self))
         return self.embedding
 
     def __str__(self) -> str:

@@ -191,21 +191,21 @@ class Policy(nn.Module):
             [
                 "".join(hyp.names)
                 for hyp in state.fringes[fringe_idx].goals[0].hypotheses
-            ] # hypotheses
-            + usable_identifiers # previously defined definitions, theorems, etc.
-            + [""] # empty string, representing a stop token
+            ]  # hypotheses
+            + usable_identifiers  # previously defined definitions, theorems, etc.
+            + [""]  # empty string, representing a stop token
         )
         argument_indices = []
         argument_probs_list = []
         tactic = TACTIC_MAP[tactic_idx.item()]
         max_argc = list(tactic.argc_range)[-1]
 
-        prev_args_embeddings = torch.from_numpy(embed(tactic.command)).unsqueeze(0)
+        prev_args_embeddings = embed(tactic.command).unsqueeze(0)
         for _ in range(max_argc):
             argument_logits = self.argument_network(
                 goal_embedding,
                 prev_args_embeddings,
-                torch.stack([torch.from_numpy(embed(arg)) for arg in arg_space]),
+                embed(arg_space),
             )
             argument_probs = F.softmax(argument_logits, dim=0)
             argument_probs_list.append(argument_probs)
@@ -221,9 +221,7 @@ class Policy(nn.Module):
             prev_args_embeddings = torch.cat(
                 (
                     prev_args_embeddings,
-                    torch.from_numpy(embed(arg_space[argument_indices[-1]])).unsqueeze(
-                        0
-                    ),
+                    embed(arg_space[argument_indices[-1]]).unsqueeze(0),
                 ),
                 dim=0,
             )

@@ -1,5 +1,3 @@
-from data import parse_txt
-from pathlib import Path
 import argparse
 import torch
 import torch.nn as nn
@@ -15,7 +13,6 @@ from actions import tactics
 from collections import deque
 from actions.tactics import TACTIC_MAP
 
-all_theorems = parse_txt.get_all_theorems(Path(__file__).parent / "data/raw")
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -196,11 +193,10 @@ def main():
 
     for i_episode in range(args.num_episodes):
         ep_reward = 0
-        t = np.random.choice(all_theorems)
-        theorem, preamble = t.get_random_state(), t.preamble
+        theorem_stmt, preamble, proof_so_far = theorems.get_random_state()
         if args.render or i_episode % args.log_interval == 0:
-            print("EPISODE {}: {}".format(i_episode, theorem))
-        env = Env(theorem, preamble)
+            print("EPISODE {}: {}".format(i_episode, theorem_stmt))
+        env = Env(theorem_stmt, preamble, proof_so_far)
         state = env.state
         for h in range(args.max_steps):
             action = agent.policy(state)

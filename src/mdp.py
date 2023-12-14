@@ -1,17 +1,14 @@
 from typing import NamedTuple
 from alectryon.core import Hypothesis
 import torch
-from sentence_transformers import SentenceTransformer
-import os
-
-embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+from embedding import embed
 
 
 class Action(NamedTuple):
     fringe_idx: int
     goal_idx: int
     tactic_idx: int
+    arg_list: list[str] = []
 
 
 class Goal:
@@ -26,13 +23,27 @@ class Goal:
 
     def get_embedding(self):
         if self.embedding is None:
-            self.embedding = torch.from_numpy(
-                embedding_model.encode(goal_to_string(self))
-            )
+            self.embedding = embed(goal_to_string(self))
         return self.embedding
 
     def __str__(self) -> str:
         return self.conclusion
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Goal):
+            return False
+        if len(self.hypotheses) != len(__value.hypotheses):
+            return False
+        return (
+            all(
+                [
+                    self.hypotheses[i].names == __value.hypotheses[i].names
+                    and self.hypotheses[i].type == __value.hypotheses[i].type
+                    for i in range(len(self.hypotheses))
+                ]
+            )
+            and self.conclusion == __value.conclusion
+        )
 
 
 class Fringe(NamedTuple):
@@ -40,6 +51,14 @@ class Fringe(NamedTuple):
     proof: list[str]
     # What goals (hypotheses included in goal) define this fringe
     goals: list[Goal]
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Fringe):
+            return False
+        if len(self.goals) != len(__value.goals):
+            return False
+
+        return self.goals == __value.goals
 
 
 class State(NamedTuple):

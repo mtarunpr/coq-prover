@@ -33,7 +33,9 @@ keywords_map = {}
 
 
 # Gets data from one file
-def parse_file(file_name: str, import_strings, file_key, theorems, path: Path, keywords_map):
+def parse_file(
+    file_name: str, import_strings, file_key, theorems, path: Path, keywords_map
+):
     print("PARSING " + file_name)
     making_theorem = False
     curr_name = ""
@@ -53,7 +55,9 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path: Path, k
             continue
 
         # Get imports and add them to preamble
-        if any(line.startswith(imp_type) for imp_type in ["Require", "Import", "Export"]):
+        if any(
+            line.startswith(imp_type) for imp_type in ["Require", "Import", "Export"]
+        ):
             key = line.split(" ")[-1].strip()[:-1]
             if key in IMPORT_KEYS:
                 preamble += import_strings[key]
@@ -128,7 +132,11 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path: Path, k
             making_theorem = False
 
             new_theorem = Theorem(
-                curr_name, curr_title, curr_steps, preamble + file_before_theorem, curr_keywords
+                curr_name,
+                curr_title,
+                curr_steps,
+                preamble + file_before_theorem,
+                curr_keywords,
             )
 
             # Add theorem and reset

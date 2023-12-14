@@ -29,12 +29,38 @@ class Goal:
     def __str__(self) -> str:
         return self.conclusion
 
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Goal):
+            return False
+        if len(self.hypotheses) != len(__value.hypotheses):
+            return False
+        return (
+            all(
+                [
+                    self.hypotheses[i].names == __value.hypotheses[i].names
+                    and self.hypotheses[i].type == __value.hypotheses[i].type
+                    for i in range(len(self.hypotheses))
+                ]
+            )
+            and self.conclusion == __value.conclusion
+        )
+
 
 class Fringe(NamedTuple):
     # What sequence of sentences define this fringe
     proof: list[str]
     # What goals (hypotheses included in goal) define this fringe
     goals: list[Goal]
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Fringe):
+            return False
+        if len(self.proof) != len(__value.proof) or len(self.goals) != len(
+            __value.goals
+        ):
+            return False
+
+        return self.proof == __value.proof and self.goals == __value.goals
 
 
 class State(NamedTuple):

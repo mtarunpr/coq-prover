@@ -7,9 +7,12 @@ from mdp import Action, Fringe, State, Goal
 from typing import Optional
 
 
-def apply_coq(proof: list[str]) -> tuple[Optional[Fringe], float]:
+def apply_coq(
+    proof: list[str], fringes: Optional[list[Fringe]] = None
+) -> tuple[Optional[Fringe], float]:
     """
-    Applies alectryon and returns the chunks and reward
+    Applies alectryon and returns the chunks and reward. If fringes is provided,
+    penalizes the reward if the fringe already exists.
     """
     # It seems coq errors aren't returned to the var, but bubble up to stderr
     # Simplest way to do it is just to catch it there, a little overkill but should be fine
@@ -20,8 +23,8 @@ def apply_coq(proof: list[str]) -> tuple[Optional[Fringe], float]:
     with open(SCRATCH_FILE, "r") as f:
         if len(f.read()) > 0:
             # Compilation failed, punish our bot
-            return (None, -0.01)
-    if len(chunks) <= 0:
+            return (None, -0.02)
+    if len(chunks) == 0:
         # Should never happen
         return (None, -1)
     border = chunks[-1][-1]
@@ -34,6 +37,8 @@ def apply_coq(proof: list[str]) -> tuple[Optional[Fringe], float]:
             for i in range(len(border.goals))
         ],
     )
+    if fringes is not None and fringe in fringes:
+        return (None, -0.01)
     reward = 1 if len(fringe.goals) == 0 else 0.1
     return (fringe, reward)
 
@@ -132,7 +137,7 @@ class Env:
         fringe = self.state.fringes[action.fringe_idx]
         tactic = TACTIC_MAP[action.tactic_idx]
         new_proof = fringe.proof[:] + [tactic.command + " ".join(action.arg_list) + "."]
-        (new_fringe, reward) = apply_coq(new_proof)
+        (new_fringe, reward) = apply_coq(new_proof, self.state.fringes)
         if new_fringe is not None:
             self.state.fringes.append(new_fringe)
             done = len(new_fringe.goals) == 0
@@ -149,7 +154,7 @@ class Env:
         fringe = self.state.fringes[action.fringe_idx]
         tactic = TACTIC_MAP[action.tactic_idx]
         new_proof = fringe.proof[:] + [tactic.command + " ".join(action.arg_list) + "."]
-        (new_fringe, reward) = apply_coq(new_proof)
+        (new_fringe, reward) = apply_coq(new_proof, self.state.fringes)
         new_state = (
             State(self.state.fringes[:] + [new_fringe])
             if new_fringe is not None

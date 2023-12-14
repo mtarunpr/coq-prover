@@ -207,11 +207,11 @@ def main():
                 print(
                     f"Action (fringe {fringe_idx}, tactic {TACTIC_MAP[tactic_idx].command})"
                 )
-                print("Proof so far:")
+                print("Proof so far (only last 5 steps):")
                 if error:
-                    pretty_print_proof(state.fringes[fringe_idx].proof)
+                    pretty_print_proof(state.fringes[fringe_idx].proof[-5:])
                 else:
-                    pretty_print_proof(state.fringes[-1].proof)
+                    pretty_print_proof(state.fringes[-1].proof[-5:])
                 print("Reward:", reward)
                 print()
 

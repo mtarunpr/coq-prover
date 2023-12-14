@@ -8,23 +8,23 @@ FILES_ORDER = [
     "missing.v",
     "tactics.v",
     "division.v",
-    "euclide.v",
-    "permutation.v",
-    "power.v",
-    "gcd.v",
-    "primes.v",
-    "nthroot.v",
+    # "euclide.v",
+    # "permutation.v",
+    # "power.v",
+    # "gcd.v",
+    # "primes.v",
+    # "nthroot.v",
 ]
 IMPORT_KEYS = [
     "missing",
     "tactics",
     "division",
-    "euclide",
-    "permutation",
-    "power",
-    "gcd",
-    "primes",
-    "nthroot",
+    # "euclide",
+    # "permutation",
+    # "power",
+    # "gcd",
+    # "primes",
+    # "nthroot",
 ]
 
 
@@ -33,7 +33,7 @@ keywords_map = {}
 
 
 # Gets data from one file
-def parse_file(file_name: str, import_strings, file_key, theorems, path, keywords_map):
+def parse_file(file_name: str, import_strings, file_key, theorems, path: Path, keywords_map):
     print("PARSING " + file_name)
     making_theorem = False
     curr_name = ""
@@ -105,6 +105,8 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path, keyword
         # Indications to start batching data to put into a block
         if line.startswith("Lemma") or line.startswith("Theorem"):
             making_theorem = True
+            # Store copy of file until before this line so we can add to this theorem's preamble
+            file_before_theorem = curr_file.copy()[:-1]
             curr_title = line.strip()
 
             index = 0
@@ -126,7 +128,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path, keyword
             making_theorem = False
 
             new_theorem = Theorem(
-                curr_name, curr_title, curr_steps, preamble, curr_keywords
+                curr_name, curr_title, curr_steps, preamble + file_before_theorem, curr_keywords
             )
 
             # Add theorem and reset
@@ -137,15 +139,14 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path, keyword
             curr_title = ""
             curr_steps = []
 
-        # If in a bathc, add lines to the batch
+        # If in a batch, add lines to the batch
         if making_theorem:
             curr_steps.append(line.strip())
 
     file.close()
 
     # Then we store the file as a preamble for future imports
-    curr_file = preamble + curr_file
-    import_strings[file_key] = curr_file
+    import_strings[file_key] = preamble + curr_file
     keywords_map[file_key] = curr_keywords
 
     # for theorem in theorems:
@@ -154,7 +155,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path, keyword
 
 
 # Iterate over all files to get data
-def get_all_theorems(path):
+def get_all_theorems(path: Path):
     theorems: tuple[Theorem] = []
     for i, file_name in enumerate(FILES_ORDER):
         file_key = IMPORT_KEYS[i]
@@ -165,4 +166,6 @@ def get_all_theorems(path):
 
 if __name__ == "__main__":
     theorems = get_all_theorems(Path(__file__).parent / "raw")
+    print(theorems[-10].name)
+    print(theorems[-10].statement)
     print(theorems[-10].preamble)

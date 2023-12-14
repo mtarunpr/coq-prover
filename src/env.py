@@ -87,7 +87,7 @@ class Env:
         self.opening_book = preamble[:] + [statement] + starter_actions[:]
         (fringe, _) = apply_coq(self.opening_book)
         if fringe is None:
-            raise Exception("Invalid opening book")
+            raise Exception("Invalid opening book. See scratch_err.out for details.")
         self.state = State([fringe])
         self.usable_identifiers = usable_identifiers[:]
 
@@ -131,13 +131,7 @@ class Env:
         """
         fringe = self.state.fringes[action.fringe_idx]
         tactic = TACTIC_MAP[action.tactic_idx]
-        new_proof = fringe.proof[:] + [
-            f"{action.goal_idx + 1}: "
-            + "{\n  "
-            + tactic.command
-            + " ".join(action.arg_list)
-            + ".\n}"
-        ]
+        new_proof = fringe.proof[:] + [tactic.command + " ".join(action.arg_list) + "."]
         (new_fringe, reward) = apply_coq(new_proof)
         if new_fringe is not None:
             self.state.fringes.append(new_fringe)
@@ -154,13 +148,7 @@ class Env:
         """
         fringe = self.state.fringes[action.fringe_idx]
         tactic = TACTIC_MAP[action.tactic_idx]
-        new_proof = fringe.proof[:] + [
-            f"{action.goal_idx + 1}: "
-            + "{\n  "
-            + tactic.command
-            + " ".join(action.arg_list)
-            + ".\n}"
-        ]
+        new_proof = fringe.proof[:] + [tactic.command + " ".join(action.arg_list) + "."]
         (new_fringe, reward) = apply_coq(new_proof)
         new_state = (
             State(self.state.fringes[:] + [new_fringe])
@@ -185,15 +173,12 @@ class Env:
 if __name__ == "__main__":
     # Simple example
     env = Env(
-        "Lemma one_min_div : forall (n:nat),(divides n 1).",
-        [
-            "Require Import Wf_nat.",
-            "Definition divides (a b:nat) := exists q:nat,a = (b*q).",
-        ],
-        ["intros.", "red.", "exists n."],
+        "Theorem excluded_middle_irrefutable: forall (P : Prop), ~ ~ (P \/ ~ P).",
+        [],
+        # ["intros.", "red.", "exists n."],
     )
     # Apply the "auto." action
-    action = Action(0, 0, tactic_to_idx("auto"))
+    action = Action(0, 0, tactic_to_idx("intros"))
     state, reward, _, _ = env.step(action)
     print(f"Reward: {reward}")
     print()

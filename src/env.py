@@ -129,9 +129,15 @@ class Env:
         theorem has been proven, and a boolean representing whether the action
         resulted in an error.
         """
-        command_with_args = self.try_all_args(action)
         fringe = self.state.fringes[action.fringe_idx]
-        new_proof = fringe.proof[:] + [command_with_args]
+        tactic = TACTIC_MAP[action.tactic_idx]
+        new_proof = fringe.proof[:] + [
+            f"{action.goal_idx + 1}: "
+            + "{\n  "
+            + tactic.command
+            + " ".join(action.arg_list)
+            + ".\n}"
+        ]
         (new_fringe, reward) = apply_coq(new_proof)
         if new_fringe is not None:
             self.state.fringes.append(new_fringe)
@@ -146,9 +152,15 @@ class Env:
         and whether the theorem will have been proven and whether the action will result in an error,
         without actually changing the environment at all.
         """
-        command_with_args = self.try_all_args(action)
         fringe = self.state.fringes[action.fringe_idx]
-        new_proof = fringe.proof[:] + [command_with_args]
+        tactic = TACTIC_MAP[action.tactic_idx]
+        new_proof = fringe.proof[:] + [
+            f"{action.goal_idx + 1}: "
+            + "{\n  "
+            + tactic.command
+            + " ".join(action.arg_list)
+            + ".\n}"
+        ]
         (new_fringe, reward) = apply_coq(new_proof)
         new_state = (
             State(self.state.fringes[:] + [new_fringe])

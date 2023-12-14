@@ -12,7 +12,7 @@ from mdp import State
 from actions import tactics
 from collections import deque
 from actions.tactics import TACTIC_MAP
-
+from embedding import embed
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -73,55 +73,97 @@ if args.seed:
 
 
 class GoalNetwork(nn.Module):
-    def __init__(self, goal_embedding_dim: int, hidden_size=128):
+    def __init__(self, embedding_dim: int, hidden_size=128):
         super(GoalNetwork, self).__init__()
         self.sequential = nn.Sequential(
-            nn.Linear(goal_embedding_dim, 2 * hidden_size),
-            nn.Dropout(p=0.6),
+            nn.Linear(embedding_dim, 2 * hidden_size),
+            nn.Dropout(p=0.25),
             nn.ReLU(),
             nn.Linear(2 * hidden_size, hidden_size),
-            nn.Dropout(p=0.6),
+            nn.Dropout(p=0.25),
             nn.ReLU(),
             nn.Linear(hidden_size, 1),
         )
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, goal_embedding: torch.Tensor):
         # Given a goal embedding, output logits representing how easy the goal is to prove
-        return self.sequential(x)
+        return self.sequential(goal_embedding)
 
 
 class TacticNetwork(nn.Module):
-    def __init__(self, goal_embedding_dim: int, num_tactics: int, hidden_size=128):
+    def __init__(self, embedding_dim: int, num_tactics: int, hidden_size=128):
         super(TacticNetwork, self).__init__()
         self.sequential = nn.Sequential(
-            nn.Linear(goal_embedding_dim, 2 * hidden_size),
-            nn.Dropout(p=0.6),
+            nn.Linear(embedding_dim, 2 * hidden_size),
+            nn.Dropout(p=0.25),
             nn.ReLU(),
             nn.Linear(2 * hidden_size, hidden_size),
-            nn.Dropout(p=0.6),
+            nn.Dropout(p=0.25),
             nn.ReLU(),
             nn.Linear(hidden_size, num_tactics),
         )
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, goal_embedding: torch.Tensor):
         # Given a goal embedding, output a tensor of logits representing how likely each tactic is the best tactic to use next
-        return self.sequential(x)
+        return self.sequential(goal_embedding)
+
+
+class ArgumentNetwork(nn.Module):
+    def __init__(self, embedding_dim: int, hidden_size=256):
+        super(ArgumentNetwork, self).__init__()
+        # LSTM takes embedding of all previous arguments (including tactic name) as input
+        self.lstm = nn.LSTM(embedding_dim, hidden_size, batch_first=True)
+        # Linear layer takes embedding of the current goal, hidden state of the LSTM,
+        # and embedding of a potential next argument as input
+        self.linear = nn.Linear(2 * embedding_dim + hidden_size, 1)
+
+    def forward(
+        self,
+        goal_embedding: torch.Tensor,
+        prev_args_embeddings: torch.Tensor,
+        arg_space_embeddings: torch.Tensor,
+    ):
+        # Given a goal embedding and previous argument embedding,
+        # output a tensor of logits representing how likely each argument is the best argument to use next
+        # dimension of goal_embedding is (embedding_dim,)
+        # dimension of prev_args_embeddings is (seq_len, embedding_dim)
+        # dimension of arg_space_embeddings is (arg_space_size, embedding_dim)
+        # seq_len is #previous arguments + 1 (for tactic name)
+        # arg_space_size is number of possible arguments (i.e. #hypotheses + #usable_identifiers)
+        lstm_out, (hidden_state, _) = self.lstm(prev_args_embeddings)
+        # dimension of lstm_out is (seq_len, hidden_size)
+        # dimension of hidden_state is (1, hidden_size)
+        # dimension of returned value is (arg_space_size,), i.e. one logit/score for each argument
+        return self.linear(
+            torch.cat(
+                (
+                    goal_embedding.unsqueeze(0).expand(
+                        arg_space_embeddings.shape[0], -1
+                    ),
+                    arg_space_embeddings,
+                    hidden_state.expand(arg_space_embeddings.shape[0], -1),
+                ),
+                dim=1,
+            )
+        ).squeeze(1)
 
 
 class Policy(nn.Module):
-    def __init__(self, goal_embedding_dim: int, num_tactics: int):
+    def __init__(self, embedding_dim: int, num_tactics: int):
         super(Policy, self).__init__()
         self.fringe_dim = 1
         self.tactic_dim = num_tactics
-        self.goal_network = GoalNetwork(goal_embedding_dim)
-        self.tactic_network = TacticNetwork(goal_embedding_dim, num_tactics)
+        self.goal_network = GoalNetwork(embedding_dim)
+        self.tactic_network = TacticNetwork(embedding_dim, num_tactics)
+        self.argument_network = ArgumentNetwork(embedding_dim)
 
         self.log_probs = []
         self.rewards = []
 
-    def forward(self, state: State):
+    def forward(self, state: State, usable_identifiers: list[str]):
         # Given a state, output an action
         # Compute score for each fringe by summing over the scores (logits) of its goals
+
         fringe_logits = []
         for fringe in state.fringes:
             goal_embeddings = torch.stack(
@@ -137,25 +179,72 @@ class Policy(nn.Module):
         fringe_idx = fringe_probs.multinomial(1).data[0]
 
         # Compute scores for each tactic (based on the 0th goal in the sampled fringe)
-        tactic_scores = self.tactic_network(
-            state.fringes[fringe_idx].goals[0].get_embedding()
-        )
+        goal_embedding = state.fringes[fringe_idx].goals[0].get_embedding()
+        tactic_scores = self.tactic_network(goal_embedding)
         tactic_probs = F.softmax(tactic_scores, dim=0)
 
         # Sample a tactic based on tactic_scores
         tactic_idx = tactic_probs.multinomial(1).data[0]
 
-        # pi(a | s) = P(fringe_idx, tactic_idx | s) = pi(fringe_idx | s) * pi(tactic_idx | fringe_idx, s)
+        # Compute scores for each possible argument
+        arg_space = [
+            "".join(hyp.names) for hyp in state.fringes[fringe_idx].goals[0].hypotheses
+        ] + usable_identifiers
+        argument_indices = []
+        argument_probs_list = []
+        tactic = TACTIC_MAP[tactic_idx.item()]
+        argc = list(tactic.argc_range)[
+            -1
+        ]  # Generate the max possible number of args; we'll try all prefixes [:n] of them later
+        if len(arg_space) > 0:
+            prev_args_embeddings = torch.from_numpy(embed(tactic.command)).unsqueeze(0)
+            for _ in range(argc):
+                argument_logits = self.argument_network(
+                    goal_embedding,
+                    prev_args_embeddings,
+                    torch.stack([torch.from_numpy(embed(arg)) for arg in arg_space]),
+                )
+                argument_probs = F.softmax(argument_logits, dim=0)
+                argument_probs_list.append(argument_probs)
+
+                # Sample an argument based on argument_scores
+                argument_indices.append(argument_probs.multinomial(1).data[0])
+
+                # Update prev_args_embeddings
+                prev_args_embeddings = torch.cat(
+                    (
+                        prev_args_embeddings,
+                        torch.from_numpy(
+                            embed(arg_space[argument_indices[-1]])
+                        ).unsqueeze(0),
+                    ),
+                    dim=0,
+                )
+
+        # pi(a | s) = P(fringe_idx, tactic_idx | s)
+        #   = pi(fringe_idx | s) * pi(tactic_idx | fringe_idx, s) * prod_i pi(argument_indices[i] | tactic_idx, fringe_idx, s)
         self.log_probs.append(
-            (fringe_probs[fringe_idx] * tactic_probs[tactic_idx]).log()
+            fringe_probs[fringe_idx].log()
+            + tactic_probs[tactic_idx].log()
+            + sum(
+                [
+                    argument_probs_list[i][argument_indices[i]].log()
+                    for i in range(len(argument_indices))
+                ]
+            )
         )
 
-        return Action(fringe_idx.item(), 0, tactic_idx.item())
+        return Action(
+            fringe_idx.item(),
+            0,
+            tactic_idx.item(),
+            [arg_space[i] for i in argument_indices],
+        )
 
 
 class REINFORCE:
-    def __init__(self, goal_embedding_dim, num_tactics):
-        self.policy = Policy(goal_embedding_dim, num_tactics)
+    def __init__(self, embedding_dim, num_tactics):
+        self.policy = Policy(embedding_dim, num_tactics)
         self.optimizer = optim.Adam(self.policy.parameters(), lr=args.learning_rate)
         self.policy.train()
 
@@ -199,13 +288,13 @@ def main():
         env = Env(theorem.statement, theorem.preamble, proof_so_far, theorem.keywords)
         state = env.state
         for h in range(args.max_steps):
-            action = agent.policy(state)
+            action = agent.policy(state, env.usable_identifiers)
             state, reward, done, error = env.step(action)
 
             if args.render:
-                fringe_idx, _, tactic_idx = action
+                fringe_idx, _, tactic_idx, tactic_args = action
                 print(
-                    f"Action (fringe {fringe_idx}, tactic {TACTIC_MAP[tactic_idx].command})"
+                    f"Action (fringe {fringe_idx}, tactic {TACTIC_MAP[tactic_idx].command}, args {tactic_args})"
                 )
                 print("Proof so far (only last 5 steps):")
                 if error:

@@ -1,17 +1,14 @@
 from typing import NamedTuple
 from alectryon.core import Hypothesis
 import torch
-from sentence_transformers import SentenceTransformer
-import os
-
-embedding_model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+from embedding import embed
 
 
 class Action(NamedTuple):
     fringe_idx: int
     goal_idx: int
     tactic_idx: int
+    arg_list: list[str] = []
 
 
 class Goal:
@@ -26,9 +23,7 @@ class Goal:
 
     def get_embedding(self):
         if self.embedding is None:
-            self.embedding = torch.from_numpy(
-                embedding_model.encode(goal_to_string(self))
-            )
+            self.embedding = torch.from_numpy(embed(goal_to_string(self)))
         return self.embedding
 
     def __str__(self) -> str:

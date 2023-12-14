@@ -32,6 +32,6 @@ theorems: list[Theorem] = [
 theorems += get_all_theorems(Path(__file__).parent / "raw")
 
 
-def get_random_state():
+def get_random_state() -> tuple[Theorem, list[str]]:
     theorem = random.choice(theorems)
-    return theorem.statement, theorem.preamble, theorem.get_random_state()
+    return theorem, theorem.get_random_state()

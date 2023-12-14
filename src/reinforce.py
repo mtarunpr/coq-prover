@@ -193,10 +193,10 @@ def main():
 
     for i_episode in range(args.num_episodes):
         ep_reward = 0
-        theorem_stmt, preamble, proof_so_far = theorems.get_random_state()
+        theorem, proof_so_far = theorems.get_random_state()
         if args.render or i_episode % args.log_interval == 0:
-            print("EPISODE {}: {}".format(i_episode, theorem_stmt))
-        env = Env(theorem_stmt, preamble, proof_so_far)
+            print("EPISODE {}: {}".format(i_episode, theorem.statement))
+        env = Env(theorem.statement, theorem.preamble, proof_so_far, theorem.keywords)
         state = env.state
         for h in range(args.max_steps):
             action = agent.policy(state)

@@ -52,12 +52,18 @@ class Env:
     """
 
     def __init__(
-        self, statement: str, preamble: list[str] = [], starter_actions: list[str] = []
+        self,
+        statement: str,
+        preamble: list[str] = [],
+        starter_actions: list[str] = [],
+        usable_identifiers: list[str] = [],
     ):
         """
         Initializes an environment trying to prove `statement`, where preamble is
-        written in proof environment before the statement, and `starter_actions`
-        have already been taken to try to prove the statement.
+        written in proof environment before the statement, `starter_actions`
+        have already been taken to try to prove the statement, and `usable_identifiers`
+        are the identifiers (theorems, definitions, etc.) that can be used as tactic arguments
+        in the proof.
 
         For example,
         ```
@@ -70,7 +76,8 @@ class Env:
             [
                 "intros.",
                 "red."
-            ]
+            ],
+            []
         )
         ```
         would create an Env trying to prove `one_min_div`, where all the
@@ -82,6 +89,7 @@ class Env:
         if fringe is None:
             raise Exception("Invalid opening book")
         self.state = State([fringe])
+        self.usable_identifiers = usable_identifiers[:]
 
     def try_all_args(self, action: Action) -> str:
         """
@@ -93,11 +101,11 @@ class Env:
         fringe = self.state.fringes[action.fringe_idx]
         target_goal = fringe.goals[action.goal_idx]
         hyps: list[Hypothesis] = target_goal.hypotheses
-        hyp_names = ["".join(hyp.names) for hyp in hyps]
+        arg_space = ["".join(hyp.names) for hyp in hyps] + self.usable_identifiers
         # Generate all the next sentences to test
         test_blocks: list[str] = []
         for argc in tactic.argc_range:
-            for combo in combinations(hyp_names, argc):
+            for combo in combinations(arg_space, argc):
                 added_block = f"{action.goal_idx + 1}: " + "{\n  " + tactic.command
                 for arg_ix in range(argc):
                     added_block += " " + combo[arg_ix]
@@ -154,7 +162,7 @@ class Env:
         """
         Copies this environment into a new environment, no mutability concerns
         """
-        new_env = Env("", [], [])
+        new_env = Env("", [], [], [])
         new_env.opening_book = self.opening_book[:]
         new_env.state = State(
             [Fringe(f.proof[:], f.goals[:]) for f in self.state.fringes]

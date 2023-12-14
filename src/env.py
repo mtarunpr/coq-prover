@@ -37,8 +37,10 @@ def apply_coq(
             for i in range(len(border.goals))
         ],
     )
+    # Penalize if the fringe already exists
     if fringes is not None and fringe in fringes:
-        return (None, -0.01)
+        return (None, -0.02)
+    # Reward if the fringe is new or (even more) if the theorem has been proven
     reward = 1 if len(fringe.goals) == 0 else 0.1
     return (fringe, reward)
 

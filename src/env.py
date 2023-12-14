@@ -20,7 +20,7 @@ def apply_coq(proof: list[str]) -> tuple[Optional[Fringe], float]:
     with open(SCRATCH_FILE, "r") as f:
         if len(f.read()) > 0:
             # Compilation failed, punish our bot
-            return (None, -0.02)
+            return (None, -0.01)
     if len(chunks) <= 0:
         # Should never happen
         return (None, -1)
@@ -34,7 +34,7 @@ def apply_coq(proof: list[str]) -> tuple[Optional[Fringe], float]:
             for i in range(len(border.goals))
         ],
     )
-    reward = 1 if len(fringe.goals) == 0 else 0.01
+    reward = 1 if len(fringe.goals) == 0 else 0.1
     return (fringe, reward)
 
 

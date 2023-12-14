@@ -5,6 +5,7 @@ __pycache__/
 
 **/scratch_err.out
 ckpt/
+**/*.cache
 
 # C extensions
 *.so

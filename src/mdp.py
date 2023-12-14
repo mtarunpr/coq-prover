@@ -55,12 +55,10 @@ class Fringe(NamedTuple):
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, Fringe):
             return False
-        if len(self.proof) != len(__value.proof) or len(self.goals) != len(
-            __value.goals
-        ):
+        if len(self.goals) != len(__value.goals):
             return False
 
-        return self.proof == __value.proof and self.goals == __value.goals
+        return self.goals == __value.goals
 
 
 class State(NamedTuple):

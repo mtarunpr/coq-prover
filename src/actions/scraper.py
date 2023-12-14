@@ -9,8 +9,9 @@ a little, but shouldn't be too bad. We can prune later if we want to.
 
 import requests
 from bs4 import BeautifulSoup
+from pathlib import Path
 
-EXCLUDED_TACTICS = ["[ … | … | … ]", "[> … | … | … ]", "admit", "… : …", "… : …", ""]
+EXCLUDED_TACTICS = ["[ … | … | … ]", "[> … | … | … ]", "admit", "give_up", "… : …", "… : …", ""]
 
 # Fetch the site
 url = "https://coq.inria.fr/refman/coq-tacindex.html"
@@ -34,7 +35,7 @@ tactics = [tactic[0].split("(")[0].strip() for tactic in tactics if len(tactic) 
 tactics = [tactic for tactic in tactics if tactic not in EXCLUDED_TACTICS]
 
 # Metaprogramming!????!?!!!
-fout = open("data.py", "w")
+fout = open(Path(__file__).parent / "data.py", "w")
 
 fout.write(
     '''"""

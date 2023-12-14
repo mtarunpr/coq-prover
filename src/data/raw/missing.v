@@ -18,7 +18,7 @@
 
 Require Export Arith.
 Require Export ArithRing.
-Require Export Omega.
+Require Export Psatz.
 
 Unset Standard Proposition Elimination Names.
 
@@ -37,7 +37,7 @@ Lemma mult_lemma2 : forall (n m:nat),(n*m = O)->(n=O)\/(m=O).
   tauto.
   simpl in H.
   right.
-  assert (m <= O);try omega.
+  assert (m <= O);try lia.
   rewrite <- H.
   auto with arith.
 Qed.
@@ -48,11 +48,11 @@ Lemma mult_lemma3 : forall (n m:nat),(n <> O)->(m > 1)->(n < n*m).
   induction m.
   inversion H0.
   simpl.
-  assert (O < m*n);try omega.
-  inversion H0;try omega.
-  assert (1 <= n);try omega.
-  assert (m > 1);try omega.
-  generalize (IHm H4);omega.
+  assert (O < m*n);try lia.
+  inversion H0;try lia.
+  assert (1 <= n);try lia.
+  assert (m > 1);try lia.
+  generalize (IHm H4);lia.
 Qed.
 
 Lemma mult_lemma4 : forall (n m:nat),n=n*m -> n=O \/ m=1.
@@ -83,12 +83,12 @@ Lemma mult_lemma5 : forall (n m:nat),((n * m) =1)->(n=1)/\(m=1).
   rewrite H1 in H0.
   rewrite H in H0.
   assert ((S n)=1).
-  omega.
+  lia.
   split;trivial.
   inversion H2.
   rewrite H4 in H.
   simpl in H.
-  omega.
+  lia.
 Qed.
 
 Lemma plus_minus_lemma1 : forall (y x:nat),(x+y-y=x).
@@ -134,12 +134,12 @@ Qed.
 
 Lemma minus_lemma1 : forall (a b:nat),(S a-S b)<S a.
   intros.
-  omega.
+  lia.
 Qed.
 
 Lemma minus_lemma2 : forall (n m:nat),(n<=m)->(n-m=O).
   intros.
-  omega.
+  lia.
 Qed.
 
 Lemma mult_minus_lemma2 : forall (x y z:nat),(x*(y-z))=(x*y-x*z).
@@ -173,5 +173,5 @@ Qed.
 
 Lemma minus_lt_lemma1 : forall (b a:nat),(a<b)->(0<b-a).
   intros.
-  omega.
+  lia.
 Qed.

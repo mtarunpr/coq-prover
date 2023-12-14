@@ -70,14 +70,14 @@ Qed.
 
 (** if 1<p and 0<m then p^m>1 *)
 Lemma power_lt : forall (p m:nat),(1<p)->(0<m)->1<(power p m).
-  induction m;simpl;try omega;intros.
-  destruct m;simpl;try omega.
+  induction m;simpl;try lia;intros.
+  destruct m;simpl;try lia.
   simpl in IHm.
   assert (1 < p*(power p m)).
   apply IHm;auto with arith.
   rewrite mult_comm.
-  apply lt_trans with (1*p);try omega.
-  apply mult_lt_compat_r;try omega.
+  apply lt_trans with (1*p);try lia.
+  apply mult_lt_compat_r;try lia.
 Qed.
 
 (** 1^n = 1 *)
@@ -92,14 +92,14 @@ Lemma power_divides_power : forall (x n m:nat),(x>1)->(divides (power x n) (powe
   case (le_lt_dec m n);trivial.
   intro.
   generalize (le_plus_minus n m);intro.
-  rewrite H1 in H0;try omega.
+  rewrite H1 in H0;try lia.
   elim H0;intro q;rewrite power_plus_lemma1;intro.
   assert (1=(power x (m-n))*q).
   apply mult_lemma6 with (power x n).
-  intro;generalize (power_zero n x H3);omega.
+  intro;generalize (power_zero n x H3);lia.
   rewrite mult_assoc;rewrite <- H2;ring.
   symmetry in H3;elim (mult_lemma5 (power x (m-n)) q H3);intros.
-  case (eq_nat_dec (m-n) 0);intro;try omega.
-  assert (x=1);try omega.
-  apply divides_antisym;[apply one_min_div | rewrite <- H4;apply power_divides_lemma1;omega].
+  case (eq_nat_dec (m-n) 0);intro;try lia.
+  assert (x=1);try lia.
+  apply divides_antisym;[apply one_min_div | rewrite <- H4;apply power_divides_lemma1;lia].
 Qed.

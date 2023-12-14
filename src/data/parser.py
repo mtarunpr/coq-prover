@@ -53,8 +53,8 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path, keyword
             continue
 
         # Get imports and add them to preamble
-        if line.startswith("Require Import"):
-            key = line[len("Require Import") + 1 : -2]
+        if any(line.startswith(imp_type) for imp_type in ["Require", "Import", "Export"]):
+            key = line.split(" ")[-1].strip()[:-1]
             if key in IMPORT_KEYS:
                 preamble += import_strings[key]
                 curr_keywords += keywords_map[key]
@@ -62,9 +62,7 @@ def parse_file(file_name: str, import_strings, file_key, theorems, path, keyword
                 preamble += [line.strip()]
             continue
 
-        # We can skip Exports probably and empty lines
-        if line.startswith("Export"):
-            continue
+        # We can skip empty lines
         if len(line.strip()) == 0:
             continue
 

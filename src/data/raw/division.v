@@ -138,7 +138,7 @@ Lemma quo_dec : forall (a b:nat),(divides a b)->{q:nat | a=b*q}.
   simpl;auto with arith.
   destruct b.
   elim H1;simpl;intros;discriminate.
-  omega.
+  lia.
   apply (divides_minus b b (S n0));[apply divides_refl | trivial].
 Qed.
 

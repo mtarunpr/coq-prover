@@ -28,8 +28,8 @@ Lemma divides_le : forall (a b:nat),(a<>O)->(divides a b)->(b<=a).
   elim H0;intro q;intro.
   replace b with (b*1);try ring.
   rewrite H1.
-  apply mult_le_compat;try omega.
-  destruct q;omega.
+  apply mult_le_compat;try lia.
+  destruct q;lia.
 Qed.
 
 (** Euclide theorem (existence) *)
@@ -46,7 +46,7 @@ Theorem euclide : forall (a b:nat),(b<>O)->{q:nat & { r:nat | (a=b*q+r) /\ (r < 
   rewrite (le_plus_minus b n);trivial.
   elim p0;intros.
   rewrite H1;ring.
-  omega.
+  lia.
   exists 0;exists n.
   split;try tauto.
   ring.
@@ -85,9 +85,9 @@ Lemma euclide_unique : forall (a b q r q' r':nat),(b<>O)->a=b*q+r->a=b*q'+r'->r<
   assert (b*(q'-q)+r' = r).
   apply plus_reg_l with (b*q).
   rewrite plus_assoc;trivial.
-  assert (0<(q'-q));try omega.
-  assert (b<=b*(q'-q));try omega.
-  case (mult_O_le b (q'-q));intro;try omega.
+  assert (0<(q'-q));try lia.
+  assert (b<=b*(q'-q));try lia.
+  case (mult_O_le b (q'-q));intro;try lia.
   rewrite mult_comm;trivial.
   split;try tauto.
   rewrite <- e in H0.
@@ -97,9 +97,9 @@ Lemma euclide_unique : forall (a b q r q' r':nat),(b<>O)->a=b*q+r->a=b*q'+r'->r<
   assert (r'=(b*(q-q')+r)).
   apply plus_reg_l with (b*q').
   rewrite plus_assoc;trivial.
-  assert (0<(q-q'));try omega.
-  assert (b<=b*(q-q'));try omega.
-  case (mult_O_le b (q-q'));intro;try omega.
+  assert (0<(q-q'));try lia.
+  assert (b<=b*(q-q'));try lia.
+  case (mult_O_le b (q-q'));intro;try lia.
   rewrite mult_comm;trivial.
 Qed.
 
@@ -113,7 +113,7 @@ Lemma divides_euclide : forall (a b:nat)(H:(b<>O)),((divides a b)<->((remainder_
   elim H0;intro q;intro.
   assert (a=b*q+0).
   rewrite plus_comm;simpl;trivial.
-  assert (0<b);try omega.
+  assert (0<b);try lia.
   generalize (euclide_unique a b (quotient_euclide a b H) (remainder_euclide a b H) q 0 H H1 H4 H2 H5).
   intros;tauto.
   generalize (quo_rem_euclide a b H).
@@ -143,10 +143,10 @@ Lemma dec_impl_lt_dec : forall (P:nat->Prop),(forall (n:nat),{(P n)}+{~(P n)})->
   left;exists m;split;try (auto with arith).
   case IHm;intro.
   elim s;intro n0;intro.
-  left;exists n0;split;[omega | tauto].
+  left;exists n0;split;[lia | tauto].
   right;intros.
   inversion H0;trivial.
-  apply n0;omega.
+  apply n0;lia.
 Qed.
 
 (** forall n, either forall p, p<>1 /\ p<>n -> not(p | n) or there is p such that p<>1 and p<>n and p | n *) 
@@ -162,7 +162,7 @@ Lemma divides_nat : forall (n:nat),{p:nat | (p<>1)/\(p<>n)/\(divides n p)}+{fora
   left;exists x.
   split;try tauto.
   split;try tauto.
-  omega.
+  lia.
   case (eq_nat_dec n 0);intro.
   rewrite e;left;exists 2.
   split;try (intro;discriminate).
@@ -171,5 +171,5 @@ Lemma divides_nat : forall (n:nat),{p:nat | (p<>1)/\(p<>n)/\(divides n p)}+{fora
   right;intros.
   case (lt_eq_lt_dec p n);intro.
   case s;intro;[red in n0;intro;apply n0 with p;tauto | auto].
-  intro;generalize (divides_le n p n1 H1);omega.
+  intro;generalize (divides_le n p n1 H1);lia.
 Qed.

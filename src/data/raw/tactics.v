@@ -41,6 +41,6 @@ Ltac clear_all :=
   end.
 
 Require Import Arith.
-Require Import Omega.
+Require Import Psatz.
 
-Ltac try_absurd_arith := try (elim (lt_irrefl 0);omega).
+Ltac try_absurd_arith := try (elim (lt_irrefl 0);lia).

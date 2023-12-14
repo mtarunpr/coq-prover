@@ -134,7 +134,7 @@ Lemma gcd_exists_prod : forall (x:nat*nat),{d:nat | (is_gcd d (fst x) (snd x))}.
   exists d.
   elim (gcd_minus d (S n) (snd x));try (auto with arith).
   simpl.
-  omega.
+  lia.
   rewrite e;exists (snd x);apply gcd_refl.
   destruct (snd x).
   exists (fst x);apply gcd_sym;apply gcd_zero.
@@ -144,7 +144,7 @@ Lemma gcd_exists_prod : forall (x:nat*nat),{d:nat | (is_gcd d (fst x) (snd x))}.
   apply gcd_sym.
   elim (gcd_minus d (S n) (fst x));try (auto with arith).
   simpl.
-  omega.
+  lia.
 Qed.
 
 (** here we are: the gcd exists *)
@@ -247,7 +247,7 @@ Lemma bezout_exists_prod : forall (x:nat*nat),{y:nat*nat | (is_gcd ((fst y)*(fst
   elim b;intro y;intro.
   right;exists ((fst y)+(snd y),(snd y)).
   simpl;apply bezout_aux2;try (auto with arith).
-  simpl;omega.
+  simpl;lia.
   rewrite e;left;exists (1,0);simpl;rewrite <- minus_n_O;rewrite plus_comm;simpl;apply gcd_refl.
   destruct (snd x).
   left;exists (1,0);simpl;rewrite <- minus_n_O;rewrite plus_comm;simpl;apply gcd_sym;apply gcd_zero.
@@ -258,7 +258,7 @@ Lemma bezout_exists_prod : forall (x:nat*nat),{y:nat*nat | (is_gcd ((fst y)*(fst
   elim b;intro y;intro.
   left;exists ((snd y),(fst y)+(snd y));apply gcd_sym.
   simpl;apply bezout_aux2;try (auto with arith).
-  simpl;omega.
+  simpl;lia.
 Qed.
 
 (** Bezout' theorem *)
@@ -403,7 +403,7 @@ Lemma gcd_exists_prod_bis : forall (x:nat*nat),{d:nat | (is_gcd d (fst x) (snd x
   exists d.
   apply gcd_sym.
   elim (gcd_euclide d (snd x) (fst x) n);auto.
-  generalize (rem_euclide (snd x) (fst x) n);try omega.
+  generalize (rem_euclide (snd x) (fst x) n);try lia.
   rewrite e;exists (snd x);apply gcd_refl.
   case (eq_nat_dec (snd x) 0);intro.
   rewrite e;exists (fst x);apply gcd_sym;apply gcd_zero.
@@ -411,7 +411,7 @@ Lemma gcd_exists_prod_bis : forall (x:nat*nat),{d:nat | (is_gcd d (fst x) (snd x
   intro d;intro.
   exists d.
   elim (gcd_euclide d (fst x) (snd x) n);auto.
-  generalize (rem_euclide (fst x) (snd x) n);try omega.
+  generalize (rem_euclide (fst x) (snd x) n);try lia.
 Qed.
 
 (** efficient algorithm to compute gcd(a,b) *)

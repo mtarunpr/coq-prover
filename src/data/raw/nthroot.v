@@ -157,10 +157,10 @@ Theorem nth_root_irrational : forall (p k a b n q r:nat),(is_prime p)->(rel_prim
   intro.
   rewrite power_plus_lemma1 in H4.
   assert (divides a (power p q)).
-  apply prime_power_qn with n;try (auto with arith);try omega.
+  apply prime_power_qn with n;try (auto with arith);try lia.
   exists ((power p r)*k*(power b n)).
   rewrite <- H4;ring.
-  assert (0<n);try omega.
+  assert (0<n);try lia.
   elim H5;intro a';intro.
   rewrite H7 in H4.
   rewrite power_mult_lemma1 in H4;rewrite power_power_lemma1 in H4.

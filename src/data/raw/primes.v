@@ -229,7 +229,7 @@ Lemma not_prime_impl_prime_divides : forall (n:nat),(~(is_prime n)->({p:nat | (i
   elim p;intros.
   elim H2;intros.
   assert (d<n0).
-  generalize (divides_le n0 d n2 H4);omega.
+  generalize (divides_le n0 d n2 H4);lia.
   case (prime_dec d);intro.
   left;exists d;tauto.
   elim (H d H5 n3);try tauto.
@@ -276,7 +276,7 @@ Lemma nat_factor : forall (n p:nat),(is_prime p)->(n<>0)->{m:nat | (divides n (p
   apply H1;rewrite H2;rewrite H3;trivial.
   elim H.
   intros.
-  destruct p;omega.
+  destruct p;lia.
   intro;apply H1.
   rewrite H2;rewrite H3;ring.
   exists 0;simpl.
@@ -291,9 +291,9 @@ Lemma nat_factor_prime : forall (n:nat),(n<>0)->(n<>1)->{p:nat & {m:nat & {q:nat
   case (prime_dec n);intro.
   exists n;exists 1;exists 1;simpl.
   split;try tauto.
-  split;try omega.
+  split;try lia.
   split;try ring.
-  split;try omega.
+  split;try lia.
   apply gcd_sym;apply gcd_one.
   elim (not_prime_impl_prime_divides n n0);intro;try tauto.
   elim a;intro p;intro.
@@ -304,7 +304,7 @@ Lemma nat_factor_prime : forall (n:nat),(n<>0)->(n<>1)->{p:nat & {m:nat & {q:nat
   exists p;exists m;exists (quo n (power p m) H3).
   split;trivial.
   split.
-  destruct m;try omega.
+  destruct m;try lia.
   elim H4;simpl;rewrite mult_comm;simpl;rewrite plus_comm;simpl;trivial.
   split.
   apply (quo_is_quo n (power p m) H3).
@@ -330,9 +330,9 @@ Lemma nat_factor_prime : forall (n:nat),(n<>0)->(n<>1)->{p:nat & {m:nat & {q:nat
   red;apply power_lt.
   destruct p.
   elim (not_prime_zero H1).
-  destruct p;try omega.
+  destruct p;try lia.
   elim H1;tauto.
-  destruct m;try omega.
+  destruct m;try lia.
   elim H4;simpl;rewrite mult_comm;simpl;rewrite plus_comm;simpl;trivial.
   trivial.
 Qed.
@@ -414,7 +414,7 @@ Lemma prime_divides_refactor : forall (p:nat)(l:list (nat*nat)),(is_prime p)->(i
   elim H6.
   intros.
   elim H;intros.
-  case (H11 p H2);try tauto;try omega.
+  case (H11 p H2);try tauto;try lia.
   exists n0;rewrite <- H3;left;trivial.
   inversion H0.
   elim (IHl H H7).
@@ -482,7 +482,7 @@ Lemma prime_power_divides_refactor : forall (p n m:nat)(l:list (nat*nat)),(is_pr
   apply power_divides_power with p;trivial.
   destruct p.
   elim (not_prime_zero H8).
-  elim H8;omega.
+  elim H8;lia.
   destruct a.
   inversion H1.
   apply IHl;trivial.
@@ -548,7 +548,7 @@ Lemma wf_power_dec : forall (n:nat)(l:list (nat*nat)),(is_wf l)->(n>0)->{x:nat |
   induction l;simpl;intros.
   left;exists 1;rewrite power_one;trivial.
   destruct a.
-  assert (n<>0);try omega.
+  assert (n<>0);try lia.
   generalize (quo_rem_euclide n1 n H1);intro.
   case (eq_nat_dec (remainder_euclide n1 n H1) 0);intro.
   rewrite e in H2;rewrite plus_comm in H2;simpl in H2.
@@ -600,7 +600,7 @@ Lemma is_power_m_dec : forall (n m:nat),(m>0)->{x:nat | n=(power x m)}+{p:nat & 
   intros n m;intro H.
   case (eq_nat_dec n 0);intro.
   left;exists 0.
-  destruct m;simpl;try omega;trivial.
+  destruct m;simpl;try lia;trivial.
   generalize (factorisation_exists n n0);intro.
   elim H0;intro l;intro.
   elim p;intros.

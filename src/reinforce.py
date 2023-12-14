@@ -1,6 +1,5 @@
 from data import parse_txt
-all_data = parse_txt.get_all_theorems('./data/txt files/')
-
+from pathlib import Path
 import argparse
 import torch
 import torch.nn as nn
@@ -16,6 +15,7 @@ from actions import tactics
 from collections import deque
 from actions.tactics import TACTIC_MAP
 
+all_theorems = parse_txt.get_all_theorems(Path(__file__).parent / "data/raw")
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -196,7 +196,7 @@ def main():
 
     for i_episode in range(args.num_episodes):
         ep_reward = 0
-        t = np.random.choice(all_data)
+        t = np.random.choice(all_theorems)
         theorem, preamble = t.get_random_state(), t.preamble
         if args.render or i_episode % args.log_interval == 0:
             print("EPISODE {}: {}".format(i_episode, theorem))
@@ -208,7 +208,9 @@ def main():
 
             if args.render:
                 fringe_idx, _, tactic_idx = action
-                print(f"Action (fringe {fringe_idx}, tactic {TACTIC_MAP[tactic_idx].command})")
+                print(
+                    f"Action (fringe {fringe_idx}, tactic {TACTIC_MAP[tactic_idx].command})"
+                )
                 print("Proof so far:")
                 if error:
                     pretty_print_proof(state.fringes[fringe_idx].proof)
@@ -233,7 +235,11 @@ def main():
             )
 
         if i_episode % args.log_interval == 0:
-            print("Episode reward: {:.2f}\tRunning reward: {:.2f}".format(ep_reward, running_reward))
+            print(
+                "Episode reward: {:.2f}\tRunning reward: {:.2f}".format(
+                    ep_reward, running_reward
+                )
+            )
 
 
 if __name__ == "__main__":

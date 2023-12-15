@@ -337,7 +337,7 @@ def main():
         running_reward = 0.05 * ep_reward + (1 - 0.05) * running_reward
         agent.finish_episode()
 
-        if i_episode % args.ckpt_interval == 0:
+        if i_episode % args.ckpt_interval == 0 or i_episode == args.num_episodes - 1:
             torch.save(
                 agent.policy.state_dict(),
                 os.path.join(ckpt_dir, "reinforce-" + str(i_episode) + ".pkl"),

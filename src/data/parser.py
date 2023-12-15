@@ -30,16 +30,22 @@ IMPORT_KEYS = [
 
 import_strings = {}
 keywords_map = {}
-
+statements_map = {}
 
 # Gets data from one file
 def parse_file(
-    file_name: str, import_strings, file_key, theorems, path: Path, keywords_map
+    file_name: str,
+    import_strings,
+    file_key,
+    theorems,
+    path: Path,
+    keywords_map, # maps file_key to list of keywords
+    statements_map, # maps keyword to statement
 ):
     print("PARSING " + file_name)
     making_theorem = False
     curr_name = ""
-    curr_title = ""
+    curr_thm_statement = ""
     curr_steps = []
     curr_file = []
     file = open(path / file_name, "r")
@@ -81,6 +87,7 @@ def parse_file(
             keyword = line[index:end_index]
             keyword = keyword.strip()
             curr_keywords.append(keyword)
+            statements_map[keyword] = line.strip()
             # print(keyword)
             continue
 
@@ -92,6 +99,7 @@ def parse_file(
             keyword = line[index:end_index]
             keyword = keyword.strip()
             curr_keywords.append(keyword)
+            statements_map[keyword] = line.strip()
             # print(keyword)
             continue
 
@@ -103,6 +111,19 @@ def parse_file(
             keyword = line[index:end_index]
             keyword = keyword.strip()
             curr_keywords.append(keyword)
+            statements_map[keyword] = line.strip()
+            # print(keyword)
+            continue
+
+        if line.startswith("Inductive"):
+            index = 10
+            end_index = index + 1
+            while line[end_index] != ":":
+                end_index += 1
+            keyword = line[index:end_index]
+            keyword = keyword.strip()
+            curr_keywords.append(keyword)
+            statements_map[keyword] = line.strip()
             # print(keyword)
             continue
 
@@ -111,7 +132,7 @@ def parse_file(
             making_theorem = True
             # Store copy of file until before this line so we can add to this theorem's preamble
             file_before_theorem = curr_file.copy()[:-1]
-            curr_title = line.strip()
+            curr_thm_statement = line.strip()
 
             index = 0
             if line.startswith("Lemma"):
@@ -133,18 +154,20 @@ def parse_file(
 
             new_theorem = Theorem(
                 curr_name,
-                curr_title,
+                curr_thm_statement,
                 curr_steps,
                 preamble + file_before_theorem,
                 curr_keywords,
+                statements_map,
             )
 
             # Add theorem and reset
             theorems.append(new_theorem)
             curr_keywords.append(curr_name)
+            statements_map[curr_name] = curr_thm_statement
 
             curr_name = ""
-            curr_title = ""
+            curr_thm_statement = ""
             curr_steps = []
 
         # If in a batch, add lines to the batch
@@ -167,7 +190,7 @@ def get_all_theorems(path: Path):
     theorems: tuple[Theorem] = []
     for i, file_name in enumerate(FILES_ORDER):
         file_key = IMPORT_KEYS[i]
-        parse_file(file_name, import_strings, file_key, theorems, path, keywords_map)
+        parse_file(file_name, import_strings, file_key, theorems, path, keywords_map, statements_map)
 
     return theorems
 
@@ -177,3 +200,5 @@ if __name__ == "__main__":
     print(theorems[-10].name)
     print(theorems[-10].statement)
     print(theorems[-10].preamble)
+    print(theorems[-10].keywords)
+    print(theorems[-10].keyword_to_statement)

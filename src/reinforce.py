@@ -160,7 +160,12 @@ class Policy(nn.Module):
         self.log_probs = []
         self.rewards = []
 
-    def forward(self, state: State, usable_identifiers: list[str]):
+    def forward(
+        self,
+        state: State,
+        usable_identifiers: list[str],
+        identifier_to_statement: dict[str, str],
+    ):
         # Given a state, output an action
         # Compute score for each fringe by summing over the scores (logits) of its goals
 
@@ -187,14 +192,25 @@ class Policy(nn.Module):
         tactic_idx = tactic_probs.multinomial(1).data[0]
 
         # Compute scores for each possible argument
+        hyps = state.fringes[fringe_idx].goals[0].hypotheses
+        hyp_name_to_statement = {}
+        for hyp in hyps:
+            for name in hyp.names:
+                hyp_name_to_statement[name] = name + " : " + hyp.type
         arg_space = (
-            [
-                "".join(hyp.names)
-                for hyp in state.fringes[fringe_idx].goals[0].hypotheses
-            ]  # hypotheses
+            ["".join(hyp.names) for hyp in hyps]  # hypotheses
             + usable_identifiers  # previously defined definitions, theorems, etc.
             + [""]  # empty string, representing a stop token
         )
+        # List containing statements for each arg, to be used for embedding
+        arg_space_statements = [
+            hyp_name_to_statement[arg]
+            if arg in hyp_name_to_statement
+            else identifier_to_statement[arg]
+            if arg in identifier_to_statement
+            else arg
+            for arg in arg_space
+        ]
         argument_indices = []
         argument_probs_list = []
         tactic = TACTIC_MAP[tactic_idx.item()]
@@ -205,7 +221,7 @@ class Policy(nn.Module):
             argument_logits = self.argument_network(
                 goal_embedding,
                 prev_args_embeddings,
-                embed(arg_space),
+                embed(arg_space_statements),
             )
             argument_probs = F.softmax(argument_logits, dim=0)
             argument_probs_list.append(argument_probs)
@@ -221,7 +237,7 @@ class Policy(nn.Module):
             prev_args_embeddings = torch.cat(
                 (
                     prev_args_embeddings,
-                    embed(arg_space[argument_indices[-1]]).unsqueeze(0),
+                    embed(arg_space_statements[argument_indices[-1]]).unsqueeze(0),
                 ),
                 dim=0,
             )
@@ -293,7 +309,9 @@ def main():
         env = Env(theorem.statement, theorem.preamble, proof_so_far, theorem.keywords)
         state = env.state
         for h in range(args.max_steps):
-            action = agent.policy(state, env.usable_identifiers)
+            action = agent.policy(
+                state, env.usable_identifiers, theorem.keyword_to_statement
+            )
             state, reward, done, error = env.step(action)
 
             if args.render:

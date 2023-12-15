@@ -12,6 +12,7 @@ theorems: list[Theorem] = [
         ["reflexivity."],
         [],
         [],
+        {},
     ),
     Theorem(
         "simple_sum2",
@@ -19,6 +20,7 @@ theorems: list[Theorem] = [
         ["induction n.", "simpl.", "reflexivity.", "simpl.", "rewrite IHn.", "reflexivity."],
         [],
         [],
+        {},
     ),
     Theorem(
         "simple_and1",
@@ -26,6 +28,7 @@ theorems: list[Theorem] = [
         ["intros P Q H.", "destruct H.", "split.", "exact H0.", "exact H."],
         [],
         [],
+        {},
     ),
 ]
 

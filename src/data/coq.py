@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Theorem:
     # Theorem has name, statement, possible set of steps, and preamble
     name: str
@@ -11,6 +12,9 @@ class Theorem:
     # We just want the name
     keywords: list[str]
 
+    # Given a keyword, we want to get the statement (i.e. definition/theorem/etc.)
+    keyword_to_statement: dict[str, str]
+
     def __init__(
         self,
         name: str,
@@ -18,12 +22,14 @@ class Theorem:
         steps: list[str],
         preamble: list[str],
         keywords: list[str],
+        keyword_to_statement: dict[str, str],
     ):
         self.name = name
         self.statement = statement
         self.steps = steps
         self.preamble = preamble
         self.keywords = keywords
+        self.keyword_to_statement = keyword_to_statement
 
     def __str__(self):
         curr_str = self.name

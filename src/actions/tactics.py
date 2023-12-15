@@ -15,17 +15,18 @@ class TacticSpec(NamedTuple):
 TACTIC_MAP = {
     idx: TacticSpec(
         idx,
-        range(0, 2),
+        argc_range,
         command,
     )
-    for (idx, command) in raw_tactics
+    for (idx, (command, argc_range)) in enumerate(raw_tactics)
 }
+
 
 def tactic_to_idx(tactic: str) -> int:
     """
     Given a tactic, return its index in the TACTIC_MAP
     """
-    for (idx, spec) in TACTIC_MAP.items():
+    for idx, spec in TACTIC_MAP.items():
         if spec.command == tactic:
             return idx
     return -1

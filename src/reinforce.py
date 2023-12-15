@@ -66,6 +66,12 @@ if __name__ == "__main__":
         default=False,
         help="render the environment (i.e. print out the attempted proof at each step)",
     )
+    parser.add_argument(
+        "--continue-model",
+        required=False,
+        default=None,
+        help="path to model (pkl file) to continue training from",
+    )
     args = parser.parse_args()
 
 
@@ -268,6 +274,8 @@ class Policy(nn.Module):
 class REINFORCE:
     def __init__(self, embedding_dim, num_tactics):
         self.policy = Policy(embedding_dim, num_tactics)
+        if args.continue_model is not None:
+            self.policy.load_state_dict(torch.load(args.continue_model))
         self.optimizer = optim.Adam(self.policy.parameters(), lr=args.learning_rate)
         self.policy.train()
 
@@ -308,6 +316,8 @@ def main():
         theorem, proof_so_far = theorems.get_random_state()
         if args.render or i_episode % args.log_interval == 0:
             print("EPISODE {}: {}".format(i_episode, theorem.statement))
+        theorem.keywords = []
+        theorem.keyword_to_statement = {}
         env = Env(theorem.statement, theorem.preamble, proof_so_far, theorem.keywords)
         state = env.state
         for h in range(args.max_steps):

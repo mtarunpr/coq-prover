@@ -5,7 +5,7 @@ from .coq import Theorem
 
 # List of all docs and keys for import
 FILES_ORDER = [
-    "handcrafted.v"
+    "handcrafted.v",
     "missing.v",
     "tactics.v",
     "division.v",
@@ -34,6 +34,7 @@ import_strings = {}
 keywords_map = {}
 statements_map = {}
 
+
 # Gets data from one file
 def parse_file(
     file_name: str,
@@ -41,8 +42,8 @@ def parse_file(
     file_key,
     theorems,
     path: Path,
-    keywords_map, # maps file_key to list of keywords
-    statements_map, # maps keyword to statement
+    keywords_map,  # maps file_key to list of keywords
+    statements_map,  # maps keyword to statement
 ):
     print("PARSING " + file_name)
     making_theorem = False
@@ -192,7 +193,15 @@ def get_all_theorems(path: Path):
     theorems: tuple[Theorem] = []
     for i, file_name in enumerate(FILES_ORDER):
         file_key = IMPORT_KEYS[i]
-        parse_file(file_name, import_strings, file_key, theorems, path, keywords_map, statements_map)
+        parse_file(
+            file_name,
+            import_strings,
+            file_key,
+            theorems,
+            path,
+            keywords_map,
+            statements_map,
+        )
 
     return theorems
 

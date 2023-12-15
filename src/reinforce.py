@@ -13,6 +13,7 @@ from actions import tactics
 from collections import deque
 from actions.tactics import TACTIC_MAP
 from embedding import embed
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -301,7 +302,7 @@ def main():
 
     running_reward = 0
 
-    for i_episode in range(args.num_episodes):
+    for i_episode in tqdm(range(args.num_episodes)):
         ep_reward = 0
         theorem, proof_so_far = theorems.get_random_state()
         if args.render or i_episode % args.log_interval == 0:

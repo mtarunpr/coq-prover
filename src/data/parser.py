@@ -5,6 +5,7 @@ from .coq import Theorem
 
 # List of all docs and keys for import
 FILES_ORDER = [
+    "handcrafted.v"
     "missing.v",
     "tactics.v",
     "division.v",
@@ -16,6 +17,7 @@ FILES_ORDER = [
     # "nthroot.v",
 ]
 IMPORT_KEYS = [
+    "handcrafted",
     "missing",
     "tactics",
     "division",

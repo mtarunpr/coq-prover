@@ -15,62 +15,63 @@ from actions.tactics import TACTIC_MAP
 from embedding import embed
 from tqdm import tqdm
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--gamma",
-    type=float,
-    default=0.99,
-    metavar="G",
-    help="discount factor (default: 0.99)",
-)
-parser.add_argument("--seed", type=int, default=543, metavar="N", help="random seed")
-parser.add_argument(
-    "--log-interval",
-    type=int,
-    default=10,
-    metavar="N",
-    help="interval between training status logs (default: 10)",
-)
-parser.add_argument(
-    "--learning-rate",
-    type=float,
-    default=1e-3,
-    metavar="LR",
-    help="learning rate (default: 1e-3)",
-)
-parser.add_argument(
-    "--num-episodes",
-    type=int,
-    default=10000,
-    metavar="N",
-    help="number of episodes to train for (default: 10000)",
-)
-parser.add_argument(
-    "--max-steps",
-    type=int,
-    default=10000,
-    metavar="N",
-    help="max number of steps per episode (default: 10000)",
-)
-parser.add_argument(
-    "--ckpt-interval",
-    type=int,
-    default=1000,
-    metavar="N",
-    help="interval between checkpoints (default: 1000)",
-)
-parser.add_argument(
-    "--render",
-    action="store_true",
-    default=False,
-    help="render the environment (i.e. print out the attempted proof at each step)",
-)
-args = parser.parse_args()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--gamma",
+        type=float,
+        default=0.99,
+        metavar="G",
+        help="discount factor (default: 0.99)",
+    )
+    parser.add_argument("--seed", type=int, default=543, metavar="N", help="random seed")
+    parser.add_argument(
+        "--log-interval",
+        type=int,
+        default=10,
+        metavar="N",
+        help="interval between training status logs (default: 10)",
+    )
+    parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=1e-3,
+        metavar="LR",
+        help="learning rate (default: 1e-3)",
+    )
+    parser.add_argument(
+        "--num-episodes",
+        type=int,
+        default=10000,
+        metavar="N",
+        help="number of episodes to train for (default: 10000)",
+    )
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=10000,
+        metavar="N",
+        help="max number of steps per episode (default: 10000)",
+    )
+    parser.add_argument(
+        "--ckpt-interval",
+        type=int,
+        default=1000,
+        metavar="N",
+        help="interval between checkpoints (default: 1000)",
+    )
+    parser.add_argument(
+        "--render",
+        action="store_true",
+        default=False,
+        help="render the environment (i.e. print out the attempted proof at each step)",
+    )
+    args = parser.parse_args()
 
 
-if args.seed:
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+    if args.seed:
+        torch.manual_seed(args.seed)
+        np.random.seed(args.seed)
 
 
 class GoalNetwork(nn.Module):
@@ -199,7 +200,7 @@ class Policy(nn.Module):
             for name in hyp.names:
                 hyp_name_to_statement[name] = name + " : " + hyp.type
         arg_space = (
-            ["".join(hyp.names) for hyp in hyps]  # hypotheses
+            [name for hyp in hyps for name in hyp.names]  # hypotheses
             + usable_identifiers  # previously defined definitions, theorems, etc.
             + [""]  # empty string, representing a stop token
         )

@@ -108,7 +108,10 @@ class Env:
         fringe = self.state.fringes[action.fringe_idx]
         target_goal = fringe.goals[action.goal_idx]
         hyps: list[Hypothesis] = target_goal.hypotheses
-        arg_space = ["".join(hyp.names) for hyp in hyps] + self.usable_identifiers
+        # Concatenate all hyp.names arrays
+        arg_space = [
+            name for hyp in hyps for name in hyp.names
+        ] + self.usable_identifiers
         # Generate all the next sentences to test
         test_blocks: list[str] = []
         for argc in tactic.argc_range:
@@ -138,7 +141,9 @@ class Env:
         """
         fringe = self.state.fringes[action.fringe_idx]
         tactic = TACTIC_MAP[action.tactic_idx]
-        new_proof = fringe.proof[:] + [tactic.command + " ".join(action.arg_list) + "."]
+        new_proof = fringe.proof[:] + [
+            tactic.command + " " + " ".join(action.arg_list) + "."
+        ]
         (new_fringe, reward) = apply_coq(new_proof, self.state.fringes)
         if new_fringe is not None:
             self.state.fringes.append(new_fringe)
@@ -155,7 +160,9 @@ class Env:
         """
         fringe = self.state.fringes[action.fringe_idx]
         tactic = TACTIC_MAP[action.tactic_idx]
-        new_proof = fringe.proof[:] + [tactic.command + " ".join(action.arg_list) + "."]
+        new_proof = fringe.proof[:] + [
+            tactic.command + " " + " ".join(action.arg_list) + "."
+        ]
         (new_fringe, reward) = apply_coq(new_proof, self.state.fringes)
         new_state = (
             State(self.state.fringes[:] + [new_fringe])

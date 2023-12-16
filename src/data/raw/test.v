@@ -9,18 +9,6 @@ Proof.
 Qed.
 
 
-Lemma mult_comm : forall m n : nat, m * n = n * m.
-Proof.
-  intros m n.
-  induction m as [|m' IHm].
-  simpl.
-  trivial.
-  simpl.
-  rewrite IHm, add_comm.
-  trivial.
-Qed.
-
-
 Lemma mult_zero : forall n : nat, n * 0 = 0.
 Proof.
   intros n.

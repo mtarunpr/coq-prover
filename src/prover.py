@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append(f'{os.getcwd()}/src/mcts')
 from run_focus import run
+from llm import generate_full
 
 from alectryon.serapi import annotate, Sentence, Text
 from tenacity import retry, stop_after_attempt, wait_random_exponential
@@ -30,17 +31,32 @@ def generate(messages, model):  # "gpt-3.5-turbo", "gpt-4"
     return client.chat.completions.create(model=model, messages=messages)
 
 
-@memory.cache
+#@memory.cache
 def ask(messages, model):
-    response = generate(messages, model)
-    return response.choices[0].message.content
+   response = generate(messages, model)
+   return response.choices[0].message.content
 
+def ask_mcts(messages, model):
+    prompt = "<s>"
+    for m in messages:
+        role = m['role']
+        content = m['content']
+        if role == "system":
+            text = "<<SYS>>"+content+"<</SYS>>"
+        elif role == "user":
+            text = "[INST]"+content+"[/INST]"
+        else:
+            text = content
+        prompt += text
+        prompt += "\n"
+    r = generate_full(prompt)
+    return r[len(prompt)-3:]
 
 def prove_using_gpt(context, theorem_or_lemma, model, prev_attempt_with_error=None):
     messages = [
         {
             "role": "system",
-            "content": "You are an automated theorem prover that can prove theorems and lemmas in Coq. Your entire response must be valid Coq code. You should explain your reasoning (what the proof steps are attempting to do), but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions, imports, etc.), and your response must be a valid Coq proof of that theorem. Your response must be in this format: ```coq\n Proof.\n<proof>. Qed.\n```. Remember: do not add any other text besides Coq code and do not repeat any imports, definitions, lemmas, etc. provided in the prompt. Do NOT use Top references.",
+            "content": "You are an automated theorem prover that can prove theorems and lemmas in Coq. Your entire response must be valid Coq code. You should explain your reasoning (what the proof steps are attempting to do), but only in comments inside the Coq code. The following messages will all consist of a theorem statement (possibly preceded by necessary definitions, imports, etc.), and your response must be a valid Coq proof of that theorem. Your response must be in this format: ```coq\n Proof.\n<proof>. Qed.\n```. Remember: do not add any other text besides Coq code and do not repeat any imports, definitions, lemmas, etc. provided in the prompt. Do NOT use `Top` references. Do NOT use `as` with induction.",
         },
         {"role": "user", "content": context + "\n\n" + theorem_or_lemma},
     ]

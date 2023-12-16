@@ -110,10 +110,12 @@ def proof_state_to_lemma(lemma_name_suffix, hypotheses, conclusion):
 def recursively_prove_lemma_mcts(
         context,
         lemma):
-    prompt = f"```coq\n{context}{lemma}"
+    prompt = f"""
+### Hint: If you're stuck in the proof, use the `hammer` tactic.
+```coq\n{context}{lemma}"""
     prompt = prompt.replace("Top.", "")
     r = run(prompt)
-    new_part = r[r.index(len(prompt)):]
+    new_part = r[len(prompt):]
     return f"{lemma}{new_part}"
 
 

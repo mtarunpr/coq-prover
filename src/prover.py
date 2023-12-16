@@ -31,8 +31,8 @@ def generate(messages, model):  # "gpt-3.5-turbo", "gpt-4"
     return client.chat.completions.create(model=model, messages=messages)
 
 
-#@memory.cache
-def ask(messages, model):
+@memory.cache
+def ask_gpt(messages, model):
    response = generate(messages, model)
    return response.choices[0].message.content
 
@@ -51,6 +51,8 @@ def ask_mcts(messages, model):
         prompt += "\n"
     r = generate_full(prompt)
     return r[len(prompt)-3:]
+
+ask = ask_mcts
 
 def prove_using_gpt(context, theorem_or_lemma, model, prev_attempt_with_error=None):
     messages = [

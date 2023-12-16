@@ -1,3 +1,6 @@
+# NOTE: comment out the following tactics to disable auto-style tactics
+# "auto", "omega", "nia", "lia", "easy", "firstorder", "eauto", "intuition"
+
 raw_tactics = [
     ("congruence", range(0, 3)),
     ("apply", range(1, 2)),

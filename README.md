@@ -1,1 +1,1 @@
-# CS 184 Final Project: RL for Coq
+# Coq LLM RL

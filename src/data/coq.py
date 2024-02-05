@@ -1,15 +1,16 @@
 import random
 from enum import StrEnum
+from typing import Union, Optional
 
 
-class DefinitionType(StrEnum):
+class DefinitionKeyword(StrEnum):
     DEFINITION = "Definition"
     FIXPOINT = "Fixpoint"
     COFIXPOINT = "CoFixpoint"
     INDUCTIVE = "Inductive"
 
 
-class TheoremType(StrEnum):
+class TheoremKeyword(StrEnum):
     THEOREM = "Theorem"
     LEMMA = "Lemma"
     FACT = "Fact"
@@ -21,75 +22,69 @@ class TheoremType(StrEnum):
 
 
 class Definition:
-    type: DefinitionType
+    keyword: DefinitionKeyword
     name: str
     args: str
+    type: str
     definition: str
-    preamble: list["Definition" | "Theorem"]
+    preamble: list[Union["Definition", "Theorem"]]
 
     def __init__(
-        self, type: DefinitionType, name: str, definition: str, preamble: list[str]
+        self,
+        keyword: DefinitionKeyword,
+        name: str,
+        args: Optional[str],
+        type: Optional[str],
+        definition: str,
+        preamble: list[str],
     ):
-        self.type = type
+        self.keyword = keyword
         self.name = name
+        self.args = args
+        self.type = type
         self.definition = definition
         self.preamble = preamble
 
     def __str__(self):
         return (
-            self.type
+            self.keyword
             + " "
             + self.name
-            + " "
-            + self.args
+            + ((" " + self.args) if self.args else "")
+            + ((" : " + self.type) if self.type else "")
             + " := "
             + self.definition
             + "."
         )
 
-    # static function to parse a definition from a string
-    @staticmethod
-    def parse(definition: str, preamble: list[str]):
-        """
-        Parse a Definition from a string.
-        """
-        components = definition.split(" ")
-        type = components[0]
-        name = components[1]
-        # get the arguments of the definition
-        args = components[2]
-        # get the definition itself
-        definition = " ".join(components[4:])
-        return Definition(type, name, args, definition, preamble)
-
 
 class Theorem:
-    type: TheoremType
+    keyword: TheoremKeyword
     name: str
     statement: str
-    partial_proof: list[str]
-    preamble: list["Definition" | "Theorem"]
+    proof: list[str]
+    preamble: list[Union["Definition", "Theorem"]]
 
     def __init__(
         self,
-        type: TheoremType,
+        keyword: TheoremKeyword,
         name: str,
         statement: str,
-        partial_proof: list[str],
+        proof: list[str],
         preamble: list[str],
     ):
-        self.type = type
+        self.keyword = keyword
         self.name = name
         self.statement = statement
-        self.partial_proof = partial_proof
+        self.proof = proof
         self.preamble = preamble
 
     def __str__(self):
-        return self.type + " " + self.name + " : " + self.statement + "."
+        return self.keyword + " " + self.name + " : " + self.statement + "."
 
     def get_random_state(self):
         """
         Get a random intermediate state from within the proof.
         """
-        length = random.randint(0, len(self.partial_proof))
-        return self.partial_proof[:length]
+        length = random.randint(0, len(self.proof))
+        return self.proof[:length]

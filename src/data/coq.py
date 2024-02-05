@@ -1,52 +1,95 @@
-import numpy as np
+import random
+from enum import StrEnum
+
+
+class DefinitionType(StrEnum):
+    DEFINITION = "Definition"
+    FIXPOINT = "Fixpoint"
+    COFIXPOINT = "CoFixpoint"
+    INDUCTIVE = "Inductive"
+
+
+class TheoremType(StrEnum):
+    THEOREM = "Theorem"
+    LEMMA = "Lemma"
+    FACT = "Fact"
+    REMARK = "Remark"
+    COROLLARY = "Corollary"
+    PROPOSITION = "Proposition"
+    PROPERTY = "Property"
+    EXAMPLE = "Example"
+
+
+class Definition:
+    type: DefinitionType
+    name: str
+    args: str
+    definition: str
+    preamble: list["Definition" | "Theorem"]
+
+    def __init__(
+        self, type: DefinitionType, name: str, definition: str, preamble: list[str]
+    ):
+        self.type = type
+        self.name = name
+        self.definition = definition
+        self.preamble = preamble
+
+    def __str__(self):
+        return (
+            self.type
+            + " "
+            + self.name
+            + " "
+            + self.args
+            + " := "
+            + self.definition
+            + "."
+        )
+
+    # static function to parse a definition from a string
+    @staticmethod
+    def parse(definition: str, preamble: list[str]):
+        """
+        Parse a Definition from a string.
+        """
+        components = definition.split(" ")
+        type = components[0]
+        name = components[1]
+        # get the arguments of the definition
+        args = components[2]
+        # get the definition itself
+        definition = " ".join(components[4:])
+        return Definition(type, name, args, definition, preamble)
 
 
 class Theorem:
-    # Theorem has name, statement, possible set of steps, and preamble
+    type: TheoremType
     name: str
     statement: str
-    steps: list[str]
-    preamble: list[str]
-
-    # Given a preamble, we want to get a list of all facts, definitions, fixed points, theorems, lemmas, etc
-    # We just want the name
-    keywords: list[str]
-
-    # Given a keyword, we want to get the statement (i.e. definition/theorem/etc.)
-    keyword_to_statement: dict[str, str]
+    partial_proof: list[str]
+    preamble: list["Definition" | "Theorem"]
 
     def __init__(
         self,
+        type: TheoremType,
         name: str,
         statement: str,
-        steps: list[str],
+        partial_proof: list[str],
         preamble: list[str],
-        keywords: list[str],
-        keyword_to_statement: dict[str, str],
     ):
+        self.type = type
         self.name = name
         self.statement = statement
-        self.steps = steps
+        self.partial_proof = partial_proof
         self.preamble = preamble
-        self.keywords = keywords
-        self.keyword_to_statement = keyword_to_statement
 
     def __str__(self):
-        curr_str = self.name
-        for step in self.steps:
-            curr_str += " / " + step
+        return self.type + " " + self.name + " : " + self.statement + "."
 
-        return curr_str
-
-    # Get a random data point from a theorem by randomly picking a number of steps
-    # We then return these steps
     def get_random_state(self):
-        curr_state = []
-
-        if len(self.steps) > 0:
-            num_states = np.random.randint(len(self.steps) + 1)
-
-            for i in range(0, num_states - 1):
-                curr_state.append(self.steps[i])
-
-        return curr_state
+        """
+        Get a random intermediate state from within the proof.
+        """
+        length = random.randint(0, len(self.partial_proof))
+        return self.partial_proof[:length]

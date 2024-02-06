@@ -8,6 +8,7 @@ ckpt/
 **/*.cache
 wandb
 data/datasets
+checkpoints
 
 # C extensions
 *.so

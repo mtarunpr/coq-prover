@@ -40,7 +40,7 @@ def parse_file(
         "("
         + "|".join([type.value for type in TheoremKeyword])
         + ")"
-        + r"\s+([\w']+?)\s*:\s*(.*?)\.\s*(?:Proof\.)?\s*(.*?)\s*(?:Qed|Defined)\."
+        + r"\s+([\w']+?)\s*:[^=]\s*(.*?)\.\s*(?:Proof\.)?\s*(.*?)\s*(?:Qed|Defined)\."
     )
 
     matches = re.findall(

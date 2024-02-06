@@ -11,18 +11,14 @@ from trl import SFTTrainer
 
 from datasets import load_dataset
 
-data_file = "dafny.jsonl"
+data_dir = "data/datasets"
 output_dir = "./checkpoints"
 
-train_dataset = load_dataset(
-    "lhoestq/squad",
-    split="validation",
-    use_auth_token=True,
-)
+train_dataset = load_dataset(data_dir, split="train")
 
 
 def formatting_func(example):
-    text = f"Context: {example['context']}\n\nQuestion: {example['question']}"
+    text = f"Given the following context and theorem statement in Coq, generate a proof.\n\n#### Context\n{example['preamble']}\n\n#### Theorem\n{example['theorem']}\n\n#### Proof\nProof.\n{example['proof']}\nQed."
     return [text]
 
 
@@ -59,7 +55,7 @@ training_args = TrainingArguments(
     logging_dir="./logs",  # Directory for storing logs
     save_strategy="steps",  # Save the model checkpoint every logging step
     save_steps=50,  # Save checkpoints every 50 steps
-    run_name="test-run",
+    run_name="coq-sft",
     report_to="wandb",
     # evaluation_strategy="steps", # Evaluate the model every logging step
     # eval_steps=50,               # Evaluate and save checkpoints every 50 steps
@@ -74,7 +70,7 @@ peft_config = LoraConfig(
     task_type="CAUSAL_LM",
 )
 
-max_seq_length = 512
+max_seq_length = 4096
 trainer = SFTTrainer(
     model=base_model,
     train_dataset=train_dataset,

@@ -1,5 +1,5 @@
 import random
-from enum import StrEnum
+from strenum import StrEnum
 from typing import Union, Optional
 
 

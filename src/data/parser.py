@@ -2,20 +2,8 @@ from pathlib import Path
 import re
 from coq import Theorem, Definition, TheoremKeyword, DefinitionKeyword
 from typing import Union
-
-# List of all docs and keys for import
-FILES_ORDER = [
-    "handcrafted.v",
-    # "missing.v",
-    # "tactics.v",
-    # "division.v",
-    # "euclide.v",
-    # "permutation.v",
-    # "power.v",
-    # "gcd.v",
-    # "primes.v",
-    # "nthroot.v",
-]
+import os
+import csv
 
 
 def parse_file(
@@ -36,12 +24,16 @@ def parse_file(
     # Remove all comments
     file_contents = re.sub(r"\(\*.*?\*\)", "", file_contents, flags=re.DOTALL)
 
+    # Parse imports
+    imports = re.findall(r"(?:Require\s+)?(?:Im|Ex)port\s+(.+?)\.\s", file_contents)
+
+    # Parse all definitions and theorems
     defn_regex = (
         "("
         + "|".join([type.value for type in DefinitionKeyword])
         + ")"
         + r"\s+([\w']+?)(?:\s+([\w:\(\)]+?))?\s*(?::[^=]\s*(.*?))?\s*:=\s*(.*?)\."
-    ) # does not support definitions with proofs
+    )  # does not support definitions with proofs
 
     thm_regex = (
         "("
@@ -50,7 +42,6 @@ def parse_file(
         + r"\s+([\w']+?)\s*:\s*(.*?)\.\s*(?:Proof\.)?\s*(.*?)\s*(?:Qed|Defined)\."
     )
 
-    # Parse all definitions and theorems using regex
     matches = re.findall(
         "(?:" + defn_regex + ")|(?:" + thm_regex + ")",
         file_contents,
@@ -79,22 +70,77 @@ def parse_file(
                 Theorem(keyword, name, statement, proof_list, defns_and_thms.copy())
             )
 
-    return defns_and_thms
+    return imports, defns_and_thms
 
 
-# Iterate over all files to get data
-def get_all_theorems(path: Path):
-    for file_name in FILES_ORDER:
-        defns_and_thms = parse_file(
+def parse_all_files(path: Path):
+    """
+    Parses all .v files in the given directory and returns a map from file name
+    to a tuple of imports and definitions/theorems.
+    """
+
+    coq_file_names = []
+    for root, _, file_names in os.walk(path):
+        for file_name in file_names:
+            if file_name.endswith(".v"):
+                coq_file_names.append(os.path.join(root, file_name))
+
+    file_name_to_parsed = {}
+    for file_name in coq_file_names:
+        imports, defns_and_thms = parse_file(
             file_name,
             path,
         )
+        file_name_to_parsed[file_name] = (imports, defns_and_thms)
 
-    return defns_and_thms
+    # Add definitions and theorems from imported files to the preamble
+    # if the imported file is also from the same project
+    for file_name in coq_file_names:
+        imports, defns_and_thms = file_name_to_parsed[file_name]
+        for import_name in reversed(imports):
+            if f"{import_name}.v" in coq_file_names:
+                for defn_or_thm in defns_and_thms:
+                    defn_or_thm.preamble = (
+                        file_name_to_parsed[import_name][1] + defn_or_thm.preamble
+                    )
+
+    return file_name_to_parsed
+
+
+def generate_dataset(project_dir_path: Path, output_file_path: Path):
+    """
+    Generates a dataset from the given Coq project directory.
+    """
+    file_name_to_parsed = parse_all_files(project_dir_path)
+
+    # Generate dataset
+    dataset = []
+    for file_name, (_, defns_and_thms) in file_name_to_parsed.items():
+        for defn_or_thm in defns_and_thms:
+            if isinstance(defn_or_thm, Definition):
+                continue
+            preamble_str = "\n".join(
+                map(lambda d_or_t: str(d_or_t), defn_or_thm.preamble)
+            )
+            theorem_str = str(defn_or_thm)
+            proof_str = "\n".join(defn_or_thm.proof)
+            dataset.append(
+                {
+                    "file_name": file_name,
+                    "preamble": preamble_str,
+                    "theorem": theorem_str,
+                    "proof": proof_str,
+                }
+            )
+
+    # Write dataset to file
+    with open(output_file_path, "w") as file:
+        writer = csv.DictWriter(file, fieldnames=dataset[0].keys())
+        writer.writeheader()
+        writer.writerows(dataset)
 
 
 if __name__ == "__main__":
-    theorems = get_all_theorems(Path(__file__).parent / "raw")
-    print(theorems[-10].name)
-    print(theorems[-10].statement)
-    print(theorems[-10].preamble)
+    generate_dataset(
+        Path(__file__).parent / "raw", Path(__file__).parent / "dataset.csv"
+    )

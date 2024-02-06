@@ -4,6 +4,7 @@ from coq import Theorem, Definition, TheoremKeyword, DefinitionKeyword
 from typing import Union
 import os
 import csv
+import argparse
 
 
 def parse_file(
@@ -83,7 +84,7 @@ def parse_all_files(path: Path):
     for root, _, file_names in os.walk(path):
         for file_name in file_names:
             if file_name.endswith(".v"):
-                coq_file_names.append(os.path.join(root, file_name))
+                coq_file_names.append(file_name)
 
     file_name_to_parsed = {}
     for file_name in coq_file_names:
@@ -101,7 +102,8 @@ def parse_all_files(path: Path):
             if f"{import_name}.v" in coq_file_names:
                 for defn_or_thm in defns_and_thms:
                     defn_or_thm.preamble = (
-                        file_name_to_parsed[import_name][1] + defn_or_thm.preamble
+                        file_name_to_parsed[f"{import_name}.v"][1]
+                        + defn_or_thm.preamble
                     )
 
     return file_name_to_parsed
@@ -134,6 +136,7 @@ def generate_dataset(project_dir_path: Path, output_file_path: Path):
             )
 
     # Write dataset to file
+    output_file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file_path, "w") as file:
         writer = csv.DictWriter(file, fieldnames=dataset[0].keys())
         writer.writeheader()
@@ -141,6 +144,16 @@ def generate_dataset(project_dir_path: Path, output_file_path: Path):
 
 
 if __name__ == "__main__":
+    # Get a command line argument for the project name
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--project-name",
+        required=True,
+        help="The name of the Coq project (must be in the raw directory).",
+    )
+    args = parser.parse_args()
+
     generate_dataset(
-        Path(__file__).parent / "raw", Path(__file__).parent / "dataset.csv"
+        Path(__file__).parent / "raw" / args.project_name,
+        Path(__file__).parent / "datasets" / f"{args.project_name}.csv",
     )

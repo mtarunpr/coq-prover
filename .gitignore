@@ -9,6 +9,7 @@ ckpt/
 wandb
 data/datasets
 checkpoints
+settings.json
 
 # C extensions
 *.so

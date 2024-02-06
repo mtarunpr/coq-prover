@@ -7,7 +7,7 @@ __pycache__/
 ckpt/
 **/*.cache
 wandb
-src/data/datasets
+data/datasets
 
 # C extensions
 *.so

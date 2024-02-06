@@ -154,6 +154,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     generate_dataset(
-        Path(__file__).parent / "raw" / args.project_name,
-        Path(__file__).parent / "datasets" / f"{args.project_name}.csv",
+        Path(__file__).parent.parent / "data" / "raw" / args.project_name,
+        Path(__file__).parent.parent / "data" / "datasets" / f"{args.project_name}.csv",
     )

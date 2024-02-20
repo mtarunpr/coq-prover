@@ -10,6 +10,12 @@ wandb
 data/datasets
 checkpoints
 settings.json
+**/*.aux
+**/*.vo
+**/*.vok
+**/*.vos
+**/*.glob
+**/*.vox
 
 # C extensions
 *.so

@@ -7,8 +7,10 @@ from transformers import (
 )
 import csv
 import random
+from peft import PeftModel
 
-# model_checkpoint = "./phind-fine-tune-baby/checkpoint-250"
+
+model_checkpoint = "./checkpoints/checkpoint-500"
 
 base_model_name = "Phind/Phind-CodeLlama-34B-v2"
 bnb_config = BitsAndBytesConfig(
@@ -27,9 +29,10 @@ base_model = AutoModelForCausalLM.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 
-streamer = TextStreamer(tokenizer)
-
 model = base_model
+model = PeftModel.from_pretrained(base_model, model_checkpoint)
+
+streamer = TextStreamer(tokenizer)
 
 
 def generate(eval_prompt):

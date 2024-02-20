@@ -1,22 +1,29 @@
 from datasets import load_dataset
 from peft import LoraConfig, PeftModel
 import torch
-from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer, TrainingArguments
+from transformers import (
+    AutoModelForCausalLM,
+    BitsAndBytesConfig,
+    AutoTokenizer,
+    TrainingArguments,
+)
 from trl import AutoModelForCausalLMWithValueHead, PPOConfig, PPOTrainer
 from tqdm import tqdm
+from coq import reward_multi, parse_proof_from_response
+import re
+from pathlib import Path
 
-model_checkpoint = "./phind-fine-tune-baby/checkpoint-250"
+model_checkpoint = "./checkpoints/sft-checkpoint-500"
+data_dir = "data/datasets"
 
 base_model_name = "Phind/Phind-CodeLlama-34B-v2"
 
-dataset = load_dataset('json', data_files='dafny-bench.jsonl', split='train')
-dataset = dataset.rename_column("prompt", "query")
-dataset = dataset.remove_columns(["file", "dafny"])
+train_dataset = load_dataset(data_dir, split="train")
 
 config = PPOConfig(
     model_name=base_model_name,
-    learning_rate=1.41e-5,
-    log_with='wandb',
+    learning_rate=1e-5,
+    log_with="wandb",
     mini_batch_size=1,
     batch_size=1,
     gradient_accumulation_steps=1,
@@ -31,7 +38,7 @@ config = PPOConfig(
 
 peft_config = LoraConfig(
     lora_alpha=16,
-    #lora_dropout=0.1,
+    lora_dropout=0.1,
     r=16,
     bias="none",
     task_type="CAUSAL_LM",
@@ -61,28 +68,47 @@ tokenizer.pad_token = tokenizer.eos_token
 model = PeftModel.from_pretrained(base_model, model_checkpoint)
 
 model = AutoModelForCausalLMWithValueHead.from_pretrained(
-    model,
-    trust_remote_code=True,
-    device_map="auto",
-    peft_config=peft_config)
+    model, trust_remote_code=True, device_map="auto", peft_config=peft_config
+)
 
-def tokenize(sample):
-    sample["input_ids"] = tokenizer.encode(sample["query"])
-    #sample["query"] = tokenizer.decode(sample["input_ids"])
-    return sample
 
-dataset = dataset.map(tokenize, batched=False)
-dataset.set_format(type='torch')
+def tokenize(example):
+    text = f"Given the following context and theorem statement in Coq, generate a proof.\n\n#### Context\n{example['preamble']}\n\n#### Theorem\n{example['theorem']}\n\n#### Proof\nProof.\n"
+    with open(
+        Path(__file__).parent.parent
+        / "data"
+        / "raw"
+        / "software_foundations"
+        / example["file_name"],
+        "r",
+    ) as f:
+        text = f.read()
+    theorem_stmt_split = example["theorem"].split()
+    theorem_type = theorem_stmt_split[0]
+    theorem_name = theorem_stmt_split[1]
+    example["text_for_annotate"] = re.match(
+        r".*" + theorem_type + r"\s+" + theorem_name + r".+?\.", text, re.DOTALL
+    ).group(0)
+    example["query"] = text
+    example["input_ids"] = tokenizer.encode(text)
+    # sample["query"] = tokenizer.decode(sample["input_ids"])
+    return example
+
+
+train_dataset = train_dataset.map(tokenize, batched=False)
+train_dataset.set_format(type="torch")
+
 
 def collator(data):
     return dict((key, [d[key] for d in data]) for key in data[0])
 
+
 ppo_trainer = PPOTrainer(
     model=model,
     config=config,
-    dataset=dataset,
+    dataset=train_dataset,
     tokenizer=tokenizer,
-    data_collator=collator
+    data_collator=collator,
 )
 
 generation_kwargs = {
@@ -102,13 +128,18 @@ for epoch, batch in tqdm(enumerate(ppo_trainer.dataloader)):
     batch["response"] = [tokenizer.decode(r.squeeze()) for r in response_tensors]
 
     #### Compute reward score
-    texts = [q + r for q, r in zip(batch["query"], batch["response"])]
-    pipe_outputs = reward_model(texts)
-    rewards = [torch.tensor(output[1]["score"]) for output in pipe_outputs]
+
+    texts = [
+        train_dataset[train_dataset["query"].index(q)]["text_for_annotate"]
+        + parse_proof_from_response(r)
+        for q, r in zip(batch["query"], batch["response"])
+    ]
+    pipe_outputs = reward_multi(texts)
+    rewards = [torch.tensor(output) for output in pipe_outputs]
 
     #### Run PPO step
     stats = ppo_trainer.step(query_tensors, response_tensors, rewards)
     ppo_trainer.log_stats(stats, batch, rewards)
 
 #### Save model
-ppo_trainer._save_pretrained("my_ppo_model")
+ppo_trainer._save_pretrained("ppo_checkpoints")

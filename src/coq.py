@@ -1,7 +1,9 @@
 import random
 from strenum import StrEnum
 from typing import Union, Optional
-
+from alectryon.serapi import annotate
+from contextlib import redirect_stderr
+import re
 
 class DefinitionKeyword(StrEnum):
     DEFINITION = "Definition"
@@ -88,3 +90,25 @@ class Theorem:
         """
         length = random.randint(0, len(self.proof))
         return self.proof[:length]
+
+def reward_multi(lst):
+    return [reward(item) for item in lst]
+
+def reward(file_with_proof: str):
+    ERROR_FILE = "coq_logs.err"
+    with open(ERROR_FILE, "w") as f:
+        with redirect_stderr(f):
+            chunks = annotate([file_with_proof])
+    with open(ERROR_FILE, "r") as f:
+        if len(f.read()) > 0:
+            return 0
+        else:
+            return 1
+
+def parse_proof_from_response(response):
+    match = re.search(r"Proof\.(.*?(?:Qed|Defined)\.)", response, re.DOTALL)
+    # if match is None:
+    #     match = re.search(r"Proof(.*?(?:Qed|Defined)\.)", response, re.DOTALL) # here the proof is the "#### Proof" header
+    if match is None:
+        return ""
+    return match.group(0)

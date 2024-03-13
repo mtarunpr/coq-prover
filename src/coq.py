@@ -73,16 +73,31 @@ class Theorem:
         name: str,
         statement: str,
         proof: list[str],
-        preamble: list[str],
+        preamble: list[Union["Definition", "Theorem"]], # list of definitions and theorems in all imported files as well as the current file, up to the point of this theorem
+        context_str: str, # the contents of the file up to just before the point of this theorem
     ):
         self.keyword = keyword
         self.name = name
         self.statement = statement
         self.proof = proof
         self.preamble = preamble
+        self.context_str = context_str
 
     def __str__(self):
         return self.keyword + " " + self.name + " : " + self.statement + "."
+    
+    def get_preamble_string(self):
+        """
+        Get a string representation of the preamble.
+        """
+        return "\n".join([str(item) for item in self.preamble])
+        
+    def get_proof_string(self):
+        """
+        Get a string representation of the proof.
+        """
+        return "\n".join(self.proof)
+
 
     def get_random_state(self):
         """

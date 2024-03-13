@@ -10,10 +10,10 @@ import argparse
 def parse_file(
     file_name: str,
     path: Path,
-) -> list[Union[Theorem, Definition]]:
+) -> tuple[list[str], list[Union[Theorem, Definition]]]:
     """
-    Parses a .v file and returns a list of Definitions and Theorems,
-    maintaining the order in which they were declared.
+    Parses a .v file and returns a list of import strings as well as a list of
+    Definitions and Theorems, maintaining the order in which they were declared.
     """
     print(f"Parsing {file_name}...")
 
@@ -67,8 +67,9 @@ def parse_file(
             _, _, _, _, _, keyword, name, statement, proof = match
             assert keyword in [type.value for type in TheoremKeyword]
             proof_list = re.findall(r"(.+?\.)\s+", proof, flags=re.DOTALL)
+            context_str = re.search(r"(.+?)" + keyword + r"\s+" + name, file_contents, flags=re.DOTALL).group(1)
             defns_and_thms.append(
-                Theorem(keyword, name, statement, proof_list, defns_and_thms.copy())
+                Theorem(keyword, name, statement, proof_list, defns_and_thms.copy(), context_str)
             )
 
     return imports, defns_and_thms

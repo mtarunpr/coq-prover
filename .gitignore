@@ -16,6 +16,10 @@ settings.json
 **/*.vos
 **/*.glob
 **/*.vox
+**/*.err
+**/*.log
+**/stderr.txt
+cachegpt
 
 # C extensions
 *.so

@@ -18,8 +18,8 @@ memory = Memory("cachegpt", verbose=0)
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 MODEL = "gpt-4-1106-preview"
-MAX_LEMMA_DEPTH = 5
-MAX_THEOREM_ERROR_COUNT = 20
+MAX_LEMMA_RETRIES = 5
+MAX_LEMMA_DEPTH = 20
 
 warning_indicators = [
     "deprecated",
@@ -70,7 +70,7 @@ def prove_using_gpt(theorem: Theorem, model, prev_attempt_error_msg=None):
     response = ask(messages, model)
     proof_contents = response.split("Proof.")[1].split("Qed.")[0]
     proof_str = "Proof.\n" + proof_contents + "\nQed."
-    theorem.proof = re.findall(r"(.+?\.)\s+", proof_str, flags=re.DOTALL)
+    theorem.proof = re.findall(r"(.+?\.)(?:\s+|$)", proof_str, flags=re.DOTALL)
 
 
 def annotate_and_fetch_error(theorem: Theorem):
@@ -158,8 +158,15 @@ def get_prev_sentence_and_error_message(annotated_code_fragments, first_error_id
             warning_indicator not in message.contents
             for warning_indicator in warning_indicators
         ):
-            error_message = f'Error in step "{annotated_code_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
-            break
+            try:
+                error_message = f'Error in step "{annotated_code_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
+                break
+            except IndexError:
+                print("UNEXPECTED ERROR. Possible causes include: the input files have some error, or the LLM output had an Admitted.")
+                print("Error message:", message.contents)
+                print()
+                exit(1)
+
     return prev_sentence, error_message
 
 def confirm_proof(annotated_code_fragments):
@@ -175,9 +182,8 @@ def confirm_proof(annotated_code_fragments):
             break
     # If the last sentence's goals list is not empty, there is some error
     if last_sentence is None or len(last_sentence.goals) > 0:
-        print("UNEXPECTED ERROR. This should never happen.")
+        print("UNEXPECTED ERROR. The proof is not complete. Possible causes include: the input files had some error, or the LLM did not output syntactically correct Coq code. Nevertheless, proof.v contains the attempted proof.")
         print()
-        exit(1)
 
 def recursively_prove_lemma(
     lemma: Theorem,
@@ -192,7 +198,7 @@ def recursively_prove_lemma(
         print()
 
     # Break out of recursion if we've reached the max depth
-    if depth > MAX_LEMMA_DEPTH:
+    if depth > MAX_LEMMA_RETRIES:
         print("MAX LEMMA DEPTH REACHED. GIVING UP.")
         exit(1)
 
@@ -238,11 +244,11 @@ def recursively_prove_lemma(
 
 def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0):
     # Break out of recursion if we've reached the max depth
-    if depth > MAX_THEOREM_ERROR_COUNT:
-        print("MAX THEOREM ERROR COUNT REACHED. GIVING UP.")
+    if depth > MAX_LEMMA_DEPTH:
+        print(f"MAX {theorem.keyword.upper()} ERROR COUNT REACHED. GIVING UP.")
         exit(1)
 
-    print(f"ATTEMPTED THEOREM PROOF (LEMMAS USED: {depth})")
+    print(f"ATTEMPTED {theorem.keyword.upper()} PROOF (LEMMAS USED: {depth})")
     print(
         theorem.context_str + "\n\n" + str(theorem) + "\n\n" + theorem.get_proof_string()
     )
@@ -257,7 +263,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
         prev_sentence, error_message = get_prev_sentence_and_error_message(
             annotated_code_fragments, first_error_idx
         )
-        print(f"ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #{first_error_idx})")
+        print(f"ERROR MESSAGE IN {theorem.keyword.upper()} PROOF (FRAGMENT #{first_error_idx})")
         print(error_message)
         print()
 
@@ -280,13 +286,16 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
         print(lemma)
         print()
 
-        recursively_prove_lemma(lemma)
+        prove_using_gpt(lemma, MODEL)
+        check_theorem_proof_and_maybe_reprove_using_lemmas(lemma, depth + 1)
 
         # Now that we have a valid lemma, we can
         # 1) add it to the theorem's context + preamble, and
         # 2) use it to complete the proof
 
         # Add lemma to theorem's context + preamble
+        theorem.preamble = lemma.preamble.copy()
+        theorem.context_str = lemma.context_str
         theorem.preamble.append(lemma)
         theorem.context_str += "\n\n" + str(lemma) + "\n\n" + lemma.get_proof_string()
 
@@ -326,7 +335,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
         )
         # Replace the old proof with the new proof
         theorem.proof = re.findall(
-            r"(.+?\.)\s+", proof_using_lemma_str, flags=re.DOTALL
+            r"(.+?\.)(?:\s+|$)", proof_using_lemma_str, flags=re.DOTALL
         )
 
         return check_theorem_proof_and_maybe_reprove_using_lemmas(theorem, depth + 1)
@@ -335,7 +344,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
     else:
         confirm_proof(annotated_code_fragments)
 
-        print("THEOREM PROOF IS VALID")
+        print(f"{theorem.keyword.upper()} PROOF IS VALID")
         print()
 
 
@@ -351,7 +360,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    data_dir = Path(__file__).parent.parent / "data" / "raw" / args.example
+    data_dir = Path(__file__).parent.parent / "data" / "raw" / "lemma_examples" / args.example
 
     with open(data_dir / "context.v", "r") as f:
         context_str = f.read()

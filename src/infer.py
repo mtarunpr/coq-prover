@@ -14,7 +14,7 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 from joblib import Memory
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
-from typing import Iterable
+from typing import Iterable, Union
 from coq import Theorem
 import os
 import re
@@ -54,7 +54,7 @@ class BaseLLM:
                     + "\n\nPlease try again.",
                 },
             ]
-        response = self.ask(messages, self.model_name)
+        response = self.ask(messages)
         proof_contents = response.split("Proof.")[1].split("Qed.")[0]
         proof_str = "Proof.\n" + proof_contents + "\nQed."
         theorem.proof = re.findall(r"(.+?\.)(?:\s+|$)", proof_str, flags=re.DOTALL)
@@ -67,13 +67,14 @@ class BaseLLM:
             },
             {"role": "user", "content": lemma_str},
         ]
-        response = self.ask(messages, self.model_name)
+        response = self.ask(messages)
         new_lemma_name = response.split("Lemma ")[1].split(":")[0].strip()
         return new_lemma_name + "_" + suffix
 
 
 class GPT(BaseLLM):
     def __init__(self, model_name: str):
+        self.ask = memory.cache(self.ask)
         self.model_name = model_name
 
     @retry(wait=wait_random_exponential(min=10, max=30), stop=stop_after_attempt(25))
@@ -81,14 +82,14 @@ class GPT(BaseLLM):
         print("Prompting GPT... model_name=" + self.model_name)
         return client.chat.completions.create(model=self.model_name, messages=messages)
 
-    @memory.cache
     def ask(self, messages: Iterable[ChatCompletionMessageParam]):
         response = self._generate(messages)
         return response.choices[0].message.content
 
 
 class LocalModel(BaseLLM):
-    def __init__(self, model_name: str, model_checkpoint: str | None = None):
+    def __init__(self, model_name: str, model_checkpoint: Union[str, None] = None):
+        self.ask = memory.cache(self.ask)
         self.model_checkpoint = model_checkpoint
         self.base_model_name = model_name
         bnb_config = BitsAndBytesConfig(
@@ -139,7 +140,6 @@ class LocalModel(BaseLLM):
             )
         return r
 
-    @memory.cache
     def ask(self, messages: Iterable[ChatCompletionMessageParam]):
         prompt = ""
         for message in messages:

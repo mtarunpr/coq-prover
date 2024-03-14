@@ -113,6 +113,7 @@ def reward(file_with_proof: str):
     ERROR_FILE = "coq_logs.err"
     with open(ERROR_FILE, "w") as f:
         with redirect_stderr(f):
+            # TODO: replace with annotate_chunks to support imports
             chunks = annotate([file_with_proof])
     with open(ERROR_FILE, "r") as f:
         if len(f.read()) > 0:

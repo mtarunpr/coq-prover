@@ -21,6 +21,7 @@ settings.json
 **/*.log
 **/stderr.txt
 cachegpt
+cachecoq
 data/raw/**/*.ml
 data/raw/**/*.mli
 data/raw/**/*Makefile.coq*

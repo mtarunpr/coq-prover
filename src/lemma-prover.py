@@ -1,3 +1,4 @@
+from alectryon import cli
 from alectryon.serapi import annotate, Sentence, Text
 from contextlib import redirect_stderr, redirect_stdout
 from dotenv import load_dotenv
@@ -7,7 +8,7 @@ from coq import Theorem
 from coq_parser import parse_file, parse_all_files
 from pathlib import Path
 from infer import GPT, LocalModel
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 load_dotenv()
 
@@ -16,7 +17,7 @@ GPT_MODEL_NAME = "gpt-4-1106-preview"
 LOCAL_MODEL_NAME = "Phind/Phind-CodeLlama-34B-v2"
 LOCAL_MODEL_CHECKPOINT = None
 MAX_LEMMA_RETRIES = 5
-MAX_LEMMA_DEPTH = 1
+MAX_LEMMA_DEPTH = 10
 
 warning_indicators = [
     "deprecated",
@@ -37,15 +38,23 @@ def annotate_and_fetch_error(theorem: Theorem):
     fragments as well as the index of the first error, if any (or -1 if no error).
     """
     first_error_idx = -1
-    annotated_code = annotate(
+    annotated_code = cli.annotate_chunks(
         [
             theorem.context_str
             + "\n\n"
             + str(theorem)
             + "\n\n"
             + theorem.get_proof_string()
-        ]
+        ],
+        ".",
+        "cachecoq",
+        "xz",
+        "coq",
+        "sertop",
+        ["-Q", f"{project_dir},LF"],
+        cli.ExitCode(0),
     )
+
     # A Fragment is a Sentence (proof step) or a Text (comment)
     annotated_code_fragments = []
     i = 0
@@ -330,7 +339,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.example:
-        example_dir = (
+        project_dir = (
             Path(__file__).parent.parent
             / "data"
             / "raw"
@@ -338,9 +347,9 @@ if __name__ == "__main__":
             / args.example
         )
 
-        with open(example_dir / "context.v", "r") as f_out:
+        with open(project_dir / "context.v", "r") as f_out:
             context_str = f_out.read()
-        with open(example_dir / "theorem.v", "r") as f_out:
+        with open(project_dir / "theorem.v", "r") as f_out:
             theorem_str = f_out.read()
 
         theorem_str_split = theorem_str.split(" ")
@@ -348,7 +357,7 @@ if __name__ == "__main__":
         name = theorem_str_split[1]
         statement = re.search(r":\s*(.+?)\.", theorem_str, re.DOTALL).group(1).strip()
 
-        _, preamble = parse_file("context.v", example_dir)
+        _, preamble = parse_file("context.v", project_dir)
         theorem = Theorem(
             keyword,
             name,
@@ -360,7 +369,7 @@ if __name__ == "__main__":
 
         llm.ask_for_proof(theorem)
 
-        with open(example_dir / "coq_logs.err", "w") as f_out:
+        with open(project_dir / "coq_logs.err", "w") as f_out:
             with redirect_stderr(f_out):
                 check_theorem_proof_and_maybe_reprove_using_lemmas(theorem)
 
@@ -372,7 +381,7 @@ if __name__ == "__main__":
                     + theorem.get_proof_string()
                 )
 
-                with open(example_dir / "proof.v", "w") as f_out:
+                with open(project_dir / "proof.v", "w") as f_out:
                     f_out.write(full_coq_code)
 
     elif args.project:
@@ -381,50 +390,48 @@ if __name__ == "__main__":
         thm_ct = 0
         success_ct = 0
         error_ct = 0
+        theorems = []
+
         for file_name in file_name_to_parsed:
-            theorems = filter(
-                lambda x: isinstance(x, Theorem), file_name_to_parsed[file_name][1]
+            theorems += list(
+                filter(
+                    lambda x: isinstance(x, Theorem), file_name_to_parsed[file_name][1]
+                )
             )
 
-            for theorem in tqdm(theorems):
-                thm_ct += 1
-                llm.ask_for_proof(theorem)
+        for theorem in tqdm(theorems):
+            thm_ct += 1
+            llm.ask_for_proof(theorem)
 
-                try:
+            try:
+                with open(project_dir / "proofs" / f"{theorem.name}.out", "w") as f_out:
                     with open(
-                        project_dir / "proofs" / f"{theorem.name}.out", "w"
-                    ) as f_out:
-                        with open(
-                            project_dir / "proofs" / f"{theorem.name}.err", "w"
-                        ) as f:
-                            with redirect_stderr(f):
-                                with redirect_stdout(f_out):
-                                    print(f"PROVING {theorem.name}")
-                                    check_theorem_proof_and_maybe_reprove_using_lemmas(
-                                        theorem
-                                    )
+                        project_dir / "proofs" / f"{theorem.name}.err", "w"
+                    ) as f_err:
+                        with redirect_stderr(f_err):
+                            with redirect_stdout(f_out):
+                                print(f"PROVING {theorem.name}")
+                                check_theorem_proof_and_maybe_reprove_using_lemmas(
+                                    theorem
+                                )
 
-                    full_coq_code = (
-                        theorem.context_str
-                        + "\n\n"
-                        + str(theorem)
-                        + "\n\n"
-                        + theorem.get_proof_string()
-                    )
+                full_coq_code = (
+                    theorem.context_str
+                    + "\n\n"
+                    + str(theorem)
+                    + "\n\n"
+                    + theorem.get_proof_string()
+                )
 
-                    with open(
-                        project_dir / "proofs" / f"{theorem.name}.v", "w"
-                    ) as f_out:
-                        f_out.write(full_coq_code)
+                with open(project_dir / "proofs" / f"{theorem.name}.v", "w") as f_out:
+                    f_out.write(full_coq_code)
 
-                    success_ct += 1
-                except Exception as e:
-                    with open(
-                        project_dir / "proofs" / f"{theorem.name}.out", "a"
-                    ) as f_out:
-                        f_out.write(f"Error proving {theorem.name}\n")
-                        f_out.write(e)
-                    error_ct += 1
+                success_ct += 1
+            except Exception as e:
+                with open(project_dir / "proofs" / f"{theorem.name}.out", "a") as f_out:
+                    f_out.write(f"Error proving {theorem.name}\n")
+                    f_out.write(str(e))
+                error_ct += 1
 
         print(f"Total theorems: {thm_ct}")
         print(f"Successes: {success_ct}")

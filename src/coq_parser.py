@@ -83,6 +83,8 @@ def parse_all_files(path: Path) -> dict[str, tuple[list[str], list[Union[Theorem
 
     coq_file_names = []
     for root, _, file_names in os.walk(path):
+        if root.endswith("proofs") or root.endswith("proofs/"):
+            continue
         for file_name in file_names:
             if file_name.endswith(".v"):
                 coq_file_names.append(file_name)

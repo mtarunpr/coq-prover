@@ -162,12 +162,15 @@ def get_prev_sentence_and_error_message(annotated_code_fragments, first_error_id
                 error_message = f'Error in step "{annotated_code_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
                 break
             except IndexError:
-                print("UNEXPECTED ERROR. Possible causes include: the input files have some error, or the LLM output had an Admitted.")
+                print(
+                    "UNEXPECTED ERROR. Possible causes include: the input files have some error, or the LLM output had an Admitted."
+                )
                 print("Error message:", message.contents)
                 print()
                 exit(1)
 
     return prev_sentence, error_message
+
 
 def confirm_proof(annotated_code_fragments):
     """
@@ -182,8 +185,11 @@ def confirm_proof(annotated_code_fragments):
             break
     # If the last sentence's goals list is not empty, there is some error
     if last_sentence is None or len(last_sentence.goals) > 0:
-        print("UNEXPECTED ERROR. The proof is not complete. Possible causes include: the input files had some error, or the LLM did not output syntactically correct Coq code. Nevertheless, proof.v contains the attempted proof.")
+        print(
+            "UNEXPECTED ERROR. The proof is not complete. Possible causes include: the input files had some error, or the LLM did not output syntactically correct Coq code. Nevertheless, proof.v contains the attempted proof."
+        )
         print()
+
 
 def recursively_prove_lemma(
     lemma: Theorem,
@@ -250,7 +256,11 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
 
     print(f"ATTEMPTED {theorem.keyword.upper()} PROOF (LEMMAS USED: {depth})")
     print(
-        theorem.context_str + "\n\n" + str(theorem) + "\n\n" + theorem.get_proof_string()
+        theorem.context_str
+        + "\n\n"
+        + str(theorem)
+        + "\n\n"
+        + theorem.get_proof_string()
     )
     print()
 
@@ -263,7 +273,9 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
         prev_sentence, error_message = get_prev_sentence_and_error_message(
             annotated_code_fragments, first_error_idx
         )
-        print(f"ERROR MESSAGE IN {theorem.keyword.upper()} PROOF (FRAGMENT #{first_error_idx})")
+        print(
+            f"ERROR MESSAGE IN {theorem.keyword.upper()} PROOF (FRAGMENT #{first_error_idx})"
+        )
         print(error_message)
         print()
 
@@ -348,7 +360,6 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
         print()
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -360,7 +371,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    data_dir = Path(__file__).parent.parent / "data" / "raw" / "lemma_examples" / args.example
+    data_dir = (
+        Path(__file__).parent.parent / "data" / "raw" / "lemma_examples" / args.example
+    )
 
     with open(data_dir / "context.v", "r") as f:
         context_str = f.read()

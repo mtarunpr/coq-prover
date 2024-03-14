@@ -1,12 +1,13 @@
 from alectryon.serapi import annotate, Sentence, Text
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from dotenv import load_dotenv
 import re
 import argparse
 from coq import Theorem
-from coq_parser import parse_file
+from coq_parser import parse_file, parse_all_files
 from pathlib import Path
 from infer import GPT, LocalModel
+from tqdm import tqdm
 
 load_dotenv()
 
@@ -15,7 +16,7 @@ GPT_MODEL_NAME = "gpt-4-1106-preview"
 LOCAL_MODEL_NAME = "Phind/Phind-CodeLlama-34B-v2"
 LOCAL_MODEL_CHECKPOINT = None
 MAX_LEMMA_RETRIES = 5
-MAX_LEMMA_DEPTH = 20
+MAX_LEMMA_DEPTH = 1
 
 warning_indicators = [
     "deprecated",
@@ -114,12 +115,10 @@ def get_prev_sentence_and_error_message(annotated_code_fragments, first_error_id
                 error_message = f'Error in step "{annotated_code_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
                 break
             except IndexError:
-                print(
-                    "UNEXPECTED ERROR. Possible causes include: the input files have some error, or the LLM output had an Admitted."
+                raise Exception(
+                    "UNEXPECTED ERROR. Possible causes include: the input files have some error, or the LLM output had an Admitted.",
+                    "Error message: " + message.contents,
                 )
-                print("Error message:", message.contents)
-                print()
-                exit(1)
 
     return prev_sentence, error_message
 
@@ -137,10 +136,9 @@ def confirm_proof(annotated_code_fragments):
             break
     # If the last sentence's goals list is not empty, there is some error
     if last_sentence is None or len(last_sentence.goals) > 0:
-        print(
+        raise Exception(
             "UNEXPECTED ERROR. The proof is not complete. Possible causes include: the input files had some error, or the LLM did not output syntactically correct Coq code. Nevertheless, proof.v contains the attempted proof."
         )
-        print()
 
 
 def recursively_prove_lemma(
@@ -160,8 +158,7 @@ def recursively_prove_lemma(
 
     # Break out of recursion if we've reached the max depth
     if depth > MAX_LEMMA_RETRIES:
-        print("MAX LEMMA DEPTH REACHED. GIVING UP.")
-        exit(1)
+        raise Exception("MAX LEMMA RETRIES EXCEEDED. GIVING UP.")
 
     # If this is the first attempt, try to prove the lemma
     if depth == 0:
@@ -207,8 +204,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
     """
     # Break out of recursion if we've reached the max depth
     if depth > MAX_LEMMA_DEPTH:
-        print(f"MAX {theorem.keyword.upper()} ERROR COUNT REACHED. GIVING UP.")
-        exit(1)
+        raise Exception(f"MAX LEMMA DEPTH REACHED. GIVING UP.")
 
     print(f"ATTEMPTED {theorem.keyword.upper()} PROOF (LEMMAS USED: {depth})")
     print(
@@ -318,52 +314,118 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
+    g = parser.add_mutually_exclusive_group(required=True)
+    g.add_argument(
         "-e",
         "--example",
-        help="name of example to prove",
-        required=True,
+        help="name of example to prove (in data/raw/lemma_examples); must contain context.v and theorem.v files",
+        type=str,
+    )
+    g.add_argument(
+        "-p",
+        "--project",
+        help="name of Coq project (in data/raw); parses all theorems inside project and runs a sweep",
         type=str,
     )
     args = parser.parse_args()
 
-    data_dir = (
-        Path(__file__).parent.parent / "data" / "raw" / "lemma_examples" / args.example
-    )
+    if args.example:
+        example_dir = (
+            Path(__file__).parent.parent
+            / "data"
+            / "raw"
+            / "lemma_examples"
+            / args.example
+        )
 
-    with open(data_dir / "context.v", "r") as f:
-        context_str = f.read()
-    with open(data_dir / "theorem.v", "r") as f:
-        theorem_str = f.read()
+        with open(example_dir / "context.v", "r") as f_out:
+            context_str = f_out.read()
+        with open(example_dir / "theorem.v", "r") as f_out:
+            theorem_str = f_out.read()
 
-    theorem_str_split = theorem_str.split(" ")
-    keyword = theorem_str_split[0]
-    name = theorem_str_split[1]
-    statement = re.search(r":\s*(.+?)\.", theorem_str, re.DOTALL).group(1).strip()
+        theorem_str_split = theorem_str.split(" ")
+        keyword = theorem_str_split[0]
+        name = theorem_str_split[1]
+        statement = re.search(r":\s*(.+?)\.", theorem_str, re.DOTALL).group(1).strip()
 
-    _, preamble = parse_file("context.v", data_dir)
-    theorem = Theorem(
-        keyword,
-        name,
-        statement,
-        [],
-        preamble,
-        context_str,
-    )
+        _, preamble = parse_file("context.v", example_dir)
+        theorem = Theorem(
+            keyword,
+            name,
+            statement,
+            [],
+            preamble,
+            context_str,
+        )
 
-    llm.ask_for_proof(theorem)
+        llm.ask_for_proof(theorem)
 
-    with open(data_dir / "stderr.txt", "w") as f:
-        with redirect_stderr(f):
-            check_theorem_proof_and_maybe_reprove_using_lemmas(theorem)
+        with open(example_dir / "coq_logs.err", "w") as f_out:
+            with redirect_stderr(f_out):
+                check_theorem_proof_and_maybe_reprove_using_lemmas(theorem)
 
-            full_coq_code = (
-                theorem.context_str
-                + "\n\n"
-                + str(theorem)
-                + "\n\n"
-                + theorem.get_proof_string()
+                full_coq_code = (
+                    theorem.context_str
+                    + "\n\n"
+                    + str(theorem)
+                    + "\n\n"
+                    + theorem.get_proof_string()
+                )
+
+                with open(example_dir / "proof.v", "w") as f_out:
+                    f_out.write(full_coq_code)
+
+    elif args.project:
+        project_dir = Path(__file__).parent.parent / "data" / "raw" / args.project
+        file_name_to_parsed = parse_all_files(project_dir)
+        thm_ct = 0
+        success_ct = 0
+        error_ct = 0
+        for file_name in file_name_to_parsed:
+            theorems = filter(
+                lambda x: isinstance(x, Theorem), file_name_to_parsed[file_name][1]
             )
 
-            with open(data_dir / "proof.v", "w") as f:
-                f.write(full_coq_code)
+            for theorem in tqdm(theorems):
+                thm_ct += 1
+                llm.ask_for_proof(theorem)
+
+                try:
+                    with open(
+                        project_dir / "proofs" / f"{theorem.name}.out", "w"
+                    ) as f_out:
+                        with open(
+                            project_dir / "proofs" / f"{theorem.name}.err", "w"
+                        ) as f:
+                            with redirect_stderr(f):
+                                with redirect_stdout(f_out):
+                                    print(f"PROVING {theorem.name}")
+                                    check_theorem_proof_and_maybe_reprove_using_lemmas(
+                                        theorem
+                                    )
+
+                    full_coq_code = (
+                        theorem.context_str
+                        + "\n\n"
+                        + str(theorem)
+                        + "\n\n"
+                        + theorem.get_proof_string()
+                    )
+
+                    with open(
+                        project_dir / "proofs" / f"{theorem.name}.v", "w"
+                    ) as f_out:
+                        f_out.write(full_coq_code)
+
+                    success_ct += 1
+                except Exception as e:
+                    with open(
+                        project_dir / "proofs" / f"{theorem.name}.out", "a"
+                    ) as f_out:
+                        f_out.write(f"Error proving {theorem.name}\n")
+                        f_out.write(e)
+                    error_ct += 1
+
+        print(f"Total theorems: {thm_ct}")
+        print(f"Successes: {success_ct}")
+        print(f"Errors: {error_ct}")

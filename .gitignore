@@ -17,9 +17,13 @@ settings.json
 **/*.glob
 **/*.vox
 **/*.err
+**/*.out
 **/*.log
 **/stderr.txt
 cachegpt
+data/raw/**/*.ml
+data/raw/**/*.mli
+data/raw/**/*Makefile.coq*
 
 # C extensions
 *.so

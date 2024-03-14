@@ -75,7 +75,7 @@ def parse_file(
     return imports, defns_and_thms
 
 
-def parse_all_files(path: Path):
+def parse_all_files(path: Path) -> dict[str, tuple[list[str], list[Union[Theorem, Definition]]]]:
     """
     Parses all .v files in the given directory and returns a map from file name
     to a tuple of imports and definitions/theorems.

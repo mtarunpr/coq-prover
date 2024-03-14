@@ -151,7 +151,7 @@ class LocalModel(BaseLLM):
                 prompt += "### Assistant\n" + message["content"] + "\n\n"
             else:
                 raise ValueError("Invalid message role: " + message["role"])
-            
+
         return self._generate(prompt)
 
 

@@ -1,5 +1,5 @@
 from alectryon import cli
-from alectryon.serapi import annotate, Sentence, Text
+from alectryon.serapi import Sentence, Text
 from contextlib import redirect_stderr, redirect_stdout
 from dotenv import load_dotenv
 import re
@@ -7,10 +7,10 @@ import argparse
 from coq import Theorem
 from coq_parser import parse_file, parse_all_files
 from pathlib import Path
-from infer import GPT, LocalModel
 from tqdm.auto import tqdm
-
 load_dotenv()
+from infer import GPT, LocalModel
+
 
 LLM_TYPE = "GPT"  # GPT | LocalModel
 GPT_MODEL_NAME = "gpt-4-1106-preview"

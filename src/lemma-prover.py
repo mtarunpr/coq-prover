@@ -412,10 +412,10 @@ if __name__ == "__main__":
 
             try:
                 with open(
-                    project_dir / "proofs" / f"{thm_ct}_{theorem.name}.out", "w"
+                    project_dir / "proofs" / f"thm{thm_ct}_{theorem.name}.out", "w"
                 ) as f_out:
                     with open(
-                        project_dir / "proofs" / f"{thm_ct}_{theorem.name}.err", "w"
+                        project_dir / "proofs" / f"thm{thm_ct}_{theorem.name}.err", "w"
                     ) as f_err:
                         with redirect_stderr(f_err):
                             with redirect_stdout(f_out):
@@ -433,17 +433,32 @@ if __name__ == "__main__":
                 )
 
                 with open(
-                    project_dir / "proofs" / f"{thm_ct}_{theorem.name}.v", "w"
+                    project_dir / "proofs" / f"thm{thm_ct}_{theorem.name}.v", "w"
                 ) as f_out:
                     f_out.write(full_coq_code)
 
                 success_ct += 1
             except Exception as e:
                 with open(
-                    project_dir / "proofs" / f"{thm_ct}_{theorem.name}.out", "a"
+                    project_dir / "proofs" / f"thm{thm_ct}_{theorem.name}.out", "a"
                 ) as f_out:
                     f_out.write(f"Error proving {theorem.name}\n")
                     f_out.write(str(e))
+
+                # Save proof attempt anyway
+                full_coq_code = (
+                    theorem.context_str
+                    + "\n\n"
+                    + str(theorem)
+                    + "\n\n"
+                    + theorem.get_proof_string()
+                )
+
+                with open(
+                    project_dir / "proofs" / f"thm{thm_ct}_err_{theorem.name}.v", "w"
+                ) as f_out:
+                    f_out.write(full_coq_code)
+
                 error_ct += 1
 
         print(f"Total theorems: {thm_ct}")

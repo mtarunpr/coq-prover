@@ -8,6 +8,7 @@ from coq import Theorem
 from coq_parser import parse_file, parse_all_files
 from pathlib import Path
 from tqdm.auto import tqdm
+
 load_dotenv()
 from infer import GPT, LocalModel
 
@@ -19,10 +20,8 @@ LOCAL_MODEL_CHECKPOINT = None
 MAX_LEMMA_RETRIES = 5
 MAX_LEMMA_DEPTH = 10
 
-warning_indicators = [
-    "deprecated",
-    "Loading ML file",
-]
+warning_indicators = ["deprecated", "Loading ML file", "(* debug"]
+ignore_messages_keywords = ["Search", "Check", "Print", "Compute", "Eval", "debug"]
 
 if LLM_TYPE == "GPT":
     llm = GPT(GPT_MODEL_NAME)
@@ -37,10 +36,12 @@ def annotate_and_fetch_error(theorem: Theorem):
     Annotates the theorem's proof using Alectryon and returns the annotated code
     fragments as well as the index of the first error, if any (or -1 if no error).
     """
+    warning_disabler = 'Set Silent.\nSet Warnings "-all".\nSet Debug "-all".\n\n'
     first_error_idx = -1
     annotated_code = cli.annotate_chunks(
         [
-            theorem.context_str
+            warning_disabler
+            + theorem.context_str
             + "\n\n"
             + str(theorem)
             + "\n\n"
@@ -60,12 +61,18 @@ def annotate_and_fetch_error(theorem: Theorem):
     i = 0
     for step in annotated_code[0]:
         if isinstance(step, Sentence) and len(step.messages) > 0:
-            if first_error_idx == -1 and not all(
-                any(
-                    warning_indicator in message.contents
-                    for warning_indicator in warning_indicators
+            if (
+                first_error_idx == -1
+                and not any(
+                    keyword in step.contents for keyword in ignore_messages_keywords
                 )
-                for message in step.messages
+                and not all(
+                    any(
+                        warning_indicator in message.contents
+                        for warning_indicator in warning_indicators
+                    )
+                    for message in step.messages
+                )
             ):
                 first_error_idx = i
         annotated_code_fragments.append(step)
@@ -114,7 +121,7 @@ def get_prev_sentence_and_error_message(annotated_code_fragments, first_error_id
         if isinstance(annotated_code_fragments[i], Sentence):
             prev_sentence = annotated_code_fragments[i]
             break
-    # Get first non-"deprecated" error message
+    # Get first non-warning error message
     for message in annotated_code_fragments[first_error_idx].messages:
         if all(
             warning_indicator not in message.contents
@@ -125,7 +132,7 @@ def get_prev_sentence_and_error_message(annotated_code_fragments, first_error_id
                 break
             except IndexError:
                 raise Exception(
-                    "UNEXPECTED ERROR. Possible causes include: the input files have some error, or the LLM output had an Admitted.",
+                    "UNEXPECTED ERROR. Possible causes include: the input files have some error, or a warning was mistaken to be an error, or the LLM output had an Admitted.",
                     "Error message: " + message.contents,
                 )
 
@@ -404,9 +411,11 @@ if __name__ == "__main__":
             llm.ask_for_proof(theorem)
 
             try:
-                with open(project_dir / "proofs" / f"{theorem.name}.out", "w") as f_out:
+                with open(
+                    project_dir / "proofs" / f"{thm_ct}_{theorem.name}.out", "w"
+                ) as f_out:
                     with open(
-                        project_dir / "proofs" / f"{theorem.name}.err", "w"
+                        project_dir / "proofs" / f"{thm_ct}_{theorem.name}.err", "w"
                     ) as f_err:
                         with redirect_stderr(f_err):
                             with redirect_stdout(f_out):
@@ -423,12 +432,16 @@ if __name__ == "__main__":
                     + theorem.get_proof_string()
                 )
 
-                with open(project_dir / "proofs" / f"{theorem.name}.v", "w") as f_out:
+                with open(
+                    project_dir / "proofs" / f"{thm_ct}_{theorem.name}.v", "w"
+                ) as f_out:
                     f_out.write(full_coq_code)
 
                 success_ct += 1
             except Exception as e:
-                with open(project_dir / "proofs" / f"{theorem.name}.out", "a") as f_out:
+                with open(
+                    project_dir / "proofs" / f"{thm_ct}_{theorem.name}.out", "a"
+                ) as f_out:
                     f_out.write(f"Error proving {theorem.name}\n")
                     f_out.write(str(e))
                 error_ct += 1

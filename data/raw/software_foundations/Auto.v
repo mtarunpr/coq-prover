@@ -122,7 +122,7 @@ Proof.
   auto.
 
   (* Let's see where [auto] gets stuck using [debug auto] *)
-  debug auto.
+  (* debug auto. *)
 
   (* Optional argument says how deep to search (default is 5) *)
   auto 6.
@@ -145,7 +145,7 @@ Proof. auto. Qed.
 
 Example auto_example_5: 2 = 2.
 Proof.
-  info_auto.
+  auto.
 Qed.
 
 Example auto_example_5' : forall (P Q R S T U W: Prop),
@@ -159,7 +159,7 @@ Example auto_example_5' : forall (P Q R S T U W: Prop),
   T.
 Proof.
   intros.
-  info_auto.
+  auto.
 Qed.
 
 (** We can extend the hint database just for the purposes of one

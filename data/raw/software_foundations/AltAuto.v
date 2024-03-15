@@ -1064,7 +1064,7 @@ Example auto_example_5 : 2 = 2.
 Proof.
   (* [auto] subsumes [reflexivity] because [eq_refl] is in the hint
      database. *)
-  info_auto.
+  auto.
 Qed.
 
 (** We can extend the hint database with theorem [t] just for the
@@ -1137,7 +1137,7 @@ Hint Unfold is_fortytwo : le_db.
 
 Example auto_example_7' : forall x,
   (x <= 42 /\ 42 <= x) -> is_fortytwo x.
-Proof. info_auto with le_db. Qed.
+Proof. auto with le_db. Qed.
 
 (** The "global" database that [auto] always uses is named [core].
     You can add your own hints to it, but the Coq manual discourages
@@ -1150,7 +1150,7 @@ Example auto_example_8 : forall (n m : nat),
     n + m = m + n.
 Proof.
   auto. (* no progress *)
-  info_auto with arith. (* uses [Nat.add_comm] *)
+  auto with arith. (* uses [Nat.add_comm] *)
 Qed.
 
 (** **** Exercise: 3 stars, standard (re_opt_match_auto) *)

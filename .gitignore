@@ -25,6 +25,7 @@ cachecoq
 data/raw/**/*.ml
 data/raw/**/*.mli
 data/raw/**/*Makefile.coq*
+proofs_mar*
 
 # C extensions
 *.so

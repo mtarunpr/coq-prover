@@ -74,6 +74,34 @@ def annotate_and_fetch_error(theorem: Theorem):
                     for message in step.messages
                 )
             ):
+                # If error is because there are no more goals, truncate the proof and try again
+                if any(
+                    "No more goals" in message.contents for message in step.messages
+                ):
+                    proof_str = ""
+                    in_proof = False
+                    for j in range(len(annotated_code[0])):
+                        if (
+                            not in_proof
+                            and isinstance(annotated_code[0][j], Sentence)
+                            and re.match(
+                                f"{theorem.keyword}\s+{theorem.name}(?:\s+|:)",
+                                annotated_code[0][j].contents,
+                            )
+                        ):
+                            in_proof = True
+                            continue
+                        elif in_proof:
+                            if j == i:
+                                break
+                            proof_str += annotated_code[0][j].contents + "\n"
+                    proof_str += "Qed."
+                    theorem.proof = re.findall(
+                        r"(.+?\.)(?:\s+|$)", proof_str, flags=re.DOTALL
+                    )
+
+                    return annotate_and_fetch_error(theorem)
+                # Otherwise we have our first error
                 first_error_idx = i
         annotated_code_fragments.append(step)
         i += 1
@@ -284,7 +312,7 @@ def check_theorem_proof_and_maybe_reprove_using_lemmas(theorem: Theorem, depth=0
         for i, fragment in enumerate(annotated_code_fragments):
             if i == first_error_idx:
                 proof_using_lemma_str += (
-                    "apply (@" + lemma.name + " " + lemma_args + ")."
+                    "apply (@" + lemma.name + " " + lemma_args + ").\n"
                 )
                 still_in_same_goal = True
             elif i > first_error_idx:

@@ -21,7 +21,7 @@ MAX_LEMMA_RETRIES = 5
 MAX_LEMMA_DEPTH = 10
 
 warning_indicators = ["deprecated", "Loading ML file", "(* debug"]
-ignore_messages_keywords = ["Search", "Check", "Print", "Compute", "Eval", "debug"]
+ignore_messages_keywords = ["Search", "Check", "Print", "Compute", "Eval", "debug", "Notation"]
 
 if LLM_TYPE == "GPT":
     llm = GPT(GPT_MODEL_NAME)

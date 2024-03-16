@@ -55,7 +55,7 @@ def annotate_and_fetch_error(theorem: Theorem):
     first_error_idx = -1
 
     try:
-        err_file_path = project_dir / "proofs" / f"thm{thm_ct}_{theorem.name}.err"
+        err_file_path = project_dir / "proofs" / f"thm{thm_ct}_{theorem_name}.err"
     except NameError:
         err_file_path = project_dir / "coq_logs.err"
 
@@ -426,15 +426,15 @@ if __name__ == "__main__":
             theorem_str = f.read()
 
         theorem_str_split = theorem_str.split(" ")
-        keyword = theorem_str_split[0]
-        name = theorem_str_split[1]
-        statement = re.search(r":\s*(.+?)\.", theorem_str, re.DOTALL).group(1).strip()
+        theorem_keyword = theorem_str_split[0]
+        theorem_name = theorem_str_split[1]
+        theorem_statement = re.search(r":\s*(.+?)\.", theorem_str, re.DOTALL).group(1).strip()
 
         _, preamble = parse_file("context.v", project_dir)
         theorem = Theorem(
-            keyword,
-            name,
-            statement,
+            theorem_keyword,
+            theorem_name,
+            theorem_statement,
             [],
             preamble,
             context_str,

@@ -22,8 +22,13 @@ def parse_file(
     with open(path / file_name, "r") as file:
         file_contents = file.read()
 
-    # Remove all comments
-    file_contents = re.sub(r"\(\*.*?\*\)", "", file_contents, flags=re.DOTALL)
+    # Remove all comments (supports 3 levels of nested comments)
+    file_contents = re.sub(
+        r"\(\*(?:(?!\(\*|\*\)).|(?:\(\*(?:(?!\(\*|\*\)).|(?:\(\*(?:(?!\(\*|\*\)).)*\*\)))*\*\)))*\*\)",
+        "",
+        file_contents,
+        flags=re.DOTALL,
+    )
 
     # Parse imports
     imports = re.findall(r"(?:Require\s+)?(?:Im|Ex)port\s+(.+?)\.\s", file_contents)
@@ -67,15 +72,26 @@ def parse_file(
             _, _, _, _, _, keyword, name, statement, proof = match
             assert keyword in [type.value for type in TheoremKeyword]
             proof_list = re.findall(r"(.+?\.)\s+", proof, flags=re.DOTALL)
-            context_str = re.search(r"(.+?)" + keyword + r"\s+" + name, file_contents, flags=re.DOTALL).group(1)
+            context_str = re.search(
+                r"(.+?)" + keyword + r"\s+" + name, file_contents, flags=re.DOTALL
+            ).group(1)
             defns_and_thms.append(
-                Theorem(keyword, name, statement, proof_list, defns_and_thms.copy(), context_str)
+                Theorem(
+                    keyword,
+                    name,
+                    statement,
+                    proof_list,
+                    defns_and_thms.copy(),
+                    context_str,
+                )
             )
 
     return imports, defns_and_thms
 
 
-def parse_all_files(path: Path) -> dict[str, tuple[list[str], list[Union[Theorem, Definition]]]]:
+def parse_all_files(
+    path: Path,
+) -> dict[str, tuple[list[str], list[Union[Theorem, Definition]]]]:
     """
     Parses all .v files in the given directory and returns a map from file name
     to a tuple of imports and definitions/theorems.
@@ -83,7 +99,7 @@ def parse_all_files(path: Path) -> dict[str, tuple[list[str], list[Union[Theorem
 
     coq_file_names = []
     for root, _, file_names in os.walk(path):
-        if root.endswith("proofs") or root.endswith("proofs/"):
+        if "proofs" in root:
             continue
         for file_name in file_names:
             if file_name.endswith(".v"):

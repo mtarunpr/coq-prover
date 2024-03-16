@@ -21,7 +21,20 @@ MAX_LEMMA_RETRIES = 5
 MAX_LEMMA_DEPTH = 10
 
 warning_indicators = ["deprecated", "Loading ML file", "(* debug"]
-ignore_messages_keywords = ["Search", "Check", "Print", "Compute", "Eval", "debug", "Notation"]
+ignore_messages_keywords = [
+    "Search",
+    "Check",
+    "Print",
+    "Compute",
+    "Eval",
+    "Notation",
+    "Fail",
+    "Show",
+    "Locate",
+    "debug",
+    "info_auto",
+    "info_eauto",
+]
 
 if LLM_TYPE == "GPT":
     llm = GPT(GPT_MODEL_NAME)
@@ -34,7 +47,9 @@ else:
 def annotate_and_fetch_error(theorem: Theorem):
     """
     Annotates the theorem's proof using Alectryon and returns the annotated code
-    fragments as well as the index of the first error, if any (or -1 if no error).
+    fragments as well as the index of the first error, if any (or -1 if no error, or
+    the length of the annotated code fragments if there is no error but there are
+    unproven goals at the end).
     """
     warning_disabler = 'Set Silent.\nSet Warnings "-all".\nSet Debug "-all".\n\n'
     first_error_idx = -1
@@ -105,6 +120,13 @@ def annotate_and_fetch_error(theorem: Theorem):
                 first_error_idx = i
         annotated_code_fragments.append(step)
         i += 1
+
+    if first_error_idx == -1:
+        try:
+            confirm_proof(annotated_code_fragments)
+        except Exception:
+            first_error_idx = len(annotated_code_fragments)
+
     return annotated_code_fragments, first_error_idx
 
 
@@ -149,20 +171,24 @@ def get_prev_sentence_and_error_message(annotated_code_fragments, first_error_id
         if isinstance(annotated_code_fragments[i], Sentence):
             prev_sentence = annotated_code_fragments[i]
             break
-    # Get first non-warning error message
-    for message in annotated_code_fragments[first_error_idx].messages:
-        if all(
-            warning_indicator not in message.contents
-            for warning_indicator in warning_indicators
-        ):
-            try:
-                error_message = f'Error in step "{annotated_code_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
-                break
-            except IndexError:
-                raise Exception(
-                    "UNEXPECTED ERROR. Possible causes include: the input files have some error, or a warning was mistaken to be an error, or the LLM output had an Admitted.",
-                    "Error message: " + message.contents,
-                )
+    if first_error_idx == len(annotated_code_fragments):
+        # If the error is at the end, there are still unproven goals
+        error_message = f'Error after step "{prev_sentence.contents}".\nMessage: There are still unproven goals.\nGoal: {prev_sentence.goals[0].conclusion}.'
+    else:
+        # Get first non-warning error message
+        for message in annotated_code_fragments[first_error_idx].messages:
+            if all(
+                warning_indicator not in message.contents
+                for warning_indicator in warning_indicators
+            ):
+                try:
+                    error_message = f'Error in step "{annotated_code_fragments[first_error_idx].contents}".\nMessage: {message.contents}.\nGoal: {prev_sentence.goals[0].conclusion}.'
+                    break
+                except IndexError:
+                    raise Exception(
+                        "UNEXPECTED ERROR. Possible causes include: the input files have some error, or a warning was mistaken to be an error, or the LLM output had an Admitted.",
+                        "Error message: " + message.contents,
+                    )
 
     return prev_sentence, error_message
 

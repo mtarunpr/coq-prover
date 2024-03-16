@@ -472,8 +472,6 @@ if __name__ == "__main__":
 
         for theorem in tqdm(theorems):
             thm_ct += 1
-            if thm_ct != 126:
-                continue
             llm.ask_for_proof(theorem)
 
             try:

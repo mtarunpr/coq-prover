@@ -38,7 +38,7 @@ class BaseLLM:
             },
             {
                 "role": "user",
-                "content": theorem.get_preamble_string() + "\n\n" + str(theorem),
+                "content": "#### CONTEXT\n\n" + theorem.get_preamble_string() + "\n\n#### THEOREM TO BE PROVEN\n\n" + str(theorem),
             },
         ]
         if prev_attempt_error_msg is not None:
@@ -89,7 +89,7 @@ class GPT(BaseLLM):
 
 class LocalModel(BaseLLM):
     def __init__(self, model_name: str, model_checkpoint: Union[str, None] = None):
-        self.ask = memory.cache(self.ask)
+        # self.ask = memory.cache(self.ask)
         self.model_checkpoint = model_checkpoint
         self.base_model_name = model_name
         bnb_config = BitsAndBytesConfig(
@@ -151,7 +151,7 @@ class LocalModel(BaseLLM):
                 prompt += "### Assistant\n" + message["content"] + "\n\n"
             else:
                 raise ValueError("Invalid message role: " + message["role"])
-
+        prompt += "### Assistant\n"
         return self._generate(prompt)
 
 

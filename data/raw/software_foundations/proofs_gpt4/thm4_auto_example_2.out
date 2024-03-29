@@ -1,0 +1,547 @@
+PROVING auto_example_2
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+
+Proof.
+(* Using the hypothesis (P -> Q) and the fact that P holds, we obtain Q.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp.
+(* Now, using the hypothesis ((P -> Q) -> (P -> S)), we obtain S since P -> Q holds.
+*)
+  apply H_PQ_PS in H_PQ as H_PS.
+(* Applying H_PS, which is P -> S, with the fact that P holds, we obtain S.
+*)
+  apply H_PS in Hp as HS.
+(* Finally, with S and T held by the hypotheses, and the hypothesis (S -> T -> U), we can obtain U.
+*)
+  apply H_STU; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #116)
+Error in step "apply H_PS in Hp as HS.".
+Message: Unable to apply lemma of type 
+"S" on hypothesis of type 
+"P"..
+Goal: U.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma P_implies_U_under_conditions_0 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, forall H_PS : S, U.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma P_implies_U_under_conditions_0 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, forall H_PS : S, U.
+
+Proof.
+(* We are given a set of hypotheses and we need to prove U.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp H_PS.
+(* Given P -> Q and T -> R, we can derive Q and R *)
+  pose proof (H_PQ Hp) as Hq.
+pose proof (H_TR Ht) as Hr.
+(* The hypothesis H_PQ_PS : (P -> Q) -> P -> S gives us S using H_PQ and Hp *)
+  pose proof (H_PQ_PS H_PQ Hp) as Hs.
+(* Using S -> T -> U, we can now prove U *)
+  apply (H_STU Hs Ht).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma P_implies_U_under_conditions_0 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, forall H_PS : S, U.
+
+Proof.
+(* We are given a set of hypotheses and we need to prove U.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp H_PS.
+(* Given P -> Q and T -> R, we can derive Q and R *)
+  pose proof (H_PQ Hp) as Hq.
+pose proof (H_TR Ht) as Hr.
+(* The hypothesis H_PQ_PS : (P -> Q) -> P -> S gives us S using H_PQ and Hp *)
+  pose proof (H_PQ_PS H_PQ Hp) as Hs.
+(* Using S -> T -> U, we can now prove U *)
+  apply (H_STU Hs Ht).
+Qed.
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+
+Proof.
+(* Using the hypothesis (P -> Q) and the fact that P holds, we obtain Q.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp.
+(* Now, using the hypothesis ((P -> Q) -> (P -> S)), we obtain S since P -> Q holds.
+*)
+  apply H_PQ_PS in H_PQ as H_PS.
+(* Applying H_PS, which is P -> S, with the fact that P holds, we obtain S.
+*)
+  apply (@P_implies_U_under_conditions_0 P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp H_PS).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #134)
+Error in step "Qed.".
+Message:  (in proof auto_example_2): Attempt to save an incomplete proof.
+Goal: P.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma P_implies_P_under_conditions_1 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, P.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma P_implies_U_under_conditions_0 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, forall H_PS : S, U.
+
+Proof.
+(* We are given a set of hypotheses and we need to prove U.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp H_PS.
+(* Given P -> Q and T -> R, we can derive Q and R *)
+  pose proof (H_PQ Hp) as Hq.
+pose proof (H_TR Ht) as Hr.
+(* The hypothesis H_PQ_PS : (P -> Q) -> P -> S gives us S using H_PQ and Hp *)
+  pose proof (H_PQ_PS H_PQ Hp) as Hs.
+(* Using S -> T -> U, we can now prove U *)
+  apply (H_STU Hs Ht).
+Qed.
+
+Lemma P_implies_P_under_conditions_1 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, P.
+
+Proof.
+(* The statement is immediately true, as P implies P by reflexivity.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp.
+exact Hp.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma P_implies_U_under_conditions_0 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, forall H_PS : S, U.
+
+Proof.
+(* We are given a set of hypotheses and we need to prove U.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp H_PS.
+(* Given P -> Q and T -> R, we can derive Q and R *)
+  pose proof (H_PQ Hp) as Hq.
+pose proof (H_TR Ht) as Hr.
+(* The hypothesis H_PQ_PS : (P -> Q) -> P -> S gives us S using H_PQ and Hp *)
+  pose proof (H_PQ_PS H_PQ Hp) as Hs.
+(* Using S -> T -> U, we can now prove U *)
+  apply (H_STU Hs Ht).
+Qed.
+
+Lemma P_implies_P_under_conditions_1 : forall P Q R S T U : Prop, forall H_PQ : P -> Q, forall H_PR : P -> R, forall H_TR : T -> R, forall H_STU : S -> T -> U, forall H_PQ_PS : (P -> Q) -> P -> S, forall Ht : T, forall Hp : P, P.
+
+Proof.
+(* The statement is immediately true, as P implies P by reflexivity.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp.
+exact Hp.
+Qed.
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+
+Proof.
+(* Using the hypothesis (P -> Q) and the fact that P holds, we obtain Q.
+*)
+  intros P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp.
+(* Now, using the hypothesis ((P -> Q) -> (P -> S)), we obtain S since P -> Q holds.
+*)
+  apply H_PQ_PS in H_PQ as H_PS.
+(* Applying H_PS, which is P -> S, with the fact that P holds, we obtain S.
+*)
+  apply (@P_implies_U_under_conditions_0 P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp H_PS).
+apply (@P_implies_P_under_conditions_1 P Q R S T U H_PQ H_PR H_TR H_STU H_PQ_PS Ht Hp).
+Qed.
+
+Outdated contents in ..cache: recomputing
+EXAMPLE PROOF IS VALID
+

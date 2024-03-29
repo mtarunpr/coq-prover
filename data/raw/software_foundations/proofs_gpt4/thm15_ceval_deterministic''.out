@@ -1,0 +1,4513 @@
+PROVING ceval_deterministic''
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Theorem ceval_deterministic'' : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(* We will prove the determinism of "ceval" by induction on the evaluation of command "c" *)
+  intros c st st1 st2 E1 E2.
+generalize dependent st2.
+(* Perform induction on the first evaluation derivation.
+*)
+  induction E1; intros; inversion E2; subst;
+  try reflexivity;
+  try (rewrite <- H in H5; inversion H5);
+  try (rewrite <- H in H2; inversion H2);
+  try (rewrite <- H in H4; inversion H4).
+- (* E_Seq, sequential composition *)
+    assert (st' = st'0) as EQ1.
+{ apply IHE1_1; assumption.
+} 
+    subst st'0.
+apply IHE1_2; assumption.
+- (* E_IfTrue *)
+    apply IHE1; assumption.
+- (* E_IfFalse | b evaluates to false *)
+    apply IHE1; assumption.
+- (* E_WhileFalse | b evaluates to false *)
+    reflexivity.
+- (* E_WhileTrue | b evaluates to true and runs once *)
+    clear IHE1_1 IHE1_2.
+apply IHE1; assumption.
+- (* E_WhileTrue | b evaluates to true and loops *)
+    clear IHE1_2.
+apply IHE1_1 in H3.
+subst st'0.
+apply IHE1_2; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #328)
+Error in step "apply IHE1; assumption.".
+Message: No such assumption..
+Goal: st' = st2.
+
+TRYING TO PROVE LEMMA
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Theorem ceval_deterministic'' : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(* We will prove the determinism of "ceval" by induction on the evaluation of command "c" *)
+  intros c st st1 st2 E1 E2.
+generalize dependent st2.
+(* Perform induction on the first evaluation derivation.
+*)
+  induction E1; intros; inversion E2; subst;
+  try reflexivity;
+  try (rewrite <- H in H5; inversion H5);
+  try (rewrite <- H in H2; inversion H2);
+  try (rewrite <- H in H4; inversion H4).
+- (* E_Seq, sequential composition *)
+    assert (st' = st'0) as EQ1.
+{ apply IHE1_1; assumption.
+} 
+    subst st'0.
+apply IHE1_2; assumption.
+- (* E_IfTrue *)
+    apply IHE1; assumption.
+- (* E_IfFalse | b evaluates to false *)
+    apply (@if_true_deterministic_execution_0 st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6).
+- (* E_WhileFalse | b evaluates to false *)
+    reflexivity.
+- (* E_WhileTrue | b evaluates to true and runs once *)
+    clear IHE1_1 IHE1_2.
+apply IHE1; assumption.
+- (* E_WhileTrue | b evaluates to true and loops *)
+    clear IHE1_2.
+apply IHE1_1 in H3.
+subst st'0.
+apply IHE1_2; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #344)
+Error in step "reflexivity.".
+Message: In environment
+st, st' : state
+b : bexp
+c1, c2 : com
+H : beval st b = false
+E1 : st =[ c2 ]=> st'
+IHE1 : forall st2 : state,
+       st =[ c2 ]=> st2 -> st' = st2
+st2 : state
+E2 : st =[ if b then c1 else c2 end ]=> st2
+H5 : beval st b = true
+H6 : st =[ c1 ]=> st2
+Unable to unify "st2" with 
+"st'"..
+Goal: st' = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Theorem ceval_deterministic'' : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(* We will prove the determinism of "ceval" by induction on the evaluation of command "c" *)
+  intros c st st1 st2 E1 E2.
+generalize dependent st2.
+(* Perform induction on the first evaluation derivation.
+*)
+  induction E1; intros; inversion E2; subst;
+  try reflexivity;
+  try (rewrite <- H in H5; inversion H5);
+  try (rewrite <- H in H2; inversion H2);
+  try (rewrite <- H in H4; inversion H4).
+- (* E_Seq, sequential composition *)
+    assert (st' = st'0) as EQ1.
+{ apply IHE1_1; assumption.
+} 
+    subst st'0.
+apply IHE1_2; assumption.
+- (* E_IfTrue *)
+    apply IHE1; assumption.
+- (* E_IfFalse | b evaluates to false *)
+    apply (@if_true_deterministic_execution_0 st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6).
+- (* E_WhileFalse | b evaluates to false *)
+    apply (@if_false_consequence_equal_state_1 st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6).
+- (* E_WhileTrue | b evaluates to true and runs once *)
+    clear IHE1_1 IHE1_2.
+apply IHE1; assumption.
+- (* E_WhileTrue | b evaluates to true and loops *)
+    clear IHE1_2.
+apply IHE1_1 in H3.
+subst st'0.
+apply IHE1_2; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #360)
+Error in step "clear IHE1_1 IHE1_2.".
+Message: No such hypothesis: IHE1_1.
+Goal: st' = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Theorem ceval_deterministic'' : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(* We will prove the determinism of "ceval" by induction on the evaluation of command "c" *)
+  intros c st st1 st2 E1 E2.
+generalize dependent st2.
+(* Perform induction on the first evaluation derivation.
+*)
+  induction E1; intros; inversion E2; subst;
+  try reflexivity;
+  try (rewrite <- H in H5; inversion H5);
+  try (rewrite <- H in H2; inversion H2);
+  try (rewrite <- H in H4; inversion H4).
+- (* E_Seq, sequential composition *)
+    assert (st' = st'0) as EQ1.
+{ apply IHE1_1; assumption.
+} 
+    subst st'0.
+apply IHE1_2; assumption.
+- (* E_IfTrue *)
+    apply IHE1; assumption.
+- (* E_IfFalse | b evaluates to false *)
+    apply (@if_true_deterministic_execution_0 st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6).
+- (* E_WhileFalse | b evaluates to false *)
+    apply (@if_false_consequence_equal_state_1 st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6).
+- (* E_WhileTrue | b evaluates to true and runs once *)
+    apply (@execution_if_false_same_end_state_2 st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6).
+- (* E_WhileTrue | b evaluates to true and loops *)
+    clear IHE1_2.
+apply IHE1_1 in H3.
+subst st'0.
+apply IHE1_2; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #386)
+Error in step "clear IHE1_2.".
+Message: No such hypothesis: IHE1_2.
+Goal: st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_false_leads_to_no_state_change_3 : forall b : bexp, forall st : state, forall c : com, forall H : beval st b = false, forall st2 : state, forall E2 : st =[ while b do c end ]=> st2, forall st' : state, forall H2 : beval st b = true, forall H3 : st =[ c ]=> st', forall H6 : st' =[ while b do c end ]=> st2, st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Lemma while_false_leads_to_no_state_change_3 : forall b : bexp, forall st : state, forall c : com, forall H : beval st b = false, forall st2 : state, forall E2 : st =[ while b do c end ]=> st2, forall st' : state, forall H2 : beval st b = true, forall H3 : st =[ c ]=> st', forall H6 : st' =[ while b do c end ]=> st2, st = st2.
+
+Proof.
+intros b st c Hbeval_false st2 E2.
+(* We perform inversion on the evaluation of the while-loop given by E2.
+*)
+  inversion E2; subst.
+- reflexivity.
+- (* The hypothesis "beval st b = true" (H4) is contradictory to the initial assumption *)
+    rewrite Hbeval_false in H4.
+discriminate H4.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #358)
+Error in step "rewrite Hbeval_false in H4.".
+Message: No such hypothesis: H4.
+Goal: forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_loop_break_early_4 : forall b : bexp, forall st : state, forall c : com, forall Hbeval_false : beval st b = false, forall st2 : state, forall E2 : st =[ while b do c end ]=> st2, forall st' : state, forall H1 : beval st b = true, forall H2 : st =[ c ]=> st', forall H5 : st' =[ while b do c end ]=> st2, forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Lemma while_loop_break_early_4 : forall b : bexp, forall st : state, forall c : com, forall Hbeval_false : beval st b = false, forall st2 : state, forall E2 : st =[ while b do c end ]=> st2, forall st' : state, forall H1 : beval st b = true, forall H2 : st =[ c ]=> st', forall H5 : st' =[ while b do c end ]=> st2, forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 -> st = st2.
+
+Proof.
+intros b st c Hbeval_false st2 E2 st' H1 H2 H5 st'.
+rewrite Hbeval_false in H1.
+discriminate H1.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #348)
+Error in step "intros b st c Hbeval_false st2 E2 st' H1 H2 H5 st'.".
+Message: st' is used twice..
+Goal: forall (b : bexp) (st : state) (c : com),
+beval st b = false ->
+forall st2 : state,
+st =[ while b do c end ]=> st2 ->
+forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 ->
+forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_false_loop_fixpoint_5 : forall (b : bexp) (st : state) (c : com),
+beval st b = false ->
+forall st2 : state,
+st =[ while b do c end ]=> st2 ->
+forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 ->
+forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Lemma while_false_loop_fixpoint_5 : forall (b : bexp) (st : state) (c : com),
+beval st b = false ->
+forall st2 : state,
+st =[ while b do c end ]=> st2 ->
+forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 ->
+forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 -> st = st2.
+
+Proof.
+intros b st c Hb_false st2 Heval_while st' Hb_true Heval_c Heval_while'.
+(* Since the premise includes both the evaluations of the while loop and the condition being false,
+     we can invert the while loop evaluation using `E_WhileFalse` to derive that the starting state
+     is equal to the ending state.
+*)
+  inversion Heval_while as [| | | | | | | | | b' st'' c'|].
+* (* case E_WhileFalse *)
+    subst st'' c' b'.
+assumption.
+* (* all other cases are contradictory because they require the loop condition to be true *)
+    rewrite Hb_false in H2.
+discriminate H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #350)
+Error in step "inversion Heval_while as [| | | | | | | | | b' st'' c'|].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_false_contradiction_6 : forall b : bexp, forall st : state, forall c : com, forall Hb_false : beval st b = false, forall st2 : state, forall Heval_while : st =[ while b do c end ]=> st2, forall st' : state, forall Hb_true : beval st b = true, forall Heval_c : st =[ c ]=> st', forall Heval_while' : st' =[ while b do c end ]=> st2, forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Lemma while_false_contradiction_6 : forall b : bexp, forall st : state, forall c : com, forall Hb_false : beval st b = false, forall st2 : state, forall Heval_while : st =[ while b do c end ]=> st2, forall st' : state, forall Hb_true : beval st b = true, forall Heval_c : st =[ c ]=> st', forall Heval_while' : st' =[ while b do c end ]=> st2, forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 -> st = st2.
+
+Proof.
+intros b st c Hb_false st2 Heval_while st' Hb_true Heval_c Heval_while' st'0 H1 H2 H3.
+(* Given the hypothesis Hb_false (beval st b = false),
+     we can directly use the rule E_WhileFalse to conclude
+     that st =[ while b do c end ]=> st.
+*)
+  inversion Heval_while.
+(* By inverting Heval_while, we get two cases: st =[ while b do c end ]=> st and a loop where the body executes at least once with beval st b = true.
+We know beval st b is false from the hypothesis Hb_false.
+*)
+  - (* Case: The loop does not execute because b evaluates to false.
+*)
+    reflexivity.
+(* If the loop doesn't execute, the state stays the same, so we can conclude st = st2 immediately.
+*)
+  - (* Case: The loop executes at least once because b evaluates to true.
+*)
+    rewrite Hb_false in H.
+discriminate H.
+(* This contradicts the assumption Hb_false (beval st b = false).
+Therefore, we can dismiss this case and conclude st = st2.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #358)
+Error in step "rewrite Hb_false in H.".
+Message: Found no subterm matching "beval st b" in H..
+Goal: st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_loop_false_with_no_state_change_7 : forall b : bexp, forall st : state, forall c : com, forall Hb_false : beval st b = false, forall st2 : state, forall Heval_while : st =[ while b do c end ]=> st2, forall st' : state, forall Hb_true : beval st b = true, forall Heval_c : st =[ c ]=> st', forall Heval_while' : st' =[ while b do c end ]=> st2, forall st'0 : state, forall H1 : beval st b = true, forall H2 : st =[ c ]=> st'0, forall H3 : st'0 =[ while b do c end ]=> st2, forall st0 st'1 st'' : state, forall b0 : bexp, forall c0 : com, forall H4 : beval st b = true, forall H5 : st =[ c ]=> st'1, forall H8 : st'1 =[ while b do c end ]=> st2, forall H : b0 = b, forall H0 : c0 = c, forall H6 : st0 = st, forall H7 : st'' = st2, st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Lemma while_loop_false_with_no_state_change_7 : forall b : bexp, forall st : state, forall c : com, forall Hb_false : beval st b = false, forall st2 : state, forall Heval_while : st =[ while b do c end ]=> st2, forall st' : state, forall Hb_true : beval st b = true, forall Heval_c : st =[ c ]=> st', forall Heval_while' : st' =[ while b do c end ]=> st2, forall st'0 : state, forall H1 : beval st b = true, forall H2 : st =[ c ]=> st'0, forall H3 : st'0 =[ while b do c end ]=> st2, forall st0 st'1 st'' : state, forall b0 : bexp, forall c0 : com, forall H4 : beval st b = true, forall H5 : st =[ c ]=> st'1, forall H8 : st'1 =[ while b do c end ]=> st2, forall H : b0 = b, forall H0 : c0 = c, forall H6 : st0 = st, forall H7 : st'' = st2, st = st2.
+
+Proof.
+intros b st c Hb_false st2 Heval_while.
+(* Using the inversion on Heval_while to deduce the possible cases from the E_WhileFalse and E_WhileTrue1/E_WhileTrue2 rules *)
+  inversion Heval_while.
+- (* Case E_WhileFalse *)
+    reflexivity.
+- (* Case E_WhileTrue1 *)
+    (* beval st b = true contradicts with our assumption beval st b = false *)
+    rewrite Hb_false in H.
+discriminate H.
+- (* Case E_WhileTrue2 *)
+    (* beval st b = true contradicts with our assumption beval st b = false *)
+    rewrite Hb_false in H.
+discriminate H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #358)
+Error in step "rewrite Hb_false in H.".
+Message: Found no subterm matching "beval st b" in H..
+Goal: forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 ->
+forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 ->
+forall (st0 st'1 st'' : state) (b0 : bexp) (c0 : com),
+beval st b = true ->
+st =[ c ]=> st'1 ->
+st'1 =[ while b do c end ]=> st2 ->
+b0 = b -> c0 = c -> st0 = st -> st'' = st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_loop_with_false_guard_leads_to_same_state_8 : forall b : bexp, forall st : state, forall c : com, forall Hb_false : beval st b = false, forall st2 : state, forall Heval_while : st =[ while b do c end ]=> st2, forall st0 st' st'' : state, forall b0 : bexp, forall c0 : com, forall H1 : beval st b = true, forall H2 : st =[ c ]=> st', forall H5 : st' =[ while b do c end ]=> st2, forall H : b0 = b, forall H0 : c0 = c, forall H3 : st0 = st, forall H4 : st'' = st2, forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 ->
+forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 ->
+forall (st0 st'1 st'' : state) (b0 : bexp) (c0 : com),
+beval st b = true ->
+st =[ c ]=> st'1 ->
+st'1 =[ while b do c end ]=> st2 ->
+b0 = b -> c0 = c -> st0 = st -> st'' = st2 -> st = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Lemma while_loop_with_false_guard_leads_to_same_state_8 : forall b : bexp, forall st : state, forall c : com, forall Hb_false : beval st b = false, forall st2 : state, forall Heval_while : st =[ while b do c end ]=> st2, forall st0 st' st'' : state, forall b0 : bexp, forall c0 : com, forall H1 : beval st b = true, forall H2 : st =[ c ]=> st', forall H5 : st' =[ while b do c end ]=> st2, forall H : b0 = b, forall H0 : c0 = c, forall H3 : st0 = st, forall H4 : st'' = st2, forall st' : state,
+beval st b = true ->
+st =[ c ]=> st' ->
+st' =[ while b do c end ]=> st2 ->
+forall st'0 : state,
+beval st b = true ->
+st =[ c ]=> st'0 ->
+st'0 =[ while b do c end ]=> st2 ->
+forall (st0 st'1 st'' : state) (b0 : bexp) (c0 : com),
+beval st b = true ->
+st =[ c ]=> st'1 ->
+st'1 =[ while b do c end ]=> st2 ->
+b0 = b -> c0 = c -> st0 = st -> st'' = st2 -> st = st2.
+
+Proof.
+(* This is a direct application of the E_WhileFalse rule *)
+  intros b c st H.
+apply E_WhileFalse.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #350)
+Error in step "apply E_WhileFalse.".
+Message: Applied theorem does not have enough premises..
+Goal: forall st2 : state,
+c =[ while b do st end ]=> st2 ->
+forall (st0 st' st'' : state) (b0 : bexp) (c0 : com),
+beval c b = true ->
+c =[ st ]=> st' ->
+st' =[ while b do st end ]=> st2 ->
+b0 = b ->
+c0 = st ->
+st0 = c ->
+st'' = st2 ->
+forall st'0 : state,
+beval c b = true ->
+c =[ st ]=> st'0 ->
+st'0 =[ while b do st end ]=> st2 ->
+forall st'1 : state,
+beval c b = true ->
+c =[ st ]=> st'1 ->
+st'1 =[ while b do st end ]=> st2 ->
+forall (st1 st'2 st''0 : state) (b1 : bexp) (c1 : com),
+beval c b = true ->
+c =[ st ]=> st'2 ->
+st'2 =[ while b do st end ]=> st2 ->
+b1 = b -> c1 = st -> st1 = c -> st''0 = st2 -> c = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_false_noop_equiv_9 : forall b : bexp, forall c : state, forall st : com, forall H : beval c b = false, forall st2 : state,
+c =[ while b do st end ]=> st2 ->
+forall (st0 st' st'' : state) (b0 : bexp) (c0 : com),
+beval c b = true ->
+c =[ st ]=> st' ->
+st' =[ while b do st end ]=> st2 ->
+b0 = b ->
+c0 = st ->
+st0 = c ->
+st'' = st2 ->
+forall st'0 : state,
+beval c b = true ->
+c =[ st ]=> st'0 ->
+st'0 =[ while b do st end ]=> st2 ->
+forall st'1 : state,
+beval c b = true ->
+c =[ st ]=> st'1 ->
+st'1 =[ while b do st end ]=> st2 ->
+forall (st1 st'2 st''0 : state) (b1 : bexp) (c1 : com),
+beval c b = true ->
+c =[ st ]=> st'2 ->
+st'2 =[ while b do st end ]=> st2 ->
+b1 = b -> c1 = st -> st1 = c -> st''0 = st2 -> c = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+
+
+Lemma if_true_deterministic_execution_0 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = true, forall E1 : st =[ c1 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c1 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = false, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that beval st b = true, we can directly use E_IfTrue to establish the link between st and st' through c1 *)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* Now, we have a contradiction because beval st b cannot be both true and false *)
+  rewrite H in H5.
+discriminate H5.
+Qed.
+
+Lemma if_false_consequence_equal_state_1 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = true, forall H6 : st =[ c1 ]=> st2, st' = st2.
+
+Proof.
+intros st st' b c1 c2 Hfalse E2 IH st2 Eif Htrue Ec1.
+(* Since `beval st b` cannot be both true and false simultaneously, we have a contradiction.
+*)
+  rewrite Htrue in Hfalse.
+discriminate Hfalse.
+Qed.
+
+Lemma execution_if_false_same_end_state_2 : forall st st' : state, forall b : bexp, forall c1 c2 : com, forall H : beval st b = false, forall E1 : st =[ c2 ]=> st', forall IHE1 : forall st2 : state,
+st =[ c2 ]=> st2 -> st' = st2, forall st2 : state, forall E2 : st =[ if b then c1 else c2 end ]=> st2, forall H5 : beval st b = beval st b, forall H6 : st =[ c2 ]=> st2, st' = st2.
+
+Proof.
+(* Given that the evaluation of b is false (H) and execution of c2 leads to st' (E1),
+     we want to prove that the if statement will also lead to st' when the else branch is taken,
+     which corresponds to executing c2.
+*)
+  intros st st' b c1 c2 H E1 IHE1 st2 E2 H5 H6.
+(* By using the assumption that the evaluation of b is false (H),
+     we can consider the rule for if false in our operational semantics *)
+  inversion E2; subst.
+- (* If the evaluation of b in the if statement is true (which cannot be due to H), 
+       we get a contradiction.
+Hence this case is impossible.
+*)
+    rewrite H in H7.
+discriminate.
+- (* If the evaluation of b in the if statement is false, (which is as in E1 & H),
+       and the else branch leads to st2, then by determinism (represented by IHE1 called with H6),
+       we get that st' (from E1) is equal to st2.
+*)
+    apply IHE1.
+assumption.
+Qed.
+
+Lemma while_false_noop_equiv_9 : forall b : bexp, forall c : state, forall st : com, forall H : beval c b = false, forall st2 : state,
+c =[ while b do st end ]=> st2 ->
+forall (st0 st' st'' : state) (b0 : bexp) (c0 : com),
+beval c b = true ->
+c =[ st ]=> st' ->
+st' =[ while b do st end ]=> st2 ->
+b0 = b ->
+c0 = st ->
+st0 = c ->
+st'' = st2 ->
+forall st'0 : state,
+beval c b = true ->
+c =[ st ]=> st'0 ->
+st'0 =[ while b do st end ]=> st2 ->
+forall st'1 : state,
+beval c b = true ->
+c =[ st ]=> st'1 ->
+st'1 =[ while b do st end ]=> st2 ->
+forall (st1 st'2 st''0 : state) (b1 : bexp) (c1 : com),
+beval c b = true ->
+c =[ st ]=> st'2 ->
+st'2 =[ while b do st end ]=> st2 ->
+b1 = b -> c1 = st -> st1 = c -> st''0 = st2 -> c = st2.
+
+Proof.
+(* Introduce all variables to the context *)
+  intros b c st H st2 H0 st0 st' st'' b0 c0 H1 H2 H3 H4 H5 H6 H7 H8 st'0 H9 H10 H11 st'1.
+intros H12 H13 H14 st1 st'2 st''0 b1 c1 H15 H16 H17 H18 H19 H20 H21.
+(* Use the evaluation rule for while when the condition is false to establish st2 = c *)
+  inversion H0.
+rewrite <- H6 in H22.
+rewrite H in H22.
+discriminate H22.
+(* State is unchanged when b evaluates to false *)
+  - reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #350)
+Error in step "intros H12 H13 H14 st1 st'2 st''0 b1 c1 H15 H16 H17 H18 H19 H20 H21.".
+Message: No product even after head-reduction..
+Goal: c =[ st ]=> H11 ->
+H11 =[ while b do st end ]=> st2 ->
+forall (st1 st'2 st''0 : state) (b1 : bexp) (c1 : com),
+beval c b = true ->
+c =[ st ]=> st'2 ->
+st'2 =[ while b do st end ]=> st2 ->
+b1 = b -> c1 = st -> st1 = c -> st''0 = st2 -> c = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma while_false_contradiction_10 : forall b : bexp, forall c : state, forall st : com, forall H : beval c b = false, forall st2 : state, forall H0 : c =[ while b do st end ]=> st2, forall st0 st' st'' : state, forall b0 : bexp, forall c0 : com, forall H1 : beval c b = true, forall H2 : c =[ st ]=> st', forall H3 : st' =[ while b do st end ]=> st2, forall H4 : b0 = b, forall H5 : c0 = st, forall H6 : st0 = c, forall H7 : st'' = st2, forall H8 : state, forall st'0 : beval c b = true, forall H9 : c =[ st ]=> H8, forall H10 : H8 =[ while b do st end ]=> st2, forall H11 : state, forall st'1 : beval c b = true, c =[ st ]=> H11 ->
+H11 =[ while b do st end ]=> st2 ->
+forall (st1 st'2 st''0 : state) (b1 : bexp) (c1 : com),
+beval c b = true ->
+c =[ st ]=> st'2 ->
+st'2 =[ while b do st end ]=> st2 ->
+b1 = b -> c1 = st -> st1 = c -> st''0 = st2 -> c = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+Error proving ceval_deterministic''
+MAX LEMMA DEPTH REACHED. GIVING UP.

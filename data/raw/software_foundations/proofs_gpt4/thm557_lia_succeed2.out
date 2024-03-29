@@ -1,0 +1,3264 @@
+PROVING lia_succeed2
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+Lemma re_opt_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + inversion IH1.
+    + inversion IH1. simpl. destruct re2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r.  apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+  -  simpl.
+    destruct re1.
+    + inversion IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+  -  simpl.
+    destruct re1.
+    + apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+ -  simpl.
+    destruct re.
+    + apply MEmpty.
+    + apply MEmpty.
+    + apply MStar0.
+    + apply MStar0.
+    + apply MStar0.
+    + simpl.
+      destruct re.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+ -  simpl.
+   destruct re.
+   + inversion IH1.
+   + inversion IH1. inversion IH2. apply MEmpty.
+   + apply star_app.
+     * apply MStar1. apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+Qed.
+
+
+
+Lemma re_opt_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl; apply MEmpty.
+  -  simpl; apply MChar.
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH1 | inversion IH1; simpl; destruct re2; apply IH2 | | | |];
+      (destruct re2;
+       [inversion IH2 | inversion IH2; rewrite app_nil_r; apply IH1 | | | | ];
+       (apply MApp; [apply IH1 | apply IH2])).
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH | | | | |];
+      destruct re2; try apply MUnionL; apply IH.
+  - 
+    simpl;
+      destruct re1;
+      [apply IH | | | | |];
+      (destruct re2; [inversion IH | | | | |]; apply MUnionR; apply IH).
+ - 
+   simpl;
+     destruct re; try apply MEmpty; try apply MStar0.
+ - 
+   simpl;
+    destruct re;
+    [inversion IH1 | inversion IH1; inversion IH2; apply MEmpty | | | |];
+    (apply star_app; [apply MStar1; apply IH1 | apply IH2]).
+Qed.
+
+Definition manual_grade_for_re_opt : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros P HP. apply HP.
+Qed.
+
+
+
+
+
+
+
+
+Theorem no_hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros. assumption.
+Qed.
+
+
+
+
+
+
+
+
+Theorem false_assumed : False -> 0 = 1.
+Proof.
+  intros H. destruct H.
+Qed.
+
+Theorem false_assumed' : False -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+Theorem contras : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros P HP HNP. exfalso. apply HNP. apply HP.
+Qed.
+
+Theorem contras' : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+
+
+
+
+
+Theorem many_eq : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros n m o p Hnm Hop. rewrite Hnm. rewrite Hop. reflexivity.
+Qed.
+
+Theorem many_eq' : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros. subst. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Check ev_0 : ev 0.
+Check ev_SS : forall n : nat, ev n -> ev (S (S n)).
+
+Example constructor_example: forall (n:nat),
+    ev (n + n).
+Proof.
+  induction n; simpl.
+  - constructor. 
+  - rewrite add_comm. simpl. constructor. 
+    assumption.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+
+Theorem lia_succeed1 : forall (n : nat),
+  n > 0 -> n * 2 > n.
+Proof. lia. Qed.
+
+
+
+Theorem lia_succeed2 : forall (n m : nat),
+    n * m = m * n.
+
+Proof.
+(* We prove the theorem by induction on n.
+*)
+  induction n as [| n' IHn'].
+- (* Case n = 0 *)
+    intros m.
+simpl.
+rewrite Nat.mul_0_r.
+reflexivity.
+- (* Case n = S n' *)
+    intros m.
+simpl.
+rewrite IHn'.
+rewrite Nat.mul_succ_r.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #1430)
+Error in step "reflexivity.".
+Message: In environment
+n' : nat
+IHn' : forall m : nat, n' * m = m * n'
+m : nat
+Unable to unify "m * n' + m" with 
+"m + m * n'"..
+Goal: m + m * n' = m * n' + m.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma plus_mult_distr_r_simplified_0 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + m * n' = m * n' + m.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+Lemma re_opt_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + inversion IH1.
+    + inversion IH1. simpl. destruct re2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r.  apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+  -  simpl.
+    destruct re1.
+    + inversion IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+  -  simpl.
+    destruct re1.
+    + apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+ -  simpl.
+    destruct re.
+    + apply MEmpty.
+    + apply MEmpty.
+    + apply MStar0.
+    + apply MStar0.
+    + apply MStar0.
+    + simpl.
+      destruct re.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+ -  simpl.
+   destruct re.
+   + inversion IH1.
+   + inversion IH1. inversion IH2. apply MEmpty.
+   + apply star_app.
+     * apply MStar1. apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+Qed.
+
+
+
+Lemma re_opt_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl; apply MEmpty.
+  -  simpl; apply MChar.
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH1 | inversion IH1; simpl; destruct re2; apply IH2 | | | |];
+      (destruct re2;
+       [inversion IH2 | inversion IH2; rewrite app_nil_r; apply IH1 | | | | ];
+       (apply MApp; [apply IH1 | apply IH2])).
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH | | | | |];
+      destruct re2; try apply MUnionL; apply IH.
+  - 
+    simpl;
+      destruct re1;
+      [apply IH | | | | |];
+      (destruct re2; [inversion IH | | | | |]; apply MUnionR; apply IH).
+ - 
+   simpl;
+     destruct re; try apply MEmpty; try apply MStar0.
+ - 
+   simpl;
+    destruct re;
+    [inversion IH1 | inversion IH1; inversion IH2; apply MEmpty | | | |];
+    (apply star_app; [apply MStar1; apply IH1 | apply IH2]).
+Qed.
+
+Definition manual_grade_for_re_opt : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros P HP. apply HP.
+Qed.
+
+
+
+
+
+
+
+
+Theorem no_hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros. assumption.
+Qed.
+
+
+
+
+
+
+
+
+Theorem false_assumed : False -> 0 = 1.
+Proof.
+  intros H. destruct H.
+Qed.
+
+Theorem false_assumed' : False -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+Theorem contras : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros P HP HNP. exfalso. apply HNP. apply HP.
+Qed.
+
+Theorem contras' : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+
+
+
+
+
+Theorem many_eq : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros n m o p Hnm Hop. rewrite Hnm. rewrite Hop. reflexivity.
+Qed.
+
+Theorem many_eq' : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros. subst. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Check ev_0 : ev 0.
+Check ev_SS : forall n : nat, ev n -> ev (S (S n)).
+
+Example constructor_example: forall (n:nat),
+    ev (n + n).
+Proof.
+  induction n; simpl.
+  - constructor. 
+  - rewrite add_comm. simpl. constructor. 
+    assumption.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+
+Theorem lia_succeed1 : forall (n : nat),
+  n > 0 -> n * 2 > n.
+Proof. lia. Qed.
+
+
+
+Lemma plus_mult_distr_r_simplified_0 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + m * n' = m * n' + m.
+
+Proof.
+intros n' IHn' m.
+rewrite <- IHn'.
+(* We use the induction hypothesis on n' to simplify the goal by rewriting n' * m to m * n'.
+*)
+  rewrite <- mult_n_Sm.
+(* Apply the fact that m * S n' = m * n' + m *)
+  rewrite <- plus_assoc.
+(* Rearrange addition using associativity from m + (m * n' + m) to (m + m * n') + m *)
+  rewrite <- mult_n_Sm in IHn'.
+(* Rewrite m * S n' as m + m * n' in the induction hypothesis for future use *)
+  reflexivity.
+(* What is left in the goal matches our assumptions, so we prove it *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1412)
+Error in step "rewrite <- mult_n_Sm.".
+Message: Found no subterm matching 
+"?M1385 * S ?M1386" in the current goal..
+Goal: m + n' * m = n' * m + m.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma mul_add_distr_l_reverse_1 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + n' * m = n' * m + m.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+Lemma re_opt_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + inversion IH1.
+    + inversion IH1. simpl. destruct re2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r.  apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+  -  simpl.
+    destruct re1.
+    + inversion IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+  -  simpl.
+    destruct re1.
+    + apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+ -  simpl.
+    destruct re.
+    + apply MEmpty.
+    + apply MEmpty.
+    + apply MStar0.
+    + apply MStar0.
+    + apply MStar0.
+    + simpl.
+      destruct re.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+ -  simpl.
+   destruct re.
+   + inversion IH1.
+   + inversion IH1. inversion IH2. apply MEmpty.
+   + apply star_app.
+     * apply MStar1. apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+Qed.
+
+
+
+Lemma re_opt_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl; apply MEmpty.
+  -  simpl; apply MChar.
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH1 | inversion IH1; simpl; destruct re2; apply IH2 | | | |];
+      (destruct re2;
+       [inversion IH2 | inversion IH2; rewrite app_nil_r; apply IH1 | | | | ];
+       (apply MApp; [apply IH1 | apply IH2])).
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH | | | | |];
+      destruct re2; try apply MUnionL; apply IH.
+  - 
+    simpl;
+      destruct re1;
+      [apply IH | | | | |];
+      (destruct re2; [inversion IH | | | | |]; apply MUnionR; apply IH).
+ - 
+   simpl;
+     destruct re; try apply MEmpty; try apply MStar0.
+ - 
+   simpl;
+    destruct re;
+    [inversion IH1 | inversion IH1; inversion IH2; apply MEmpty | | | |];
+    (apply star_app; [apply MStar1; apply IH1 | apply IH2]).
+Qed.
+
+Definition manual_grade_for_re_opt : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros P HP. apply HP.
+Qed.
+
+
+
+
+
+
+
+
+Theorem no_hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros. assumption.
+Qed.
+
+
+
+
+
+
+
+
+Theorem false_assumed : False -> 0 = 1.
+Proof.
+  intros H. destruct H.
+Qed.
+
+Theorem false_assumed' : False -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+Theorem contras : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros P HP HNP. exfalso. apply HNP. apply HP.
+Qed.
+
+Theorem contras' : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+
+
+
+
+
+Theorem many_eq : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros n m o p Hnm Hop. rewrite Hnm. rewrite Hop. reflexivity.
+Qed.
+
+Theorem many_eq' : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros. subst. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Check ev_0 : ev 0.
+Check ev_SS : forall n : nat, ev n -> ev (S (S n)).
+
+Example constructor_example: forall (n:nat),
+    ev (n + n).
+Proof.
+  induction n; simpl.
+  - constructor. 
+  - rewrite add_comm. simpl. constructor. 
+    assumption.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+
+Theorem lia_succeed1 : forall (n : nat),
+  n > 0 -> n * 2 > n.
+Proof. lia. Qed.
+
+
+
+Lemma mul_add_distr_l_reverse_1 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + n' * m = n' * m + m.
+
+Proof.
+(* ∀ n', we prove by induction on n' that ∀ m, m + n' * m = n' * m + m holds *)
+  intros n' IHn' m.
+rewrite <- IHn'.
+(* First, apply the hypothesis about multiplication commutativity *)
+  rewrite <- Nat.mul_add_distr_r.
+(* Then rewrite m + n' * m as (1 + n') * m to use distributivity *)
+  reflexivity.
+(* This holds because multiplication is commutative and associative *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1410)
+Error in step "rewrite <- IHn'.".
+Message: Found no subterm matching 
+"?M1378 * n'" in the current goal..
+Goal: m + n' * m = n' * m + m.
+
+TRYING TO PROVE LEMMA
+Lemma mul_add_distr_l_reverse_2 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + n' * m = n' * m + m.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+Lemma re_opt_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + inversion IH1.
+    + inversion IH1. simpl. destruct re2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r.  apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+  -  simpl.
+    destruct re1.
+    + inversion IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+  -  simpl.
+    destruct re1.
+    + apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+ -  simpl.
+    destruct re.
+    + apply MEmpty.
+    + apply MEmpty.
+    + apply MStar0.
+    + apply MStar0.
+    + apply MStar0.
+    + simpl.
+      destruct re.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+ -  simpl.
+   destruct re.
+   + inversion IH1.
+   + inversion IH1. inversion IH2. apply MEmpty.
+   + apply star_app.
+     * apply MStar1. apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+Qed.
+
+
+
+Lemma re_opt_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl; apply MEmpty.
+  -  simpl; apply MChar.
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH1 | inversion IH1; simpl; destruct re2; apply IH2 | | | |];
+      (destruct re2;
+       [inversion IH2 | inversion IH2; rewrite app_nil_r; apply IH1 | | | | ];
+       (apply MApp; [apply IH1 | apply IH2])).
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH | | | | |];
+      destruct re2; try apply MUnionL; apply IH.
+  - 
+    simpl;
+      destruct re1;
+      [apply IH | | | | |];
+      (destruct re2; [inversion IH | | | | |]; apply MUnionR; apply IH).
+ - 
+   simpl;
+     destruct re; try apply MEmpty; try apply MStar0.
+ - 
+   simpl;
+    destruct re;
+    [inversion IH1 | inversion IH1; inversion IH2; apply MEmpty | | | |];
+    (apply star_app; [apply MStar1; apply IH1 | apply IH2]).
+Qed.
+
+Definition manual_grade_for_re_opt : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros P HP. apply HP.
+Qed.
+
+
+
+
+
+
+
+
+Theorem no_hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros. assumption.
+Qed.
+
+
+
+
+
+
+
+
+Theorem false_assumed : False -> 0 = 1.
+Proof.
+  intros H. destruct H.
+Qed.
+
+Theorem false_assumed' : False -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+Theorem contras : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros P HP HNP. exfalso. apply HNP. apply HP.
+Qed.
+
+Theorem contras' : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+
+
+
+
+
+Theorem many_eq : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros n m o p Hnm Hop. rewrite Hnm. rewrite Hop. reflexivity.
+Qed.
+
+Theorem many_eq' : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros. subst. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Check ev_0 : ev 0.
+Check ev_SS : forall n : nat, ev n -> ev (S (S n)).
+
+Example constructor_example: forall (n:nat),
+    ev (n + n).
+Proof.
+  induction n; simpl.
+  - constructor. 
+  - rewrite add_comm. simpl. constructor. 
+    assumption.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+
+Theorem lia_succeed1 : forall (n : nat),
+  n > 0 -> n * 2 > n.
+Proof. lia. Qed.
+
+
+
+Lemma mul_add_distr_l_reverse_2 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + n' * m = n' * m + m.
+
+Proof.
+intros n' IHn' m.
+(* We utilize the hypothesis `IHn'` that `n'` times `m` equals `m` times `n'`, which is given by commutativity of multiplication *)
+  rewrite <- IHn'.
+(* Now we need to show that `m + m * n' = m * n' + m`, which is trivial because `+` is commutative for natural numbers *)
+  rewrite Nat.add_comm.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1410)
+Error in step "rewrite <- IHn'.".
+Message: Found no subterm matching 
+"?M1378 * n'" in the current goal..
+Goal: m + n' * m = n' * m + m.
+
+TRYING TO PROVE LEMMA
+Lemma mul_add_distr_l_reverse_3 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + n' * m = n' * m + m.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+Lemma re_opt_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + inversion IH1.
+    + inversion IH1. simpl. destruct re2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+      * apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r.  apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+    + destruct re2.
+      * inversion IH2.
+      * inversion IH2. rewrite app_nil_r. apply IH1.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+      * apply MApp.
+        -- apply IH1.
+        -- apply IH2.
+  -  simpl.
+    destruct re1.
+    + inversion IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+    + destruct re2.
+      * apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+      * apply MUnionL. apply IH.
+  -  simpl.
+    destruct re1.
+    + apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+    + destruct re2.
+      * inversion IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+      * apply MUnionR. apply IH.
+ -  simpl.
+    destruct re.
+    + apply MEmpty.
+    + apply MEmpty.
+    + apply MStar0.
+    + apply MStar0.
+    + apply MStar0.
+    + simpl.
+      destruct re.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+      * apply MStar0.
+ -  simpl.
+   destruct re.
+   + inversion IH1.
+   + inversion IH1. inversion IH2. apply MEmpty.
+   + apply star_app.
+     * apply MStar1. apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+   + apply star_app.
+     * apply MStar1.  apply IH1.
+     * apply IH2.
+Qed.
+
+
+
+Lemma re_opt_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl; apply MEmpty.
+  -  simpl; apply MChar.
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH1 | inversion IH1; simpl; destruct re2; apply IH2 | | | |];
+      (destruct re2;
+       [inversion IH2 | inversion IH2; rewrite app_nil_r; apply IH1 | | | | ];
+       (apply MApp; [apply IH1 | apply IH2])).
+  - 
+    simpl;
+      destruct re1;
+      [inversion IH | | | | |];
+      destruct re2; try apply MUnionL; apply IH.
+  - 
+    simpl;
+      destruct re1;
+      [apply IH | | | | |];
+      (destruct re2; [inversion IH | | | | |]; apply MUnionR; apply IH).
+ - 
+   simpl;
+     destruct re; try apply MEmpty; try apply MStar0.
+ - 
+   simpl;
+    destruct re;
+    [inversion IH1 | inversion IH1; inversion IH2; apply MEmpty | | | |];
+    (apply star_app; [apply MStar1; apply IH1 | apply IH2]).
+Qed.
+
+Definition manual_grade_for_re_opt : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros P HP. apply HP.
+Qed.
+
+
+
+
+
+
+
+
+Theorem no_hyp_name : forall (P : Prop), P -> P.
+Proof.
+  intros. assumption.
+Qed.
+
+
+
+
+
+
+
+
+Theorem false_assumed : False -> 0 = 1.
+Proof.
+  intros H. destruct H.
+Qed.
+
+Theorem false_assumed' : False -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+Theorem contras : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros P HP HNP. exfalso. apply HNP. apply HP.
+Qed.
+
+Theorem contras' : forall (P : Prop), P -> ~P -> 0 = 1.
+Proof.
+  intros. contradiction.
+Qed.
+
+
+
+
+
+
+Theorem many_eq : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros n m o p Hnm Hop. rewrite Hnm. rewrite Hop. reflexivity.
+Qed.
+
+Theorem many_eq' : forall (n m o p : nat),
+  n = m ->
+  o = p ->
+  [n; o] = [m; p].
+Proof.
+  intros. subst. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Check ev_0 : ev 0.
+Check ev_SS : forall n : nat, ev n -> ev (S (S n)).
+
+Example constructor_example: forall (n:nat),
+    ev (n + n).
+Proof.
+  induction n; simpl.
+  - constructor. 
+  - rewrite add_comm. simpl. constructor. 
+    assumption.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+
+Theorem lia_succeed1 : forall (n : nat),
+  n > 0 -> n * 2 > n.
+Proof. lia. Qed.
+
+
+
+Lemma mul_add_distr_l_reverse_3 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + n' * m = n' * m + m.
+
+Proof.
+intros n' IHn' m.
+(* Step 1: Rewrite the right side using commutativity hypothesis *)
+  rewrite <- IHn'.
+(* Step 2: Apply the distributivity of multiplication over addition *)
+  rewrite Nat.mul_add_distr_r.
+(* Everything is proven, now the left side and the right side match *)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1410)
+Error in step "rewrite <- IHn'.".
+Message: Found no subterm matching 
+"?M1378 * n'" in the current goal..
+Goal: m + n' * m = n' * m + m.
+
+TRYING TO PROVE LEMMA
+Lemma mul_add_distr_l_reverse_4 : forall n' : nat, forall IHn' : forall m : nat, n' * m = m * n', forall m : nat, m + n' * m = n' * m + m.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+Error proving lia_succeed2
+MAX LEMMA DEPTH REACHED. GIVING UP.

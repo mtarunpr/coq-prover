@@ -1,0 +1,1734 @@
+PROVING auto_example_5'
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+
+Proof.
+(* Apply implication introduction repeatedly to bring all hypotheses into the context *)
+  intros P Q R S T U W HUT HWU HRS HST HPR HUT' p.
+(* Use the hypotheses that have the form of implications to derive T from P *)
+  apply HUT.
+(* Apply the U -> T hypothesis to bring U into the goal *)
+  apply HWU.
+(* Apply the W -> U hypothesis to bring W into the goal *)
+  apply HRS.
+(* Apply the R -> S hypothesis to bring R into the goal *)
+  apply HPR.
+(* Apply the P -> R hypothesis to conclude the proof using P *)
+  assumption.
+(* The current goal P coincides with assumption p, so we are done *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #152)
+Error in step "apply HRS.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+Unable to unify "S" with 
+"W"..
+Goal: W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_0 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_0 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Proof.
+(* We aim to prove that W holds under the given conditions.
+We can start by applying the implication from P to R,
+     since we have a proof of P (p : P).
+*)
+  intros P Q R S T U W HUT HWU HRS HST HPR HUT' p.
+(* Now we have a proof of (HPR p : R).
+We can use the implication R -> S to get S.
+*)
+  apply HWU, HUT, HST, HRS, HPR, p.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU, HUT, HST, HRS, HPR, p.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_1 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_1 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Proof.
+intros P Q R S T U W HUT HWU HRS HST HPR HUT' p.
+(* Apply the implications in sequence *)
+  apply HWU, HUT, HST, HRS, HPR, p.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU, HUT, HST, HRS, HPR, p.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_2 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_2 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Proof.
+intros P Q R S T U W HUT HWU HRS HST HPR HUT' p.
+(* Apply each hypothesis in the chain, starting with P to get W.
+*)
+  apply HWU.
+(* W -> U *)
+  apply HUT.
+(* U -> T *)
+  apply HST.
+(* S -> T *)
+  apply HRS.
+(* R -> S *)
+  apply HPR.
+(* P -> R *)
+  assumption.
+(* p is a proof of P *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_3 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_3 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Proof.
+intros P Q R S T U W HUT HWU HRS HST HPR HUT' p.
+apply HWU.
+(* Reduce the goal W to U, using hypothesis HWU *)
+  apply HUT.
+(* Reduce the goal U to T, using hypothesis HUT *)
+  apply HST.
+(* Reduce the goal T to S, using hypothesis HST *)
+  apply HRS.
+(* Reduce the goal S to R, using hypothesis HRS *)
+  apply HPR.
+(* Reduce the goal R to P, using hypothesis HPR *)
+  assumption.
+(* Finish the proof by invoking hypothesis p, which is of type P *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_4 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma P_implies_W_through_PR_RS_ST_UT_and_HWU_4 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, W.
+
+Proof.
+intros P Q R S T U W HUT HWU HRS HST HPR HUT' p.
+(* Apply HPR to derive R from p *)
+  apply HPR in p as HR.
+(* Use HR to derive S using HRS *)
+  apply HRS in HR as HS.
+(* Use HS to derive T using HST *)
+  apply HST in HS as HT.
+(* Since we have HUT or HUT', we can get U (we don't need both HUT and HUT'.
+One is enough.) *)
+  apply HUT in HT as HU.
+(* Apply HWU to derive W from HU *)
+  apply HWU in HU as HW.
+(* We have W as required *)
+  exact HW.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #154)
+Error in step "apply HUT in HT as HU.".
+Message: Unable to apply lemma of type 
+"U -> T" on hypothesis of type 
+"T"..
+Goal: W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma W_from_chain_PQRSTU_and_HWU_5 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma W_from_chain_PQRSTU_and_HWU_5 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Proof.
+intros P Q R S T U W HUT HWU HRS HST HPR HUT' p HR HS HT.
+apply HWU.
+apply HUT.
+exact HT.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+HR : R
+HS : S
+HT : T
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma W_from_chain_PQRSTU_and_HWU_6 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma W_from_chain_PQRSTU_and_HWU_6 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Proof.
+(* Given the premises, we can construct a proof chain that leads to W.
+*)
+  intros P Q R S T U W HUT HWU HRS HST HPR HUT' p HR HS HT.
+(* We have a hypothesis HWU : W -> U and need to prove U in order to use HWU.
+*)
+  (* We can extract U from HUT because we already have T from HT.
+*)
+  apply HWU.
+apply HUT.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+HR : R
+HS : S
+HT : T
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma W_from_chain_PQRSTU_and_HWU_7 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma W_from_chain_PQRSTU_and_HWU_7 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Proof.
+intros P Q R S T U W HUT HWU HRS HST HPR HUT' p HR HS HT.
+(* We have all the hypotheses to construct U from W using [HWU] *)
+  (* Then, we can prove T using [HUT'] and T leads us to W by [HWU] *)
+  apply HWU; apply HUT'; apply HST; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU; apply HUT'; apply HST; assumption.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+HR : R
+HS : S
+HT : T
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma W_from_chain_PQRSTU_and_HWU_8 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma W_from_chain_PQRSTU_and_HWU_8 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Proof.
+intros P Q R S T U W HUT HWU HRS HST HPR HUT' p HR HS HT.
+apply HWU.
+(* Use hypothesis HWU to reduce goal W to U.
+*)
+  apply HUT.
+(* Use hypothesis HUT (U -> T) to reduce goal U to T.
+*)
+  exact HT.
+(* Conclude proof by exact match of hypothesis HT.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+HR : R
+HS : S
+HT : T
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma W_from_chain_PQRSTU_and_HWU_9 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+
+
+Lemma W_from_chain_PQRSTU_and_HWU_9 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Proof.
+(* Introduce all propositions and hypotheses *)
+  intros P Q R S T U W HUT HWU HRS HST HPR HUT' p HR HS HT.
+(* We have a hypothesis HWU : W -> U, which we can apply, but we need U.
+*)
+  (* We also have HUT : U -> T, which we can apply since we have T.
+As T is also required
+     for HWU, apply HUT to HT providing U.
+*)
+  apply HWU, HUT, HT.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "apply HWU, HUT, HT.".
+Message: In environment
+P, Q, R, S, T, U, W : Prop
+HUT : U -> T
+HWU : W -> U
+HRS : R -> S
+HST : S -> T
+HPR : P -> R
+HUT' : U -> T
+p : P
+HR : R
+HS : S
+HT : T
+Unable to unify "U" with 
+"W"..
+Goal: W.
+
+TRYING TO PROVE LEMMA
+Lemma W_from_chain_PQRSTU_and_HWU_10 : forall P Q R S T U W : Prop, forall HUT : U -> T, forall HWU : W -> U, forall HRS : R -> S, forall HST : S -> T, forall HPR : P -> R, forall HUT' : U -> T, forall p : P, forall HR : R, forall HS : S, forall HT : T, W.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+Error proving auto_example_5'
+MAX LEMMA DEPTH REACHED. GIVING UP.

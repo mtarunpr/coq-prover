@@ -1,0 +1,1855 @@
+PROVING t_update_permute
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Theorem t_update_permute : forall (A : Type) (m : total_map A)
+                                  v1 v2 x1 x2,
+  x2 <> x1 ->
+  (x1 !-> v1 ; x2 !-> v2 ; m)
+  =
+  (x2 !-> v2 ; x1 !-> v1 ; m).
+
+Proof.
+(* To prove two functions (total maps) are equal, we use extensionality.
+This requires us to show that for every input the output is the same.
+*)
+  intros A m v1 v2 x1 x2 Hneq.
+apply functional_extensionality.
+intro x.
+unfold t_update.
+(* Now we must consider two cases: when 'x' is equal to 'x1' or 'x2', or when it is not.
+*)
+  destruct (string_dec x1 x) as [Hx1 | Hnx1]; destruct (string_dec x2 x) as [Hx2 | Hnx2].
+- (* Case where x = x1 and x = x2, which is impossible due to our assumption *)
+    contradiction.
+- (* Case where x = x1 and x ≠ x2: the updates commute because we're outside the 'impact area' of x2's update *)
+    rewrite <- Hx1.
+rewrite Hneq.
+reflexivity.
+- (* Case where x ≠ x1 and x = x2: 
+       This is the 'impact area' of x2's update, but x1's update does not affect the result *)
+    reflexivity.
+- (* Case where x ≠ x1 and x ≠ x2: neither updates have an 'impact', so the order does not matter *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #180)
+Error in step "contradiction.".
+Message: No such contradiction.
+Goal: (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma total_map_value_switch_iff_neq_keys_0 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hx2 : x2 = x, (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma total_map_value_switch_iff_neq_keys_0 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hx2 : x2 = x, (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hx2.
+subst x1.
+subst x2.
+rewrite Hneq in Hx2.
+(* since Hneq : x2 <> x1 and we substituted x2 with x, now Hx2 must be false *)
+  contradict Hx2.
+apply eq_sym.
+(* Since x2 cannot be x because it leads to false by contradiction with Hneq, this branch becomes invalid.
+We thus continue with the first branch *)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #174)
+Error in step "rewrite Hneq in Hx2.".
+Message: No such hypothesis: Hx2.
+Goal: (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma impossible_equality_under_strict_inequality_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x : string, forall Hneq : x <> x, (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma impossible_equality_under_strict_inequality_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x : string, forall Hneq : x <> x, (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x Hneq.
+exfalso.
+(* We apply the absurdity generated by the assumption that x is not equal to x *)
+  apply Hneq; reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma impossible_equality_under_strict_inequality_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x : string, forall Hneq : x <> x, (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x Hneq.
+exfalso.
+(* We apply the absurdity generated by the assumption that x is not equal to x *)
+  apply Hneq; reflexivity.
+Qed.
+
+Lemma total_map_value_switch_iff_neq_keys_0 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hx2 : x2 = x, (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hx2.
+subst x1.
+subst x2.
+apply (@impossible_equality_under_strict_inequality_1 A m v1 v2 x Hneq).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma impossible_equality_under_strict_inequality_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x : string, forall Hneq : x <> x, (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x Hneq.
+exfalso.
+(* We apply the absurdity generated by the assumption that x is not equal to x *)
+  apply Hneq; reflexivity.
+Qed.
+
+Lemma total_map_value_switch_iff_neq_keys_0 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hx2 : x2 = x, (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hx2.
+subst x1.
+subst x2.
+apply (@impossible_equality_under_strict_inequality_1 A m v1 v2 x Hneq).
+Qed.
+
+Theorem t_update_permute : forall (A : Type) (m : total_map A)
+                                  v1 v2 x1 x2,
+  x2 <> x1 ->
+  (x1 !-> v1 ; x2 !-> v2 ; m)
+  =
+  (x2 !-> v2 ; x1 !-> v1 ; m).
+
+Proof.
+(* To prove two functions (total maps) are equal, we use extensionality.
+This requires us to show that for every input the output is the same.
+*)
+  intros A m v1 v2 x1 x2 Hneq.
+apply functional_extensionality.
+intro x.
+unfold t_update.
+(* Now we must consider two cases: when 'x' is equal to 'x1' or 'x2', or when it is not.
+*)
+  destruct (string_dec x1 x) as [Hx1 | Hnx1]; destruct (string_dec x2 x) as [Hx2 | Hnx2].
+- (* Case where x = x1 and x = x2, which is impossible due to our assumption *)
+    apply (@total_map_value_switch_iff_neq_keys_0 A m v1 v2 x1 x2 Hneq x Hx1 Hx2).
+- (* Case where x = x1 and x ≠ x2: the updates commute because we're outside the 'impact area' of x2's update *)
+    rewrite <- Hx1.
+rewrite Hneq.
+reflexivity.
+- (* Case where x ≠ x1 and x = x2: 
+       This is the 'impact area' of x2's update, but x1's update does not affect the result *)
+    reflexivity.
+- (* Case where x ≠ x1 and x ≠ x2: neither updates have an 'impact', so the order does not matter *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #212)
+Error in step "rewrite Hneq.".
+Message: setoid rewrite failed: Unable to satisfy the following constraints:
+UNDEFINED EVARS:
+ ?X116==[A m v1 v2 x1 x2 Hneq x Hx1 Hnx2 |-
+          Relation_Definitions.relation string]
+          (internal placeholder) {?r}
+ ?X117==[A m v1 v2 x1 x2 Hneq x Hx1 Hnx2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful
+               (fun x y : string => x <> y)
+               (Morphisms.respectful ?r eq)) eqb]
+          (internal placeholder) {?p}
+ ?X118==[A m v1 v2 x1 x2 Hneq x Hx1 Hnx2 |-
+          Morphisms.ProperProxy ?r x1]
+          (internal placeholder) {?p0}
+TYPECLASSES:?X116 ?X117 ?X118 ?X120 ?X121 ?X122
+?X123
+SHELF:||
+FUTURE GOALS STACK:?X123 ?X122 ?X121 ?X120 ?X118 ?X117
+?X116||
+.
+Goal: (if (x1 =? x1)%string
+ then v1
+ else if (x2 =? x1)%string then v2 else m x1) =
+(if (x2 =? x1)%string
+ then v2
+ else if (x1 =? x1)%string then v1 else m x1).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma total_map_update_diff_comm_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hnx2 : x2 <> x, (if (x1 =? x1)%string
+ then v1
+ else if (x2 =? x1)%string then v2 else m x1) =
+(if (x2 =? x1)%string
+ then v2
+ else if (x1 =? x1)%string then v1 else m x1).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma impossible_equality_under_strict_inequality_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x : string, forall Hneq : x <> x, (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x Hneq.
+exfalso.
+(* We apply the absurdity generated by the assumption that x is not equal to x *)
+  apply Hneq; reflexivity.
+Qed.
+
+Lemma total_map_value_switch_iff_neq_keys_0 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hx2 : x2 = x, (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hx2.
+subst x1.
+subst x2.
+apply (@impossible_equality_under_strict_inequality_1 A m v1 v2 x Hneq).
+Qed.
+
+Lemma total_map_update_diff_comm_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hnx2 : x2 <> x, (if (x1 =? x1)%string
+ then v1
+ else if (x2 =? x1)%string then v2 else m x1) =
+(if (x2 =? x1)%string
+ then v2
+ else if (x1 =? x1)%string then v1 else m x1).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hnx2.
+rewrite Hx1.
+(* Replace the variable x with x1 according to hypothesis Hx1 *)
+  rewrite <- beq_string_refl.
+destruct (x2 =? x1)%string eqn:H.
+- (* In the case where x2 =? x1 evaluates to true, we have a contradiction with Hneq because x2 should not equal x1 *)
+    apply beq_string_true_iff in H.
+contradiction Hneq.
+(* The hypothesis Hneq tells us that x2 is not equal to x1 *)
+  - reflexivity.
+(* In the case where x2 =? x1 evaluates to false, both sides of the equation are equal by definition *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #198)
+Error in step "rewrite <- beq_string_refl.".
+Message: The variable beq_string_refl was not found
+in the current environment..
+Goal: (if (x =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma swap_if_string_comparison_2 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hnx2 : x2 <> x, (if (x =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma impossible_equality_under_strict_inequality_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x : string, forall Hneq : x <> x, (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x Hneq.
+exfalso.
+(* We apply the absurdity generated by the assumption that x is not equal to x *)
+  apply Hneq; reflexivity.
+Qed.
+
+Lemma total_map_value_switch_iff_neq_keys_0 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hx2 : x2 = x, (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hx2.
+subst x1.
+subst x2.
+apply (@impossible_equality_under_strict_inequality_1 A m v1 v2 x Hneq).
+Qed.
+
+Lemma swap_if_string_comparison_2 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hnx2 : x2 <> x, (if (x =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hnx2.
+(* Introduce all variables and hypotheses *)
+  rewrite Hx1.
+(* Rewrite the first if clause with Hx1 which states x1 = x *)
+  simpl.
+(* Simplify the boolean equality expression *)
+  destruct (x2 =? x1) eqn:H.
+(* Introduce case analysis for the string comparison x2 =? x1 *)
+  - apply beq_string_true_iff in H.
+(* If the comparison is true, convert it into equality in logic *)
+    contradiction Hneq.
+(* Hneq states that x2 <> x1 and would give a contradiction with our previous meet *)
+  - reflexivity.
+(* In case the comparison is false, the terms are already equal and thus, reflexivity can be used *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #196)
+Error in step "rewrite Hx1.".
+Message: Found no subterm matching "x1" in the current goal..
+Goal: (if (x =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+TRYING TO PROVE LEMMA
+Lemma swap_if_string_comparison_3 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hnx2 : x2 <> x, (if (x =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma impossible_equality_under_strict_inequality_1 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x : string, forall Hneq : x <> x, (if (x =? x)%string
+ then v1
+ else if (x =? x)%string then v2 else m x) =
+(if (x =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x Hneq.
+exfalso.
+(* We apply the absurdity generated by the assumption that x is not equal to x *)
+  apply Hneq; reflexivity.
+Qed.
+
+Lemma total_map_value_switch_iff_neq_keys_0 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hx2 : x2 = x, (if (x1 =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x1 =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hx2.
+subst x1.
+subst x2.
+apply (@impossible_equality_under_strict_inequality_1 A m v1 v2 x Hneq).
+Qed.
+
+Lemma swap_if_string_comparison_3 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hnx2 : x2 <> x, (if (x =? x)%string
+ then v1
+ else if (x2 =? x)%string then v2 else m x) =
+(if (x2 =? x)%string
+ then v2
+ else if (x =? x)%string then v1 else m x).
+
+Proof.
+intros A m v1 v2 x1 x2 Hneq x Hx1 Hnx2.
+(* Rewrite the occurrences of x with x1 in the boolean comparisons *)
+  rewrite <- Hx1.
+(* Now the equality comparisons are between x1 and itself, which is true *)
+  rewrite eqb_refl.
+(* Use the inequality between x2 and x to simplify the second condition *)
+  assert (H: (x2 =? x1) = false).
+{ apply eqb_neq.
+assumption.
+}
+  rewrite H.
+(* Now both sides of the equality are reduced to v1 *)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #200)
+Error in step "assert (H: (x2 =? x1) = false).".
+Message: In environment
+A : Type
+m : total_map A
+v1, v2 : A
+x1, x2 : string
+Hneq : x2 <> x1
+x : string
+Hx1 : x1 = x
+Hnx2 : x2 <> x
+The term "x2" has type "string"
+while it is expected to have type 
+"nat"..
+Goal: v1 = (if (x2 =? x1)%string then v2 else v1).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma total_map_identity_on_distinct_keys_4 : forall A : Type, forall m : total_map A, forall v1 v2 : A, forall x1 x2 : string, forall Hneq : x2 <> x1, forall x : string, forall Hx1 : x1 = x, forall Hnx2 : x2 <> x, v1 = (if (x2 =? x1)%string then v2 else v1).
+
+Prompting GPT... model_name=gpt-4-1106-preview
+Error proving t_update_permute
+MAX LEMMA DEPTH REACHED. GIVING UP.

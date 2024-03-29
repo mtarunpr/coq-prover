@@ -26,6 +26,8 @@ data/raw/**/*.ml
 data/raw/**/*.mli
 data/raw/**/*Makefile.coq*
 proofs_mar*
+!data/raw/software_foundations/proofs_gpt4/*
+!data/raw/software_foundations/proofs_phind/*
 
 # C extensions
 *.so

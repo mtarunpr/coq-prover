@@ -1,0 +1,1379 @@
+PROVING update_shadow
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_permute : forall (A : Type) (m : total_map A)
+                                  v1 v2 x1 x2,
+  x2 <> x1 ->
+  (x1 !-> v1 ; x2 !-> v2 ; m)
+  =
+  (x2 !-> v2 ; x1 !-> v1 ; m).
+Proof.
+  intros A m v1 v2 x1 x2 H.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x1 x') as [H1 | H1].
+  - destruct (eqb_spec x2 x') as [H2 | _].
+    + exfalso. apply H. rewrite H1. rewrite H2. reflexivity.
+    + reflexivity.
+  - destruct (eqb_spec x2 x') as [H2 | H2].
+    + reflexivity.
+    + reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition partial_map (A : Type) := total_map (option A).
+
+Definition empty {A : Type} : partial_map A :=
+  t_empty None.
+
+Definition update {A : Type} (m : partial_map A)
+           (x : string) (v : A) :=
+  (x !-> Some v ; m).
+
+
+Notation "x '|->' v ';' m" := (update m x v)
+  (at level 100, v at next level, right associativity).
+
+
+Notation "x '|->' v" := (update empty x v)
+  (at level 100).
+
+Definition examplepmap :=
+  ("Church" |-> true ; "Turing" |-> false).
+
+
+
+Lemma apply_empty : forall (A : Type) (x : string),
+  @empty A x = None.
+Proof.
+  intros. unfold empty. rewrite t_apply_empty.
+  reflexivity.
+Qed.
+
+Lemma update_eq : forall (A : Type) (m : partial_map A) x v,
+  (x |-> v ; m) x = Some v.
+Proof.
+  intros. unfold update. rewrite t_update_eq.
+  reflexivity.
+Qed.
+
+Theorem update_neq : forall (A : Type) (m : partial_map A) x1 x2 v,
+  x2 <> x1 ->
+  (x2 |-> v ; m) x1 = m x1.
+Proof.
+  intros A m x1 x2 v H.
+  unfold update. rewrite t_update_neq. reflexivity.
+  apply H. Qed.
+
+
+
+Lemma update_shadow : forall (A : Type) (m : partial_map A) x v1 v2,
+  (x |-> v2 ; x |-> v1 ; m) = (x |-> v2 ; m).
+
+Proof.
+intros A m x v1 v2.
+(* Introduce all variables into the context *)
+  apply functional_extensionality.
+(* Use functional extensionality to reduce the problem
+                                      to proving equality for all inputs *)
+  intro x0.
+(* Introduce the arbitrary input string x0 *)
+  unfold t_update.
+(* Unfold the definition of t_update to work with its cases *)
+  destruct (eqb_string x x0) eqn:Heq.
+(* Use the boolean equality result to branch the proof *)
+  - apply eqb_string_true_iff in Heq.
+(* Convert the boolean equality result to propositional *)
+    subst.
+(* Substitute x0 with x, as they are proven equal *)
+    apply update_eq.
+(* Apply the property of update leading to equality when keys match *)
+  - apply eqb_string_false_iff in Heq.
+(* Convert the boolean non-equality result to propositional *)
+    apply update_neq.
+(* Apply the property of update leading to equality 
+                                   when the keys do not match *)
+    assumption.
+(* The non-equality hypothesis can be used directly as the assumption *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #280)
+Error in step "destruct (eqb_string x x0) eqn:Heq.".
+Message: The variable eqb_string was not found in the current
+environment..
+Goal: (x |-> v2; x |-> v1; m) x0 = (x |-> v2; m) x0.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma partial_map_overwrite_0 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, (x |-> v2; x |-> v1; m) x0 = (x |-> v2; m) x0.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_permute : forall (A : Type) (m : total_map A)
+                                  v1 v2 x1 x2,
+  x2 <> x1 ->
+  (x1 !-> v1 ; x2 !-> v2 ; m)
+  =
+  (x2 !-> v2 ; x1 !-> v1 ; m).
+Proof.
+  intros A m v1 v2 x1 x2 H.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x1 x') as [H1 | H1].
+  - destruct (eqb_spec x2 x') as [H2 | _].
+    + exfalso. apply H. rewrite H1. rewrite H2. reflexivity.
+    + reflexivity.
+  - destruct (eqb_spec x2 x') as [H2 | H2].
+    + reflexivity.
+    + reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition partial_map (A : Type) := total_map (option A).
+
+Definition empty {A : Type} : partial_map A :=
+  t_empty None.
+
+Definition update {A : Type} (m : partial_map A)
+           (x : string) (v : A) :=
+  (x !-> Some v ; m).
+
+
+Notation "x '|->' v ';' m" := (update m x v)
+  (at level 100, v at next level, right associativity).
+
+
+Notation "x '|->' v" := (update empty x v)
+  (at level 100).
+
+Definition examplepmap :=
+  ("Church" |-> true ; "Turing" |-> false).
+
+
+
+Lemma apply_empty : forall (A : Type) (x : string),
+  @empty A x = None.
+Proof.
+  intros. unfold empty. rewrite t_apply_empty.
+  reflexivity.
+Qed.
+
+Lemma update_eq : forall (A : Type) (m : partial_map A) x v,
+  (x |-> v ; m) x = Some v.
+Proof.
+  intros. unfold update. rewrite t_update_eq.
+  reflexivity.
+Qed.
+
+Theorem update_neq : forall (A : Type) (m : partial_map A) x1 x2 v,
+  x2 <> x1 ->
+  (x2 |-> v ; m) x1 = m x1.
+Proof.
+  intros A m x1 x2 v H.
+  unfold update. rewrite t_update_neq. reflexivity.
+  apply H. Qed.
+
+
+
+Lemma partial_map_overwrite_0 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, (x |-> v2; x |-> v1; m) x0 = (x |-> v2; m) x0.
+
+Proof.
+intros A m x v1 v2 x0.
+destruct (string_dec x x0) as [H | H].
+- (* Case where x = x0 *)
+    rewrite H.
+apply update_eq.
+- (* Case where x <> x0 *)
+    rewrite update_neq; try assumption.
+apply update_neq; try assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #280)
+Error in step "apply update_eq.".
+Message: In environment
+A : Type
+m : partial_map A
+x : string
+v1, v2 : A
+x0 : string
+H : x = x0
+Unable to unify
+ "(?M1099 |-> ?M1100; ?M1098) ?M1099 = Some ?M1100"
+with
+ "(x0 |-> v2; x0 |-> v1; m) x0 = (x0 |-> v2; m) x0"..
+Goal: (x0 |-> v2; x0 |-> v1; m) x0 = (x0 |-> v2; m) x0.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma update_shadow_1 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, forall H : x = x0, (x0 |-> v2; x0 |-> v1; m) x0 = (x0 |-> v2; m) x0.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_permute : forall (A : Type) (m : total_map A)
+                                  v1 v2 x1 x2,
+  x2 <> x1 ->
+  (x1 !-> v1 ; x2 !-> v2 ; m)
+  =
+  (x2 !-> v2 ; x1 !-> v1 ; m).
+Proof.
+  intros A m v1 v2 x1 x2 H.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x1 x') as [H1 | H1].
+  - destruct (eqb_spec x2 x') as [H2 | _].
+    + exfalso. apply H. rewrite H1. rewrite H2. reflexivity.
+    + reflexivity.
+  - destruct (eqb_spec x2 x') as [H2 | H2].
+    + reflexivity.
+    + reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition partial_map (A : Type) := total_map (option A).
+
+Definition empty {A : Type} : partial_map A :=
+  t_empty None.
+
+Definition update {A : Type} (m : partial_map A)
+           (x : string) (v : A) :=
+  (x !-> Some v ; m).
+
+
+Notation "x '|->' v ';' m" := (update m x v)
+  (at level 100, v at next level, right associativity).
+
+
+Notation "x '|->' v" := (update empty x v)
+  (at level 100).
+
+Definition examplepmap :=
+  ("Church" |-> true ; "Turing" |-> false).
+
+
+
+Lemma apply_empty : forall (A : Type) (x : string),
+  @empty A x = None.
+Proof.
+  intros. unfold empty. rewrite t_apply_empty.
+  reflexivity.
+Qed.
+
+Lemma update_eq : forall (A : Type) (m : partial_map A) x v,
+  (x |-> v ; m) x = Some v.
+Proof.
+  intros. unfold update. rewrite t_update_eq.
+  reflexivity.
+Qed.
+
+Theorem update_neq : forall (A : Type) (m : partial_map A) x1 x2 v,
+  x2 <> x1 ->
+  (x2 |-> v ; m) x1 = m x1.
+Proof.
+  intros A m x1 x2 v H.
+  unfold update. rewrite t_update_neq. reflexivity.
+  apply H. Qed.
+
+
+
+Lemma update_shadow_1 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, forall H : x = x0, (x0 |-> v2; x0 |-> v1; m) x0 = (x0 |-> v2; m) x0.
+
+Proof.
+intros A m x v1 v2 x0 H.
+rewrite <- H.
+(* Use hypothesis H to replace x0 with x *)
+  apply update_eq.
+(* Apply the lemma stating that the update at the current key equals the new value *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #276)
+Error in step "apply update_eq.".
+Message: In environment
+A : Type
+m : partial_map A
+x : string
+v1, v2 : A
+x0 : string
+H : x = x0
+Unable to unify
+ "(?M1098 |-> ?M1099; ?M1097) ?M1098 = Some ?M1099"
+with "(x |-> v2; x |-> v1; m) x = (x |-> v2; m) x"..
+Goal: (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+TRYING TO PROVE LEMMA
+Lemma update_shadowing_lemma_2 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, forall H : x = x0, (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_permute : forall (A : Type) (m : total_map A)
+                                  v1 v2 x1 x2,
+  x2 <> x1 ->
+  (x1 !-> v1 ; x2 !-> v2 ; m)
+  =
+  (x2 !-> v2 ; x1 !-> v1 ; m).
+Proof.
+  intros A m v1 v2 x1 x2 H.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x1 x') as [H1 | H1].
+  - destruct (eqb_spec x2 x') as [H2 | _].
+    + exfalso. apply H. rewrite H1. rewrite H2. reflexivity.
+    + reflexivity.
+  - destruct (eqb_spec x2 x') as [H2 | H2].
+    + reflexivity.
+    + reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition partial_map (A : Type) := total_map (option A).
+
+Definition empty {A : Type} : partial_map A :=
+  t_empty None.
+
+Definition update {A : Type} (m : partial_map A)
+           (x : string) (v : A) :=
+  (x !-> Some v ; m).
+
+
+Notation "x '|->' v ';' m" := (update m x v)
+  (at level 100, v at next level, right associativity).
+
+
+Notation "x '|->' v" := (update empty x v)
+  (at level 100).
+
+Definition examplepmap :=
+  ("Church" |-> true ; "Turing" |-> false).
+
+
+
+Lemma apply_empty : forall (A : Type) (x : string),
+  @empty A x = None.
+Proof.
+  intros. unfold empty. rewrite t_apply_empty.
+  reflexivity.
+Qed.
+
+Lemma update_eq : forall (A : Type) (m : partial_map A) x v,
+  (x |-> v ; m) x = Some v.
+Proof.
+  intros. unfold update. rewrite t_update_eq.
+  reflexivity.
+Qed.
+
+Theorem update_neq : forall (A : Type) (m : partial_map A) x1 x2 v,
+  x2 <> x1 ->
+  (x2 |-> v ; m) x1 = m x1.
+Proof.
+  intros A m x1 x2 v H.
+  unfold update. rewrite t_update_neq. reflexivity.
+  apply H. Qed.
+
+
+
+Lemma update_shadowing_lemma_2 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, forall H : x = x0, (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+Proof.
+intros A m x v1 v2 x0 H.
+rewrite <- H.
+(* Replace x0 with x since x = x0 *)
+  rewrite update_eq.
+(* Apply the lemma update_eq to show (x |-> v2; x |-> v1; m) x = Some v2 *)
+  rewrite update_eq.
+(* Apply update_eq again to show (x |-> v2; m) x = Some v2 *)
+  reflexivity.
+(* Both sides are equal to Some v2 *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #274)
+Error in step "rewrite <- H.".
+Message: Found no subterm matching "x0" in the current goal..
+Goal: (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+TRYING TO PROVE LEMMA
+Lemma update_shadowing_lemma_3 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, forall H : x = x0, (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+Proof.
+  intros A m x.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [H | _]. rewrite H. reflexivity. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_permute : forall (A : Type) (m : total_map A)
+                                  v1 v2 x1 x2,
+  x2 <> x1 ->
+  (x1 !-> v1 ; x2 !-> v2 ; m)
+  =
+  (x2 !-> v2 ; x1 !-> v1 ; m).
+Proof.
+  intros A m v1 v2 x1 x2 H.
+  apply functional_extensionality.
+  intros x'.
+  unfold t_update.
+  destruct (eqb_spec x1 x') as [H1 | H1].
+  - destruct (eqb_spec x2 x') as [H2 | _].
+    + exfalso. apply H. rewrite H1. rewrite H2. reflexivity.
+    + reflexivity.
+  - destruct (eqb_spec x2 x') as [H2 | H2].
+    + reflexivity.
+    + reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition partial_map (A : Type) := total_map (option A).
+
+Definition empty {A : Type} : partial_map A :=
+  t_empty None.
+
+Definition update {A : Type} (m : partial_map A)
+           (x : string) (v : A) :=
+  (x !-> Some v ; m).
+
+
+Notation "x '|->' v ';' m" := (update m x v)
+  (at level 100, v at next level, right associativity).
+
+
+Notation "x '|->' v" := (update empty x v)
+  (at level 100).
+
+Definition examplepmap :=
+  ("Church" |-> true ; "Turing" |-> false).
+
+
+
+Lemma apply_empty : forall (A : Type) (x : string),
+  @empty A x = None.
+Proof.
+  intros. unfold empty. rewrite t_apply_empty.
+  reflexivity.
+Qed.
+
+Lemma update_eq : forall (A : Type) (m : partial_map A) x v,
+  (x |-> v ; m) x = Some v.
+Proof.
+  intros. unfold update. rewrite t_update_eq.
+  reflexivity.
+Qed.
+
+Theorem update_neq : forall (A : Type) (m : partial_map A) x1 x2 v,
+  x2 <> x1 ->
+  (x2 |-> v ; m) x1 = m x1.
+Proof.
+  intros A m x1 x2 v H.
+  unfold update. rewrite t_update_neq. reflexivity.
+  apply H. Qed.
+
+
+
+Lemma update_shadowing_lemma_3 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, forall H : x = x0, (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+Proof.
+intros A m x v1 v2 x0 H.
+rewrite <- H.
+(* We use the hypothesis H to replace x0 with x *)
+  apply update_eq.
+(* Use the lemma update_eq to show the left side equals Some v2,
+                     as the update with v2 on x will shadow the previous one.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #274)
+Error in step "rewrite <- H.".
+Message: Found no subterm matching "x0" in the current goal..
+Goal: (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+TRYING TO PROVE LEMMA
+Lemma update_shadowing_lemma_4 : forall A : Type, forall m : partial_map A, forall x : string, forall v1 v2 : A, forall x0 : string, forall H : x = x0, (x |-> v2; x |-> v1; m) x = (x |-> v2; m) x.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+Error proving update_shadow
+MAX LEMMA DEPTH REACHED. GIVING UP.

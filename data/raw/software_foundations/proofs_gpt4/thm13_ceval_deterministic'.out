@@ -1,0 +1,808 @@
+PROVING ceval_deterministic'
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+
+
+Theorem ceval_deterministic' : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(* Introduce the command [c] and states [st], [st1], and [st2], which are subject to evaluation *)
+  intros c st st1 st2 E1 E2.
+(* The proof strategy will be to generalize the induction argument on the first evaluation derivation, E1 *)
+  generalize dependent st2.
+(* Proceed by induction on the structure of the derivation *)
+  induction E1 as
+  [|  (* E_Skip *)
+    |  (* E_Break *)
+    | st a n x H1 (* E_Asgn *)
+    | c1 c2 st st' H1 IH1 st'' H2 IH2  (* E_Seq - both parts *)
+    | st st' b c1 c2 H1 IH1  (* E_IfTrue *)
+    | st st' b c1 c2 H1 IH1  (* E_IfFalse *)
+    | b st c H1  (* E_WhileFalse *)
+    | st st' b c H1 H2 IH2  (* E_WhileTrue1 *)
+    | st st' st'' b c H1 IH1 H2 IH2  (* E_WhileTrue2 *)
+  ]; intros st2 E2; inversion E2; subst.
+(* Go through each case generated from induction, using inversion to prune impossible cases
+     and the induction hypothesis plus additional reasoning to prove the remaining ones.
+*)
+
+  - (* E_Skip *) reflexivity.
+- (* E_Break *) reflexivity.
+- (* E_Asgn *) 
+    (* If we have two E_Asgn, we check that the resulting states are the same, since assignments are deterministic *)
+    rewrite H1 in H4.
+inversion H4.
+reflexivity.
+- (* E_Seq1 E_Skip *)
+    (* If the first command is skip and it breaks in the first execution, this is impossible *)
+    discriminate H1.
+- (* E_Seq2 E_Skip *)
+    (* If the first command is skip and goes to completion, then by determinism of skip, we have that the 
+       states must be the same and we can apply the induction hypothesis for the second command *)
+    clear IH1.
+apply IH2.
+assumption.
+- (* E_Seq1 E_Asgn *)
+    (* If the first command is an assignment and breaks in the first execution, this is impossible *)
+    discriminate H1.
+- (* E_Seq2 E_Asgn *)
+    (* If the first command is an assignment and goes to completion, then by determinism of assignments, 
+      we have the same states *)
+    rewrite H1 in H4.
+inversion H4; subst.
+apply IH2.
+assumption.
+- (* E_Seq1 E_Seq *)
+    (* If the first sequence breaks, then the second sequence, regardless of its structure, should also break.
+We can then use the first command's induction hypothesis directly *)
+    clear E_Seq2.
+apply IH1; assumption.
+- (* E_Seq2 E_Seq *)
+    (* If the sequences continue, we match up the individual components and apply the respective IHs *)
+    clear E_Seq1.
+apply IH2.
+apply IH1.
+assumption.
+- (* E_IfTrue E_IfTrue *)
+    (* When both if statements take the true branch, we apply the induction hypothesis *)
+    apply IH1.
+assumption.
+- (* E_IfTrue E_IfFalse *)
+    (* An if statement cannot be both true and false; this case is impossible *)
+    rewrite H1 in H5.
+discriminate H5.
+- (* E_IfFalse E_IfTrue *)
+    (* An if statement cannot be both false and true; this case is impossible *)
+    rewrite H1 in H5.
+discriminate H5.
+- (* E_IfFalse E_IfFalse *)
+    (* When both if statements take the false branch, we apply the induction hypothesis *)
+    apply IH1.
+assumption.
+- (* E_WhileFalse E_WhileFalse *)
+    (* When both while statements evaluate to false, they don't enter the loop, and the states remain the same *)
+    reflexivity.
+- (* E_WhileFalse E_WhileTrue1 *)
+    (* A while loop cannot both fail to begin and break during execution *)
+    rewrite H1 in H3.
+discriminate H3.
+- (* E_WhileFalse E_WhileTrue2 *)
+    (* A while loop cannot both fail to begin and continue loop execution *)
+    rewrite H1 in H3.
+discriminate H3.
+- (* E_WhileTrue1 E_WhileFalse *)
+    (* A while loop cannot both break during execution and fail to begin *)
+    rewrite H3 in H1.
+discriminate H3.
+- (* E_WhileTrue1 E_WhileTrue1 *)
+    (* If a while loop breaks during iteration, we must have consistent states *)
+    apply IH2.
+assumption.
+- (* E_WhileTrue1 E_WhileTrue2 *)
+    (* A while loop cannot both break and continue execution in the same iteration *)
+    rewrite H3 in H5.
+discriminate H5.
+- (* E_WhileTrue2 E_WhileFalse *)
+    (* A while loop cannot both continue and fail to begin execution *)
+    rewrite H5 in H3.
+discriminate H5.
+- (* E_WhileTrue2 E_WhileTrue1 *)
+    (* A while loop cannot both continue and break execution in the same iteration *)
+    rewrite H5 in H3.
+discriminate H5.
+- (* E_WhileTrue2 E_WhileTrue2 *)
+    (* If a while loop continues execution, apply the second command's IH *)
+    apply IH2.
+apply IH1.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #206)
+Error in step "induction E1 as
+  [|  (* E_Skip *)
+    |  (* E_Break *)
+    | st a n x H1 (* E_Asgn *)
+    | c1 c2 st st' H1 IH1 st'' H2 IH2  (* E_Seq - both parts *)
+    | st st' b c1 c2 H1 IH1  (* E_IfTrue *)
+    | st st' b c1 c2 H1 IH1  (* E_IfFalse *)
+    | b st c H1  (* E_WhileFalse *)
+    | st st' b c H1 H2 IH2  (* E_WhileTrue1 *)
+    | st st' st'' b c H1 IH1 H2 IH2  (* E_WhileTrue2 *)
+  ]; intros st2 E2; inversion E2; subst.".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_computation_lemma_0 : forall c : com, forall st st1 : state, forall E1 : st =[ c ]=> st1, forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+Prompting GPT... model_name=gpt-4-1106-preview
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+
+
+Lemma deterministic_computation_lemma_0 : forall c : com, forall st st1 : state, forall E1 : st =[ c ]=> st1, forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+intros c st st1 E1 st2 E2.
+apply ceval_deterministic with (c := c) (st := st); assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+
+
+Lemma deterministic_computation_lemma_0 : forall c : com, forall st st1 : state, forall E1 : st =[ c ]=> st1, forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+intros c st st1 E1 st2 E2.
+apply ceval_deterministic with (c := c) (st := st); assumption.
+Qed.
+
+Theorem ceval_deterministic' : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(* Introduce the command [c] and states [st], [st1], and [st2], which are subject to evaluation *)
+  intros c st st1 st2 E1 E2.
+(* The proof strategy will be to generalize the induction argument on the first evaluation derivation, E1 *)
+  generalize dependent st2.
+(* Proceed by induction on the structure of the derivation *)
+  apply (@deterministic_computation_lemma_0 c st st1 E1).
+- (* E_Skip *) reflexivity.
+- (* E_Break *) reflexivity.
+- (* E_Asgn *) 
+    (* If we have two E_Asgn, we check that the resulting states are the same, since assignments are deterministic *)
+    rewrite H1 in H4.
+inversion H4.
+reflexivity.
+- (* E_Seq1 E_Skip *)
+    (* If the first command is skip and it breaks in the first execution, this is impossible *)
+    discriminate H1.
+- (* E_Seq2 E_Skip *)
+    (* If the first command is skip and goes to completion, then by determinism of skip, we have that the 
+       states must be the same and we can apply the induction hypothesis for the second command *)
+    clear IH1.
+apply IH2.
+assumption.
+- (* E_Seq1 E_Asgn *)
+    (* If the first command is an assignment and breaks in the first execution, this is impossible *)
+    discriminate H1.
+- (* E_Seq2 E_Asgn *)
+    (* If the first command is an assignment and goes to completion, then by determinism of assignments, 
+      we have the same states *)
+    rewrite H1 in H4.
+inversion H4; subst.
+apply IH2.
+assumption.
+- (* E_Seq1 E_Seq *)
+    (* If the first sequence breaks, then the second sequence, regardless of its structure, should also break.
+We can then use the first command's induction hypothesis directly *)
+    clear E_Seq2.
+apply IH1; assumption.
+- (* E_Seq2 E_Seq *)
+    (* If the sequences continue, we match up the individual components and apply the respective IHs *)
+    clear E_Seq1.
+apply IH2.
+apply IH1.
+assumption.
+- (* E_IfTrue E_IfTrue *)
+    (* When both if statements take the true branch, we apply the induction hypothesis *)
+    apply IH1.
+assumption.
+- (* E_IfTrue E_IfFalse *)
+    (* An if statement cannot be both true and false; this case is impossible *)
+    rewrite H1 in H5.
+discriminate H5.
+- (* E_IfFalse E_IfTrue *)
+    (* An if statement cannot be both false and true; this case is impossible *)
+    rewrite H1 in H5.
+discriminate H5.
+- (* E_IfFalse E_IfFalse *)
+    (* When both if statements take the false branch, we apply the induction hypothesis *)
+    apply IH1.
+assumption.
+- (* E_WhileFalse E_WhileFalse *)
+    (* When both while statements evaluate to false, they don't enter the loop, and the states remain the same *)
+    reflexivity.
+- (* E_WhileFalse E_WhileTrue1 *)
+    (* A while loop cannot both fail to begin and break during execution *)
+    rewrite H1 in H3.
+discriminate H3.
+- (* E_WhileFalse E_WhileTrue2 *)
+    (* A while loop cannot both fail to begin and continue loop execution *)
+    rewrite H1 in H3.
+discriminate H3.
+- (* E_WhileTrue1 E_WhileFalse *)
+    (* A while loop cannot both break during execution and fail to begin *)
+    rewrite H3 in H1.
+discriminate H3.
+- (* E_WhileTrue1 E_WhileTrue1 *)
+    (* If a while loop breaks during iteration, we must have consistent states *)
+    apply IH2.
+assumption.
+- (* E_WhileTrue1 E_WhileTrue2 *)
+    (* A while loop cannot both break and continue execution in the same iteration *)
+    rewrite H3 in H5.
+discriminate H5.
+- (* E_WhileTrue2 E_WhileFalse *)
+    (* A while loop cannot both continue and fail to begin execution *)
+    rewrite H5 in H3.
+discriminate H5.
+- (* E_WhileTrue2 E_WhileTrue1 *)
+    (* A while loop cannot both continue and break execution in the same iteration *)
+    rewrite H5 in H3.
+discriminate H5.
+- (* E_WhileTrue2 E_WhileTrue2 *)
+    (* If a while loop continues execution, apply the second command's IH *)
+    apply IH2.
+apply IH1.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+THEOREM PROOF IS VALID
+

@@ -1,0 +1,76 @@
+PROVING succ_inj
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma succ_inj : injective S.
+
+Proof.
+unfold injective.
+(* We unfold the definition of injective to work with it directly.
+*)
+  intros n m H.
+(* Assume n and m are natural numbers and we have S n = S m.
+*)
+  inversion H.
+(* Apply inversion to the hypothesis to conclude that n = m.
+*)
+  reflexivity.
+(* Conclude the goal using reflexivity, since n = m.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+

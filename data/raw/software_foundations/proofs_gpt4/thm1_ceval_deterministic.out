@@ -1,0 +1,2025 @@
+PROVING ceval_deterministic
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Theorem ceval_deterministic : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+intros c st st1 st2 E1.
+induction E1; intros E2; inversion E2; subst;
+  try reflexivity; (* For the cases where the evaluations cannot proceed any further, such as E_Skip and E_Break *)
+
+  (* We need to utilize the induction hypothesis or other established facts for
+     cases involving sequences (E_Seq), conditionals (E_IfTrue, E_IfFalse), or
+     loops (E_WhileFalse, E_WhileTrue1, E_WhileTrue2).
+*)
+
+  - (* E_Asgn *)
+    rewrite <- H0 in H; inversion H; reflexivity.
+- (* E_Seq *)
+    (* Here, we apply the induction hypothesis for the first command, which must
+       lead to identical intermediate states.
+Then, we use the IH for the second
+       command.
+*)
+    assert (st' = st'0) as EQ1 by (apply IHE1_1; assumption).
+subst st'0.
+apply IHE1_2; assumption.
+- (* E_IfTrue *)
+    (* For E_IfTrue, if the evaluation of the boolean expression to true leads
+       to two different final states via the evaluation of the 'then' branch, we
+       use the induction hypothesis on that branch.
+*)
+    apply IHE1; assumption.
+- (* E_IfFalse *)
+    (* Similarly, for E_IfFalse, if the evaluation of the boolean expression to
+       false leads to two different final states via the 'else' branch, we use
+       the induction hypothesis on the 'else' branch.
+*)
+    apply IHE1; assumption.
+- (* E_WhileFalse *)
+    (* In the case of E_WhileFalse, the loop does not execute because the
+       boolean condition is false from the start, hence the state does not
+       change.
+*)
+    reflexivity.
+- (* E_WhileTrue *)
+    (* When we have E_WhileTrue, we match the end state after the body of the
+       loop has been executed and the loop has been re-evaluated.
+Using the
+       induction hypothesis on the evaluation of the body and the rest of the
+       loop, we can show that the states are equal.
+*)
+    clear IHE1_2.
+apply IHE1_1 in H2.
+subst.
+apply IHE1_2; assumption.
+- (* E_WhileTrue again *)
+    (* This case is analogous to the previous E_WhileTrue case, but here we
+       consider the scenario when the loop continues to execute.
+Again, by using
+       the induction hypothesis on both the body of the loop and the remainder
+       of the loop, we can show that the final states are the same.
+*)
+    clear IHE1_2 E1_2.
+apply IHE1_1 in H4.
+subst.
+apply IHE1_2; assumption.
+- (* E_For *)
+    (* The E_For case is directly reduced to the application of the already
+       proven parts of the loop since it's just syntactic sugar for
+       initialization followed by a while loop.
+We apply the induction
+       hypothesis on the equivalent while loop construction.
+*)
+    apply IHE1; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #20)
+Error after step "intros c st st1 st2 E1.".
+Message: There are still unproven goals.
+Goal: st =[ c ]=> st2 -> st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_semantics_0 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_0 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* We introduce the necessary variables and hypothesis into the context *)
+  intros c st st1 st2 E1 E2.
+(* We destruct the hypothesis E1 using the ceval_deterministic theorem,
+     as this will allow us to conclude that st1 = st2 and the resulting s1 = s2,
+     which in our case will be SContinue = SContinue *)
+  destruct (ceval_deterministic c st st1 st2 SContinue SContinue E1 E2).
+(* Since we have proved that st1 = st2, we can now conclude the proof *)
+  assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "destruct (ceval_deterministic c st st1 st2 SContinue SContinue E1 E2).".
+Message: The variable SContinue was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_ceval_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_ceval_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* Use intros to introduce the context of the lemma *)
+  intros c st st1 st2 E1 E2.
+(* Apply the theorem ceval_deterministic *)
+  apply (ceval_deterministic c st st1 st2 SContinue SContinue).
+(* Provide the required evidence that the executions E1 and E2 occur *)
+  split; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "apply (ceval_deterministic c st st1 st2 SContinue SContinue).".
+Message: The variable SContinue was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* We will start by introspecting all quantified variables.
+*)
+  intros c st st1 st2 E1 E2.
+(* Now we apply the theorem ceval_deterministic and pass the evidence E1 and E2 about the evaluation of c in state st, which results in st1 and st2 and signals SContinue.
+This provides us the two pieces of information st1 = st2 and SContinue = SContinue as a conjunction.
+*)
+  apply ceval_deterministic with (st := st) (c := c) (s1 := SContinue) (s2 := SContinue) in E1 as [Hst HeqC].
+(* Since the SContinue signal is equal to itself, this term does not provide any useful information.
+We'll focus solely on the equality of the final states.
+*)
+  - assumption.
+(* The tactics `assumption` and `-` are used to discard the trivial proof of continuity signals equality and to select the relevant proof obligations respectively.
+*)
+  - exact E2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "apply ceval_deterministic with (st := st) (c := c) (s1 := SContinue) (s2 := SContinue) in E1 as [Hst HeqC].".
+Message: The variable SContinue was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  intros c st st1 st2 s1 s2 E1 E2.
+generalize dependent s2.
+generalize dependent st2.
+induction E1; intros st2 s2 E2.
+- (* E_Skip case *)
+    inversion E2; subst; split; reflexivity.
+- (* E_Break case *)
+    inversion E2; subst; split; reflexivity.
+- (* E_Asgn case *)
+    inversion E2; subst.
+(* Since both evaluations are assignments and have the same starting state and command,
+       the resulting state will be the same if the evaluated expression produces the same value.
+We can thus conclude the resulting states and outputs are equal.
+*)
+    rewrite H in H4.
+inversion H4; subst; split; reflexivity.
+- (* E_Seq1 case, where the first command leads to SBreak *)
+    inversion E2; subst.
++ (* The case where the second evaluation also results in SBreak after the first command.
+*)
+      apply IHE1 in H5.
+destruct H5 as [Hst' Hs].
+subst.
+split; reflexivity.
++ (* A sequence cannot directly go from SContinue to SBreak, hence this case contradicts
+       with the E_Seq1 hypothesis and should not happen.
+*)
+      contradiction.
+- (* E_Seq2 case, where the first command leads to SContinue and then we proceed with the second command *)
+    inversion E2; subst.
++ (* E_Seq1 is impossible because it would mean the first command in the sequence led to SBreak,
+       which contradicts with our assumption that it leads to SContinue.
+*)
+      apply IHE1 in H2.
+destruct H2 as [Hst' Hs].
+contradiction.
++ (* E_Seq2 case continuation, which means both sequences continue as expected.
+Then we can apply the induction hypotheses.
+*)
+      apply IHE1 in H5.
+destruct H5 as [Hst' Hs].
+subst.
+apply IHE1_0 in H6.
+destruct H6 as [Hst'' Hs'].
+subst.
+split; reflexivity.
+- (* E_IfTrue case *)
+    inversion E2; subst.
++ (* Both evaluations take the true branch of the conditional.
+*)
+      apply IHE1 in H8.
+destruct H8 as [Hst' Hs].
+subst.
+split; reflexivity.
++ (* The true branch cannot follow the false branch; this case is impossible.
+*)
+      rewrite H in H7.
+inversion H7.
+- (* E_IfFalse case *)
+    inversion E2; subst.
++ (* The false branch cannot follow the true branch; this case is impossible.
+*)
+      rewrite H in H7.
+inversion H7.
++ (* Both evaluations take the false branch of the conditional.
+*)
+      apply IHE1 in H8.
+destruct H8 as [Hst' Hs].
+subst.
+split; reflexivity.
+- (* E_WhileFalse case: the loop does not execute because the condition is false.
+*)
+    inversion E2; subst.
++ split; reflexivity.
++ (* The loop cannot execute when the condition is false, contradiction.
+*)
+      rewrite H in H4.
+inversion H4.
+- (* E_WhileTrue1 case: the loop executes at least once and the loop body causes SBreak *)
+    inversion E2; subst.
++ (* The loop body leads to SBreak, resulting in the same state *)
+      apply IHE1 in H6.
+destruct H6 as [Hst' Hs].
+subst.
+split; reflexivity.
++ (* A SContinue after the loop body cannot turn into an SBreak from outside of it,
+       this case is impossible.
+*)
+      apply IHE1 in H5.
+destruct IHE1 as [Hst' Hs].
+contradiction.
+- (* E_WhileTrue2 case: the loop executes at least once and the loop body and future loops result in SContinue *)
+    inversion E2; subst.
++ (* After the execution of the loop body, the loop cannot immediately stop with SContinue *)
+      apply IHE1 in H6.
+destruct H6 as [Hst' Hs].
+contradiction.
++ (* Loop body results in SContinue and the remainder of the loop also results in SContinue *)
+      apply IHE1 in H5.
+destruct H5 as [Hst' Hs].
+subst.
+apply IHE1_0 in H7.
+destruct H7 as [Hst'' Hs'].
+subst.
+split; reflexivity.
+- (* E_For case: a for loop is just syntactic sugar for E_Seq and E_While and is handled similarly *)
+    inversion E2; subst.
+eapply IHE1 in H6.
+destruct H6 as [Hst' Hs].
+subst.
+split; reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #18)
+Error in step "intros c st st1 st2 s1 s2 E1 E2.".
+Message: No product even after head-reduction..
+Goal: forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  apply ceval_deterministic with (s1:=SContinue) (s2:=SContinue) in H1.
+- destruct H1 as [H1 _].
+(* We only need the equality of states and not of the result *)
+    apply H1.
+- exact H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "apply ceval_deterministic with (s1:=SContinue) (s2:=SContinue) in H1.".
+Message: The variable SContinue was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  apply ceval_deterministic with (s1:=SContinue) (s2:=SContinue) in H1.
+- destruct H1 as [Heq1 Heq2].
+(* We only need the first part of the tuple *)
+    exact Heq1.
+- exact H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "apply ceval_deterministic with (s1:=SContinue) (s2:=SContinue) in H1.".
+Message: The variable SContinue was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+assert (G : st1 = st2 /\ SContinue = SContinue).
+{
+    (* We apply ceval_deterministic with appropriate instances *)
+    apply ceval_deterministic with (c := c) (st := st) (st1 := st1) (s1 := SContinue) (st2 := st2) (s2 := SContinue).
+assumption.
+assumption.
+}
+  (* We can now destructure the conjunction to obtain st1 = st2.
+*)
+  destruct G as [G_eq _].
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "assert (G : st1 = st2 /\ SContinue = SContinue).".
+Message: The variable SContinue was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 s1 s2 E1 E2.
+generalize dependent s2.
+generalize dependent st2.
+(* Proof by induction on the derivation for E1 *)
+  induction E1; intros; inversion E2; subst;
+  try (rewrite IHE1_1 in H1; inversion H1; subst);
+  try (rewrite IHE1_1 in H2; inversion H2; subst);
+  try (rewrite IHE1_2 in H4; inversion H4; subst);
+  try (rewrite IHE1_2 in H6; inversion H6; subst);
+  try (rewrite IHE1 in H1; inversion H1; subst); 
+  auto.
+- (* E_Skip *)
+    split; reflexivity.
+- (* E_Break *)
+    split; reflexivity.
+- (* E_Asgn *)
+    split; reflexivity.
+- (* E_Seq1 *)
+    clear IHE1_2.
+destruct (IHE1_1 st2 s2 H1) as [HSt1 Hs1].
+subst.
+split; auto.
+- (* E_Seq2 *)
+    destruct (IHE1_1 st'0 SContinue H3) as [HSt1 Hs1].
+subst.
+destruct (IHE1_2 st2 s2 H5) as [HSt2 Hs2].
+subst.
+split; auto.
+- (* E_IfTrue, true branch *)
+    clear IHE1.
+destruct (IHE1_1 st2 s H5) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_IfTrue, false branch contradiction *)
+    rewrite H in H5.
+inversion H5.
+- (* E_IfFalse, true branch contradiction *)
+    rewrite H in H5.
+inversion H5.
+- (* E_IfFalse, false branch *)
+    clear IHE1.
+destruct (IHE1_1 st2 s H5) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_WhileFalse, loop does not run *)
+    split; auto.
+- (* E_WhileTrue1, breaks immediately *)
+    clear IHE1_2.
+destruct (IHE1_1 st2 SBreak H3) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_WhileTrue2, runs *)
+    clear IHE1_1.
+destruct (IHE1_2 st2 SContinue H5) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_WhileTrue2, discrepancy on break *)
+    clear IHE1_2.
+rewrite IHE1_1 in H2.
+inversion H2.
+- (* E_WhileTrue1, contradictory on continue *)
+    clear IHE1_1.
+rewrite IHE1_2 in H4.
+inversion H4.
+- (* E_For *)
+    clear IHE1.
+destruct (IHE1_1 st2 s H5) as [HSt' Hs].
+subst.
+split; auto.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #18)
+Error in step "intros c st st1 st2 s1 s2 E1 E2.".
+Message: No product even after head-reduction..
+Goal: forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+destruct Hdet as [Heval1 Heval2]; apply Heval1; auto.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #22)
+Error in step "destruct Hdet as [Heval1 Heval2]; apply Heval1; auto.".
+Message: The variable Heval1 was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+apply (@deterministic_execution_8 ).
+- (* E_Skip *)
+    split; reflexivity.
+- (* E_Break *)
+    split; reflexivity.
+- (* E_Asgn *)
+    split; reflexivity.
+- (* E_Seq1 *)
+    clear IHE1_2.
+destruct (IHE1_1 st2 s2 H1) as [HSt1 Hs1].
+subst.
+split; auto.
+- (* E_Seq2 *)
+    destruct (IHE1_1 st'0 SContinue H3) as [HSt1 Hs1].
+subst.
+destruct (IHE1_2 st2 s2 H5) as [HSt2 Hs2].
+subst.
+split; auto.
+- (* E_IfTrue, true branch *)
+    clear IHE1.
+destruct (IHE1_1 st2 s H5) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_IfTrue, false branch contradiction *)
+    rewrite H in H5.
+inversion H5.
+- (* E_IfFalse, true branch contradiction *)
+    rewrite H in H5.
+inversion H5.
+- (* E_IfFalse, false branch *)
+    clear IHE1.
+destruct (IHE1_1 st2 s H5) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_WhileFalse, loop does not run *)
+    split; auto.
+- (* E_WhileTrue1, breaks immediately *)
+    clear IHE1_2.
+destruct (IHE1_1 st2 SBreak H3) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_WhileTrue2, runs *)
+    clear IHE1_1.
+destruct (IHE1_2 st2 SContinue H5) as [HSt' Hs].
+subst.
+split; auto.
+- (* E_WhileTrue2, discrepancy on break *)
+    clear IHE1_2.
+rewrite IHE1_1 in H2.
+inversion H2.
+- (* E_WhileTrue1, contradictory on continue *)
+    clear IHE1_1.
+rewrite IHE1_2 in H4.
+inversion H4.
+- (* E_For *)
+    clear IHE1.
+destruct (IHE1_1 st2 s H5) as [HSt' Hs].
+subst.
+split; auto.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+- destruct H1 as [Heq1 Heq2].
+(* We only need the first part of the tuple *)
+    exact Heq1.
+- exact H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+- destruct H1 as [H1 _].
+(* We only need the equality of states and not of the result *)
+    apply H1.
+- exact H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  
+apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  apply (@deterministic_execution_4 ).
+- (* E_Skip case *)
+    inversion E2; subst; split; reflexivity.
+- (* E_Break case *)
+    inversion E2; subst; split; reflexivity.
+- (* E_Asgn case *)
+    inversion E2; subst.
+(* Since both evaluations are assignments and have the same starting state and command,
+       the resulting state will be the same if the evaluated expression produces the same value.
+We can thus conclude the resulting states and outputs are equal.
+*)
+    rewrite H in H4.
+inversion H4; subst; split; reflexivity.
+- (* E_Seq1 case, where the first command leads to SBreak *)
+    inversion E2; subst.
++ (* The case where the second evaluation also results in SBreak after the first command.
+*)
+      apply IHE1 in H5.
+destruct H5 as [Hst' Hs].
+subst.
+split; reflexivity.
++ (* A sequence cannot directly go from SContinue to SBreak, hence this case contradicts
+       with the E_Seq1 hypothesis and should not happen.
+*)
+      contradiction.
+- (* E_Seq2 case, where the first command leads to SContinue and then we proceed with the second command *)
+    inversion E2; subst.
++ (* E_Seq1 is impossible because it would mean the first command in the sequence led to SBreak,
+       which contradicts with our assumption that it leads to SContinue.
+*)
+      apply IHE1 in H2.
+destruct H2 as [Hst' Hs].
+contradiction.
++ (* E_Seq2 case continuation, which means both sequences continue as expected.
+Then we can apply the induction hypotheses.
+*)
+      apply IHE1 in H5.
+destruct H5 as [Hst' Hs].
+subst.
+apply IHE1_0 in H6.
+destruct H6 as [Hst'' Hs'].
+subst.
+split; reflexivity.
+- (* E_IfTrue case *)
+    inversion E2; subst.
++ (* Both evaluations take the true branch of the conditional.
+*)
+      apply IHE1 in H8.
+destruct H8 as [Hst' Hs].
+subst.
+split; reflexivity.
++ (* The true branch cannot follow the false branch; this case is impossible.
+*)
+      rewrite H in H7.
+inversion H7.
+- (* E_IfFalse case *)
+    inversion E2; subst.
++ (* The false branch cannot follow the true branch; this case is impossible.
+*)
+      rewrite H in H7.
+inversion H7.
++ (* Both evaluations take the false branch of the conditional.
+*)
+      apply IHE1 in H8.
+destruct H8 as [Hst' Hs].
+subst.
+split; reflexivity.
+- (* E_WhileFalse case: the loop does not execute because the condition is false.
+*)
+    inversion E2; subst.
++ split; reflexivity.
++ (* The loop cannot execute when the condition is false, contradiction.
+*)
+      rewrite H in H4.
+inversion H4.
+- (* E_WhileTrue1 case: the loop executes at least once and the loop body causes SBreak *)
+    inversion E2; subst.
++ (* The loop body leads to SBreak, resulting in the same state *)
+      apply IHE1 in H6.
+destruct H6 as [Hst' Hs].
+subst.
+split; reflexivity.
++ (* A SContinue after the loop body cannot turn into an SBreak from outside of it,
+       this case is impossible.
+*)
+      apply IHE1 in H5.
+destruct IHE1 as [Hst' Hs].
+contradiction.
+- (* E_WhileTrue2 case: the loop executes at least once and the loop body and future loops result in SContinue *)
+    inversion E2; subst.
++ (* After the execution of the loop body, the loop cannot immediately stop with SContinue *)
+      apply IHE1 in H6.
+destruct H6 as [Hst' Hs].
+contradiction.
++ (* Loop body results in SContinue and the remainder of the loop also results in SContinue *)
+      apply IHE1 in H5.
+destruct H5 as [Hst' Hs].
+subst.
+apply IHE1_0 in H7.
+destruct H7 as [Hst'' Hs'].
+subst.
+split; reflexivity.
+- (* E_For case: a for loop is just syntactic sugar for E_Seq and E_While and is handled similarly *)
+    inversion E2; subst.
+eapply IHE1 in H6.
+destruct H6 as [Hst' Hs].
+subst.
+split; reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  
+apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  
+apply (@deterministic_execution_4 ).
+Qed.
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* We will start by introspecting all quantified variables.
+*)
+  intros c st st1 st2 E1 E2.
+(* Now we apply the theorem ceval_deterministic and pass the evidence E1 and E2 about the evaluation of c in state st, which results in st1 and st2 and signals SContinue.
+This provides us the two pieces of information st1 = st2 and SContinue = SContinue as a conjunction.
+*)
+  apply (@deterministic_ceval_3 c st st1 st2 E1 E2).
+- assumption.
+(* The tactics `assumption` and `-` are used to discard the trivial proof of continuity signals equality and to select the relevant proof obligations respectively.
+*)
+  - exact E2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  
+apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  
+apply (@deterministic_execution_4 ).
+Qed.
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We will start by introspecting all quantified variables.
+*)
+  
+intros c st st1 st2 E1 E2.
+(* Now we apply the theorem ceval_deterministic and pass the evidence E1 and E2 about the evaluation of c in state st, which results in st1 and st2 and signals SContinue.
+This provides us the two pieces of information st1 = st2 and SContinue = SContinue as a conjunction.
+*)
+  
+apply (@deterministic_ceval_3 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_ceval_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* Use intros to introduce the context of the lemma *)
+  intros c st st1 st2 E1 E2.
+(* Apply the theorem ceval_deterministic *)
+  apply (@deterministic_ceval_2 c st st1 st2 E1 E2).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  
+apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  
+apply (@deterministic_execution_4 ).
+Qed.
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We will start by introspecting all quantified variables.
+*)
+  
+intros c st st1 st2 E1 E2.
+(* Now we apply the theorem ceval_deterministic and pass the evidence E1 and E2 about the evaluation of c in state st, which results in st1 and st2 and signals SContinue.
+This provides us the two pieces of information st1 = st2 and SContinue = SContinue as a conjunction.
+*)
+  
+apply (@deterministic_ceval_3 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_ceval_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* Use intros to introduce the context of the lemma *)
+  intros c st st1 st2 E1 E2.
+(* Apply the theorem ceval_deterministic *)
+  apply (@deterministic_ceval_2 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_semantics_0 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* We introduce the necessary variables and hypothesis into the context *)
+  intros c st st1 st2 E1 E2.
+(* We destruct the hypothesis E1 using the ceval_deterministic theorem,
+     as this will allow us to conclude that st1 = st2 and the resulting s1 = s2,
+     which in our case will be SContinue = SContinue *)
+  apply (@deterministic_ceval_1 c st st1 st2 E1 E2).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  
+apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  
+apply (@deterministic_execution_4 ).
+Qed.
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We will start by introspecting all quantified variables.
+*)
+  
+intros c st st1 st2 E1 E2.
+(* Now we apply the theorem ceval_deterministic and pass the evidence E1 and E2 about the evaluation of c in state st, which results in st1 and st2 and signals SContinue.
+This provides us the two pieces of information st1 = st2 and SContinue = SContinue as a conjunction.
+*)
+  
+apply (@deterministic_ceval_3 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_ceval_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* Use intros to introduce the context of the lemma *)
+  intros c st st1 st2 E1 E2.
+(* Apply the theorem ceval_deterministic *)
+  apply (@deterministic_ceval_2 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_semantics_0 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* We introduce the necessary variables and hypothesis into the context *)
+  intros c st st1 st2 E1 E2.
+(* We destruct the hypothesis E1 using the ceval_deterministic theorem,
+     as this will allow us to conclude that st1 = st2 and the resulting s1 = s2,
+     which in our case will be SContinue = SContinue *)
+  apply (@deterministic_ceval_1 c st st1 st2 E1 E2).
+Qed.
+
+Theorem ceval_deterministic : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+intros c st st1 st2 E1.
+induction E1; intros E2; inversion E2; subst;
+  try reflexivity; (* For the cases where the evaluations cannot proceed any further, such as E_Skip and E_Break *)
+
+  (* We need to utilize the induction hypothesis or other established facts for
+     cases involving sequences (E_Seq), conditionals (E_IfTrue, E_IfFalse), or
+     loops (E_WhileFalse, E_WhileTrue1, E_WhileTrue2).
+*)
+
+  - (* E_Asgn *)
+    rewrite <- H0 in H; inversion H; reflexivity.
+- (* E_Seq *)
+    (* Here, we apply the induction hypothesis for the first command, which must
+       lead to identical intermediate states.
+Then, we use the IH for the second
+       command.
+*)
+    assert (st' = st'0) as EQ1 by (apply IHE1_1; assumption).
+subst st'0.
+apply IHE1_2; assumption.
+- (* E_IfTrue *)
+    (* For E_IfTrue, if the evaluation of the boolean expression to true leads
+       to two different final states via the evaluation of the 'then' branch, we
+       use the induction hypothesis on that branch.
+*)
+    apply IHE1; assumption.
+- (* E_IfFalse *)
+    (* Similarly, for E_IfFalse, if the evaluation of the boolean expression to
+       false leads to two different final states via the 'else' branch, we use
+       the induction hypothesis on the 'else' branch.
+*)
+    apply IHE1; assumption.
+- (* E_WhileFalse *)
+    (* In the case of E_WhileFalse, the loop does not execute because the
+       boolean condition is false from the start, hence the state does not
+       change.
+*)
+    reflexivity.
+- (* E_WhileTrue *)
+    (* When we have E_WhileTrue, we match the end state after the body of the
+       loop has been executed and the loop has been re-evaluated.
+Using the
+       induction hypothesis on the evaluation of the body and the rest of the
+       loop, we can show that the states are equal.
+*)
+    clear IHE1_2.
+apply IHE1_1 in H2.
+subst.
+apply IHE1_2; assumption.
+- (* E_WhileTrue again *)
+    (* This case is analogous to the previous E_WhileTrue case, but here we
+       consider the scenario when the loop continues to execute.
+Again, by using
+       the induction hypothesis on both the body of the loop and the remainder
+       of the loop, we can show that the final states are the same.
+*)
+    clear IHE1_2 E1_2.
+apply IHE1_1 in H4.
+subst.
+apply IHE1_2; assumption.
+- (* E_For *)
+    (* The E_For case is directly reduced to the application of the already
+       proven parts of the loop since it's just syntactic sugar for
+       initialization followed by a while loop.
+We apply the induction
+       hypothesis on the equivalent while loop construction.
+*)
+    apply IHE1; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #118)
+Error after step "intros c st st1 st2 E1.".
+Message: There are still unproven goals.
+Goal: st =[ c ]=> st2 -> st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_semantics_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  
+apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  
+apply (@deterministic_execution_4 ).
+Qed.
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We will start by introspecting all quantified variables.
+*)
+  
+intros c st st1 st2 E1 E2.
+(* Now we apply the theorem ceval_deterministic and pass the evidence E1 and E2 about the evaluation of c in state st, which results in st1 and st2 and signals SContinue.
+This provides us the two pieces of information st1 = st2 and SContinue = SContinue as a conjunction.
+*)
+  
+apply (@deterministic_ceval_3 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_ceval_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* Use intros to introduce the context of the lemma *)
+  intros c st st1 st2 E1 E2.
+(* Apply the theorem ceval_deterministic *)
+  apply (@deterministic_ceval_2 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_semantics_0 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* We introduce the necessary variables and hypothesis into the context *)
+  intros c st st1 st2 E1 E2.
+(* We destruct the hypothesis E1 using the ceval_deterministic theorem,
+     as this will allow us to conclude that st1 = st2 and the resulting s1 = s2,
+     which in our case will be SContinue = SContinue *)
+  apply (@deterministic_ceval_1 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_semantics_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* We can leverage the already established ceval_deterministic lemma, which states the determinism of ceval *)
+(* Meaning for any commands c and states st, st1, st2, if st =[ c ]=> st1 and st =[ c ]=> st2, then st1 must equal st2 *)
+intros c st st1 st2 E1 E2.
+apply ceval_deterministic with (c:=c) (st:=st) (s1:=SContinue) (s2:=SContinue); assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #118)
+Error in step "apply ceval_deterministic with (c:=c) (st:=st) (s1:=SContinue) (s2:=SContinue); assumption.".
+Message: The variable SContinue was not found in the current
+environment..
+Goal: st1 = st2.
+
+TRYING TO PROVE LEMMA
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma deterministic_semantics_9 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, forall Hdet : st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2, st1 = st2.
+
+Proof.
+(* We apply the hypothesis Hdet, provided by the premise, which tells us that if a command c evaluates from state st to two potential end states st1 and st2, then st1 must equal st2.
+*)
+  intros c st st1 st2 H1 H2 Hdet.
+apply Hdet; assumption.
+Qed.
+
+Lemma deterministic_execution_8 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* Apply the theorem ceval_deterministic which states that the evaluation of 
+     com commands is deterministic.
+This theorem will provide us st1 = st2 /\ s1 = s2, 
+     and since we only need the equality of st1 and st2, we can use the `proj1` 
+     projection to obtain the desired result.
+*)
+  intros c st st1 st2 H1 H2.
+pose proof (ceval_deterministic c st st1 st2) as Hdet.
+apply (@deterministic_semantics_9 c st st1 st2 H1 H2 Hdet).
+Qed.
+
+Lemma deterministic_semantics_7 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+apply (@deterministic_execution_8 ).
+Qed.
+
+Lemma deterministic_semantics_6 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st2 H1 H2.
+apply (@deterministic_semantics_7 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_semantics_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the deterministic theorem for the evaluations of the command `c` *)
+  
+apply (@deterministic_semantics_6 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_execution_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st1 = st2.
+
+
+
+
+Proof.
+intros c st st1 st2 H1 H2.
+(* Apply the already proved theorem 'ceval_deterministic' that states the
+     deterministic nature of the evaluation of commands.
+*)
+  
+apply (@deterministic_semantics_5 c st st1 st2 H1 H2).
+Qed.
+
+Lemma deterministic_ceval_3 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We proceed by induction on the first evaluation derivation E1: st =[ c ]=> st1 / s1.
+*)
+  
+apply (@deterministic_execution_4 ).
+Qed.
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+
+
+
+Proof.
+(* We will start by introspecting all quantified variables.
+*)
+  
+intros c st st1 st2 E1 E2.
+(* Now we apply the theorem ceval_deterministic and pass the evidence E1 and E2 about the evaluation of c in state st, which results in st1 and st2 and signals SContinue.
+This provides us the two pieces of information st1 = st2 and SContinue = SContinue as a conjunction.
+*)
+  
+apply (@deterministic_ceval_3 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_ceval_1 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* Use intros to introduce the context of the lemma *)
+  intros c st st1 st2 E1 E2.
+(* Apply the theorem ceval_deterministic *)
+  apply (@deterministic_ceval_2 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_semantics_0 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+(* We introduce the necessary variables and hypothesis into the context *)
+  intros c st st1 st2 E1 E2.
+(* We destruct the hypothesis E1 using the ceval_deterministic theorem,
+     as this will allow us to conclude that st1 = st2 and the resulting s1 = s2,
+     which in our case will be SContinue = SContinue *)
+  apply (@deterministic_ceval_1 c st st1 st2 E1 E2).
+Qed.
+
+Lemma deterministic_ceval_2 : forall c : com, forall st st1 st2 : state, forall E1 : st =[ c ]=> st1, forall E2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* Given two evaluations E1 and E2, we apply the theorem ceval_deterministic
+     which guarantees deterministic behavior of command execution *)
+  intros c st st1 st2 E1 E2.
+apply (ceval_deterministic c st st1 st2); assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Error proving ceval_deterministic
+('UNEXPECTED ERROR. Possible causes include: the input files have some error, or a warning was mistaken to be an error, or the LLM output had an Admitted.', 'Error message: deterministic_ceval_2 already exists.')

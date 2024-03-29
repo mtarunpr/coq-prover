@@ -1,0 +1,31 @@
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+
+
+Theorem plus_2_2_is_4 : 2 + 2 = 4.
+
+Proof.
+(* Both sides of the equation reduce to the same value through simplification *)
+  reflexivity.
+Qed.

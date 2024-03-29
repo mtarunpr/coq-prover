@@ -1,0 +1,39 @@
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+
+Proof.
+intros n m o p Hnm Himp.
+apply Himp.
+(* Use the provided implication assuming n = m *)
+  apply Hnm.
+(* Assumption n = m is already known *)
+
+Qed.

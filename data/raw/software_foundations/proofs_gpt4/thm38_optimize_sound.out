@@ -1,0 +1,4230 @@
+PROVING optimize_sound
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Theorem optimize_sound : forall a,
+  aeval (optimize a) = aeval a.
+
+Proof.
+(* We will prove by induction over the structure of arithmetic expressions *)
+  intros a.
+induction a.
+- (* ANum *) simpl.
+reflexivity.
+- (* APlus *) simpl.
+destruct (optimize a1) eqn:E1, (optimize a2) eqn:E2; 
+    simpl; rewrite IHa1, IHa2; reflexivity.
+- (* AMinus *) simpl.
+destruct (optimize a1) eqn:E1, (optimize a2) eqn:E2; 
+    simpl; rewrite IHa1, IHa2; reflexivity.
+- (* AMult *) simpl.
+destruct (optimize a1) eqn:E1, (optimize a2) eqn:E2; 
+    simpl; rewrite IHa1, IHa2; reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #300)
+Error in step "destruct (optimize a1) eqn:E1, (optimize a2) eqn:E2; 
+    simpl; rewrite IHa1, IHa2; reflexivity.".
+Message: Found no subterm matching 
+"aeval (ANum n)" in the current goal..
+Goal: aeval
+  match optimize a1 with
+  | ANum 0 => optimize a2
+  | ANum (S n0) =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  | APlus a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => APlus a1 a3
+      | ANum (S n0) =>
+          APlus (APlus a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (APlus a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (APlus a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (APlus a1 a3) (AMult a2 a4)
+      end
+  | AMinus a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => AMinus a1 a3
+      | ANum (S n0) =>
+          APlus (AMinus a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (AMinus a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (AMinus a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (AMinus a1 a3) (AMult a2 a4)
+      end
+  | AMult a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => AMult a1 a3
+      | ANum (S n0) =>
+          APlus (AMult a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (AMult a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (AMult a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (AMult a1 a3) (AMult a2 a4)
+      end
+  end = aeval a1 + aeval a2.
+
+TRYING TO PROVE LEMMA
+Lemma aeval_optimized_plus_distributes_0 : forall a1 a2 : aexp, forall IHa1 : aeval (optimize a1) = aeval a1, forall IHa2 : aeval (optimize a2) = aeval a2, aeval
+  match optimize a1 with
+  | ANum 0 => optimize a2
+  | ANum (S n0) =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  | APlus a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => APlus a1 a3
+      | ANum (S n0) =>
+          APlus (APlus a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (APlus a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (APlus a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (APlus a1 a3) (AMult a2 a4)
+      end
+  | AMinus a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => AMinus a1 a3
+      | ANum (S n0) =>
+          APlus (AMinus a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (AMinus a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (AMinus a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (AMinus a1 a3) (AMult a2 a4)
+      end
+  | AMult a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => AMult a1 a3
+      | ANum (S n0) =>
+          APlus (AMult a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (AMult a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (AMult a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (AMult a1 a3) (AMult a2 a4)
+      end
+  end = aeval a1 + aeval a2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma aeval_optimized_plus_distributes_0 : forall a1 a2 : aexp, forall IHa1 : aeval (optimize a1) = aeval a1, forall IHa2 : aeval (optimize a2) = aeval a2, aeval
+  match optimize a1 with
+  | ANum 0 => optimize a2
+  | ANum (S n0) =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  | APlus a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => APlus a1 a3
+      | ANum (S n0) =>
+          APlus (APlus a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (APlus a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (APlus a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (APlus a1 a3) (AMult a2 a4)
+      end
+  | AMinus a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => AMinus a1 a3
+      | ANum (S n0) =>
+          APlus (AMinus a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (AMinus a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (AMinus a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (AMinus a1 a3) (AMult a2 a4)
+      end
+  | AMult a1 a3 =>
+      match optimize a2 with
+      | ANum 0 => AMult a1 a3
+      | ANum (S n0) =>
+          APlus (AMult a1 a3) (ANum (S n0))
+      | APlus a2 a4 =>
+          APlus (AMult a1 a3) (APlus a2 a4)
+      | AMinus a2 a4 =>
+          APlus (AMult a1 a3) (AMinus a2 a4)
+      | AMult a2 a4 =>
+          APlus (AMult a1 a3) (AMult a2 a4)
+      end
+  end = aeval a1 + aeval a2.
+
+Proof.
+intros a1 a2 IHa1 IHa2.
+(* First we perform case analysis on the result of `optimize a1`.
+*)
+  destruct (optimize a1) eqn:E1.
+- (* Case ANum 0: simplifies to aeval (optimize a2) *)
+    simpl.
+rewrite IHa2.
+reflexivity.
+- (* Case ANum n: we perform a nested case analysis on the result of `optimize a2`.
+*)
+    destruct (optimize a2) eqn:E2.
++ (* Subcase ANum 0: the result is aeval (ANum n) *)
+      simpl.
+rewrite IHa1.
+reflexivity.
++ (* Subcase ANum (S n0): the result is aeval (APlus (ANum n) (ANum n0)) *)
+      simpl.
+rewrite IHa1.
+rewrite IHa2.
+reflexivity.
++ (* All other subcases don't change the structure significantly *)
+      simpl.
+rewrite IHa1.
+rewrite IHa2.
+reflexivity.
+- (* Case APlus: The structure does not change after aeval, so we can just use the inductive hypotheses.
+*)
+    simpl.
+rewrite IHa1, IHa2.
+reflexivity.
+- (* Case AMinus: Similar to the APlus case *)
+    simpl.
+rewrite IHa1, IHa2.
+reflexivity.
+- (* Case AMult: Similar to the APlus and AMinus cases *)
+    simpl.
+rewrite IHa1, IHa2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #294)
+Error in step "rewrite IHa2.".
+Message: Found no subterm matching 
+"aeval (optimize a2)" in the current goal..
+Goal: aeval
+  match n with
+  | 0 => optimize a2
+  | S n0 =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  end = aeval a1 + aeval a2.
+
+TRYING TO PROVE LEMMA
+Lemma aeval_optimized_plus_1 : forall a1 a2 : aexp, forall n : nat, forall E1 : optimize a1 = ANum n, forall IHa1 : aeval (ANum n) = aeval a1, forall IHa2 : aeval (optimize a2) = aeval a2, aeval
+  match n with
+  | 0 => optimize a2
+  | S n0 =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  end = aeval a1 + aeval a2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma aeval_optimized_plus_1 : forall a1 a2 : aexp, forall n : nat, forall E1 : optimize a1 = ANum n, forall IHa1 : aeval (ANum n) = aeval a1, forall IHa2 : aeval (optimize a2) = aeval a2, aeval
+  match n with
+  | 0 => optimize a2
+  | S n0 =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  end = aeval a1 + aeval a2.
+
+Proof.
+intros a1 a2 n E1 IHa1 IHa2.
+(* Introduce variables and hypotheses.
+*)
+  rewrite IHa1.
+(* aeval (ANum n) is equal to aeval a1 by hypothesis IHa1.
+*)
+  rewrite IHa2.
+(* aeval (optimize a2) is equal to aeval a2 by hypothesis IHa2.
+*)
+  destruct a2;               (* We perform case analysis on a2.
+*)
+  destruct n;                (* We perform case analysis on n.
+*)
+  - simpl.
+reflexivity.
+(* In the case n = 0, the result follows immediately by simplification.
+*)
+  - simpl.
+omega.
+(* Here omega solves arithmetic goals under current hypotheses, but is removed in current versions of Coq, therefore use lia if needed.
+*)
+  - simpl.
+omega.
+(* Same as above.
+*)
+  - simpl.
+omega.
+(* Same as above.
+*)
+  - simpl.
+reflexivity.
+(* For the case n = 0 and a nested optimize on a2, reflexivity after simplification.
+*)
+  - simpl.
+destruct (optimize a2_1); destruct (optimize a2_2); omega.
+(* In case optimize a2 has ANum, APlus, AMinus or AMult constructor, destruct further and solve.
+*)
+  - simpl.
+reflexivity.
+(* Similar to previous cases, reflexivity after simplification.
+*)
+  - simpl.
+destruct (optimize a2_1); destruct (optimize a2_2); omega.
+(* In case optimize a2 has ANum, APlus, AMinus or AMult constructor, destruct further and solve.
+*)
+  - simpl.
+reflexivity.
+(* Similar to previous cases, reflexivity after simplification.
+*)
+  - simpl.
+destruct (optimize a2_1); destruct (optimize a2_2); omega.
+(* In case optimize a2 has ANum, APlus, AMinus or AMult constructor, destruct further and solve.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "rewrite IHa1.".
+Message: Found no subterm matching 
+"aeval (ANum n)" in the current goal..
+Goal: aeval
+  match n with
+  | 0 => optimize a2
+  | S n0 =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  end = aeval a1 + aeval a2.
+
+TRYING TO PROVE LEMMA
+Lemma aeval_optimized_plus_2 : forall a1 a2 : aexp, forall n : nat, forall E1 : optimize a1 = ANum n, forall IHa1 : aeval (ANum n) = aeval a1, forall IHa2 : aeval (optimize a2) = aeval a2, aeval
+  match n with
+  | 0 => optimize a2
+  | S n0 =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  end = aeval a1 + aeval a2.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma aeval_optimized_plus_2 : forall a1 a2 : aexp, forall n : nat, forall E1 : optimize a1 = ANum n, forall IHa1 : aeval (ANum n) = aeval a1, forall IHa2 : aeval (optimize a2) = aeval a2, aeval
+  match n with
+  | 0 => optimize a2
+  | S n0 =>
+      match optimize a2 with
+      | ANum 0 => ANum (S n0)
+      | ANum (S n2) =>
+          APlus (ANum (S n0)) (ANum (S n2))
+      | APlus a1 a2 =>
+          APlus (ANum (S n0)) (APlus a1 a2)
+      | AMinus a1 a2 =>
+          APlus (ANum (S n0)) (AMinus a1 a2)
+      | AMult a1 a2 =>
+          APlus (ANum (S n0)) (AMult a1 a2)
+      end
+  end = aeval a1 + aeval a2.
+
+Proof.
+intros a1 a2 n E1 IHa1 IHa2.
+rewrite <- IHa1.
+(* Replace occurrence of `aeval (ANum n)` with `aeval a1` to match the goal *)
+  destruct n as [|n0].
+- simpl.
+(* After simplifying, `optimize a2` should be `aeval (optimize a2)` which is equal to `aeval a2` by assumption `IHa2` *)
+    assumption.
+- simpl.
+(* Need to consider different possible forms of `optimize a2` *)
+    destruct (optimize a2) as [|a3 a4|a3 a4|a3 a4] eqn:E2.
++ simpl.
+(* If `optimize a2` is `ANum m`, then arithmetic addition applies *)
+      apply IHa2.
++ simpl.
+(* For `APlus`, `AMinus`, and `AMult`, we follow the same pattern *)
+      rewrite IHa2.
+reflexivity.
++ simpl.
+rewrite IHa2.
+reflexivity.
++ simpl.
+rewrite IHa2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #308)
+Error in step "apply IHa2.".
+Message: In environment
+a1, a2 : aexp
+n0 : nat
+E1 : optimize a1 = ANum (S n0)
+IHa1 : aeval (ANum (S n0)) = aeval a1
+n : nat
+E2 : optimize a2 = ANum n
+IHa2 : aeval (ANum n) = aeval a2
+Unable to unify "aeval (ANum n) = aeval a2" with
+ "aeval
+    match n with
+    | 0 => ANum (S n0)
+    | S n2 => APlus (ANum (S n0)) (ANum (S n2))
+    end = S (n0 + aeval a2)"..
+Goal: aeval
+  match n with
+  | 0 => ANum (S n0)
+  | S n2 => APlus (ANum (S n0)) (ANum (S n2))
+  end = S (n0 + aeval a2).
+
+TRYING TO PROVE LEMMA
+Lemma optimize_aexp_plus_zero_3 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall n : nat, forall E2 : optimize a2 = ANum n, forall IHa2 : aeval (ANum n) = aeval a2, aeval
+  match n with
+  | 0 => ANum (S n0)
+  | S n2 => APlus (ANum (S n0)) (ANum (S n2))
+  end = S (n0 + aeval a2).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma optimize_aexp_plus_zero_3 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall n : nat, forall E2 : optimize a2 = ANum n, forall IHa2 : aeval (ANum n) = aeval a2, aeval
+  match n with
+  | 0 => ANum (S n0)
+  | S n2 => APlus (ANum (S n0)) (ANum (S n2))
+  end = S (n0 + aeval a2).
+
+Proof.
+intros a1 a2 n0 E1 IHa1 n E2 IHa2.
+destruct n.
+(* Split the proof into two cases: when n is 0 and when n is S n2 *)
+  - (* n = 0 *)
+    simpl.
+(* Simplification will remove the APlus (ANum (S n0)) (ANum 0) *)
+    rewrite IHa2.
+lia.
+(* We use the `lia` tactic which solves linear integer arithmetic problems.
+*)
+  - (* n = S n2 *)
+    simpl.
+(* Simplification will show the final expression to be S (n0 + S n2) *)
+    rewrite IHa1, IHa2.
+lia.
+(* `lia` solves the arithmetic S (n0 + S n2) = S (n0 + (S n2)) *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #294)
+Error in step "rewrite IHa2.".
+Message: Found no subterm matching 
+"aeval (ANum 0)" in the current goal..
+Goal: S n0 = S (n0 + aeval a2).
+
+TRYING TO PROVE LEMMA
+Lemma optimize_aexp_add_zero_r_4 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + aeval a2).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma optimize_aexp_add_zero_r_4 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + aeval a2).
+
+Proof.
+intros a1 a2 n0 E1 IHa1 E2 IHa2.
+rewrite IHa2.
+simpl.
+(* S n0 = S (n0 + 0) *)
+  rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "rewrite IHa2.".
+Message: Found no subterm matching 
+"aeval (ANum 0)" in the current goal..
+Goal: S n0 = S (n0 + aeval a2).
+
+TRYING TO PROVE LEMMA
+Lemma optimize_aexp_add_zero_r_5 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + aeval a2).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma optimize_aexp_add_zero_r_5 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + aeval a2).
+
+Proof.
+(* Introducing the variables into the context *)
+  intros a1 a2 n0 E1 IHa1 E2 IHa2.
+(* Rewriting the aeval of ANum 0 to be 0 by definition *)
+  rewrite <- IHa2.
+(* Simplifying the S (n0 + 0) to just S n0, using the fact that x + 0 = x for any x *)
+  simpl.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #292)
+Error in step "reflexivity.".
+Message: In environment
+a1, a2 : aexp
+n0 : nat
+E1 : optimize a1 = ANum (S n0)
+IHa1 : aeval (ANum (S n0)) = aeval a1
+E2 : optimize a2 = ANum 0
+IHa2 : aeval (ANum 0) = aeval a2
+Unable to unify "S (n0 + 0)" with 
+"S n0"..
+Goal: S n0 = S (n0 + 0).
+
+TRYING TO PROVE LEMMA
+Lemma optimized_aexp_addition_zero_6 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma optimized_aexp_addition_zero_6 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+Proof.
+(* By applying the Peano axiom that states S n = S m -> n = m, and basic arithmetic,
+     we can show that S n0 is equal to S (n0 + 0) where "+" denotes addition.
+This result holds because adding 0 to any natural number does not change its value.
+*)
+  intros a1 a2 n0 E1 IHa1 E2 IHa2.
+simpl.
+(* Simplify to observe that n0 = n0 + 0 *)
+  reflexivity.
+(* Conclude that both sides are indeed equal, by the definition of "+" and reflexivity of equality.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #290)
+Error in step "reflexivity.".
+Message: In environment
+a1, a2 : aexp
+n0 : nat
+E1 : optimize a1 = ANum (S n0)
+IHa1 : aeval (ANum (S n0)) = aeval a1
+E2 : optimize a2 = ANum 0
+IHa2 : aeval (ANum 0) = aeval a2
+Unable to unify "S (n0 + 0)" with 
+"S n0"..
+Goal: S n0 = S (n0 + 0).
+
+TRYING TO PROVE LEMMA
+Lemma optimized_aexp_addition_zero_7 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma optimized_aexp_addition_zero_7 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+Proof.
+intros a1 a2 n0 E1 IHa1 E2 IHa2.
+simpl.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #290)
+Error in step "reflexivity.".
+Message: In environment
+a1, a2 : aexp
+n0 : nat
+E1 : optimize a1 = ANum (S n0)
+IHa1 : aeval (ANum (S n0)) = aeval a1
+E2 : optimize a2 = ANum 0
+IHa2 : aeval (ANum 0) = aeval a2
+Unable to unify "S (n0 + 0)" with 
+"S n0"..
+Goal: S n0 = S (n0 + 0).
+
+TRYING TO PROVE LEMMA
+Lemma optimized_aexp_addition_zero_8 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma optimized_aexp_addition_zero_8 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+Proof.
+intros a1 a2 n0 E1 IHa1 E2 IHa2.
+(* We use `reflexivity` which resolves using the fact that `n0 + 0 = n0` in Peano arithmetic.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "reflexivity.".
+Message: In environment
+a1, a2 : aexp
+n0 : nat
+E1 : optimize a1 = ANum (S n0)
+IHa1 : aeval (ANum (S n0)) = aeval a1
+E2 : optimize a2 = ANum 0
+IHa2 : aeval (ANum 0) = aeval a2
+Unable to unify "S (n0 + 0)" with 
+"S n0"..
+Goal: S n0 = S (n0 + 0).
+
+TRYING TO PROVE LEMMA
+Lemma optimized_aexp_addition_zero_9 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat simpl.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+Theorem repeat_loop : forall (m n : nat),
+  m + n = n + m.
+Proof.
+  intros m n.
+  
+  
+Admitted.
+
+
+
+
+
+Fixpoint optimize_0plus_b (b : bexp) : bexp
+  :=
+  match b with
+  | BTrue       => BTrue
+  | BFalse      => BFalse
+  | BEq a1 a2   => BEq (optimize_0plus a1) (optimize_0plus a2)
+  | BNeq a1 a2  => BNeq (optimize_0plus a1) (optimize_0plus a2)
+  | BLe a1 a2   => BLe (optimize_0plus a1) (optimize_0plus a2)
+  | BGt a1 a2   => BGt (optimize_0plus a1) (optimize_0plus a2)
+  | other       => other
+  end.
+
+Theorem optimize_0plus_b_sound : forall b,
+  beval (optimize_0plus_b b) = beval b.
+Proof.
+  intros b.
+  destruct b;
+  try (simpl; repeat (rewrite optimize_0plus_sound); reflexivity).
+Qed.
+
+
+
+
+Fixpoint optimize (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => APlus e1 e2
+          end
+      end
+  | AMinus e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => e1
+          | e2 => AMinus e1 e2
+          end
+      end
+  | AMult e1 e2 =>
+      match optimize e1 with
+      | ANum 0 => ANum 0
+      | ANum 1 => optimize e2
+      | e1 =>
+          match optimize e2 with
+          | ANum 0 => ANum 0
+          | ANum 1 => e1
+          | e2 => AMult e1 e2
+          end
+      end
+  end.
+
+
+
+Lemma optimized_aexp_addition_zero_9 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+Proof.
+(* This theorem is a simple statement of arithmetic where "S n0" is the successor of "n0", equivalent to "n0 + 1",
+     and the theorem states that "S n0" is equal to "S (n0 + 0)" which is trivially true since "n0 + 0" is "n0".
+Therefore we can prove this directly using reflexivity, as both sides are definitionally equal.
+*)
+  intros a1 a2 n0 E1 IHa1 E2 IHa2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "reflexivity.".
+Message: In environment
+a1, a2 : aexp
+n0 : nat
+E1 : optimize a1 = ANum (S n0)
+IHa1 : aeval (ANum (S n0)) = aeval a1
+E2 : optimize a2 = ANum 0
+IHa2 : aeval (ANum 0) = aeval a2
+Unable to unify "S (n0 + 0)" with 
+"S n0"..
+Goal: S n0 = S (n0 + 0).
+
+TRYING TO PROVE LEMMA
+Lemma optimized_aexp_addition_zero_10 : forall a1 a2 : aexp, forall n0 : nat, forall E1 : optimize a1 = ANum (S n0), forall IHa1 : aeval (ANum (S n0)) = aeval a1, forall E2 : optimize a2 = ANum 0, forall IHa2 : aeval (ANum 0) = aeval a2, S n0 = S (n0 + 0).
+
+Error proving optimize_sound
+MAX LEMMA DEPTH REACHED. GIVING UP.

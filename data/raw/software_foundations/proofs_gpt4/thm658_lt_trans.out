@@ -1,0 +1,746 @@
+PROVING lt_trans
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+
+
+Theorem lt_trans : transitive lt.
+
+Proof.
+unfold transitive.
+intros n m o Hnm Hmo.
+unfold lt in *.
+apply (le_trans n (S m) o).
+- apply n_lt_m__n_le_m.
+assumption.
+- assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #158)
+Error in step "apply (le_trans n (S m) o).".
+Message: In environment
+n, m, o : nat
+Hnm : S n <= m
+Hmo : S m <= o
+Unable to unify "n <= o" with "S n <= o"..
+Goal: S n <= o.
+
+TRYING TO PROVE LEMMA
+Lemma nat_succ_le_transitive_0 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+
+
+Lemma nat_succ_le_transitive_0 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+Proof.
+(* Given the premises S n <= m and S m <= o, we need to prove S n <= o.
+Since we have transitivity of <= available, we will use it to first prove n <= m and then S n <= S m.
+Then we can apply transitivity of <= again with S n <= S m and S m <= o to conclude S n <= o.
+Start with introducing variables.
+*)
+  intros n m o Hnm Hmo.
+(* Given Hnm : S n <= m, we can apply Sn_le_Sm__n_le_m to get n <= m *)
+  apply Sn_le_Sm__n_le_m in Hnm.
+(* Now we apply n_le_m__Sn_le_Sm because we have n <= m to get S n <= S m *)
+  apply n_le_m__Sn_le_Sm in Hnm.
+(* Finally, we apply the transitivity of <= because we have S n <= S m and S m <= o *)
+  apply (le_trans _ (S m) _ Hnm Hmo).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #154)
+Error in step "apply Sn_le_Sm__n_le_m in Hnm.".
+Message: Unable to apply lemma of type
+ "forall n m : nat, S n <= S m -> n <= m"
+on hypothesis of type "S n <= m"..
+Goal: S n <= o.
+
+TRYING TO PROVE LEMMA
+Lemma nat_succ_le_transitive_1 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+
+
+Lemma nat_succ_le_transitive_1 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+Proof.
+intros n m o Hnm Hmo.
+apply le_trans with (m := S m); assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #154)
+Error in step "apply le_trans with (m := S m); assumption.".
+Message: No such bound variable m
+(no bound variables at all in the expression)..
+Goal: S n <= o.
+
+TRYING TO PROVE LEMMA
+Lemma nat_succ_le_transitive_2 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+
+
+Lemma nat_succ_le_transitive_2 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+Proof.
+intros n m o Hnm Hmo.
+(* Apply the transitivity of the 'le' relation *)
+  apply le_trans with (S n) m o; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #154)
+Error in step "apply le_trans with (S n) m o; assumption.".
+Message: Not the right number of missing arguments (expected
+0)..
+Goal: S n <= o.
+
+TRYING TO PROVE LEMMA
+Lemma nat_succ_le_transitive_3 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+
+
+Lemma nat_succ_le_transitive_3 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+Proof.
+(* Since `le_trans` is already proven to be transitive, we can simply use it.
+We know that `S n <= m`, and `S m <= o`, so we can use transitive property 
+     to show that `S n <= o`.
+We first convert `S m <= o` to `m <= o` 
+     by using `Sn_le_Sm__n_le_m`, and then we apply `le_trans`.
+*)
+  intros n m o Hnm Hmo.
+apply Sn_le_Sm__n_le_m in Hmo.
+apply (le_trans (S n) m o); assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #154)
+Error in step "apply Sn_le_Sm__n_le_m in Hmo.".
+Message: Unable to apply lemma of type
+ "forall n m : nat, S n <= S m -> n <= m"
+on hypothesis of type "S m <= o"..
+Goal: S n <= o.
+
+TRYING TO PROVE LEMMA
+Lemma nat_succ_le_transitive_4 : forall n m o : nat, forall Hnm : S n <= m, forall Hmo : S m <= o, S n <= o.
+
+Error proving lt_trans
+MAX LEMMA DEPTH REACHED. GIVING UP.

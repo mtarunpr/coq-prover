@@ -1,0 +1,2220 @@
+PROVING ceval__ceval_step
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven4 :
+  test_ceval (X !-> 4) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Theorem ceval_step__ceval: forall c st st',
+      (exists i, ceval_step st c i = Some st') ->
+      st =[ c ]=> st'.
+Proof.
+  intros c st st' H.
+  inversion H as [i E].
+  clear H.
+  generalize dependent st'.
+  generalize dependent st.
+  generalize dependent c.
+  induction i as [| i' ].
+
+  - 
+    intros c st st' H. discriminate H.
+
+  - 
+    intros c st st' H.
+    destruct c;
+           simpl in H; inversion H; subst; clear H.
+      +  apply E_Skip.
+      +  apply E_Asgn. reflexivity.
+
+      + 
+        destruct (ceval_step st c1 i') eqn:Heqr1.
+        * 
+          apply E_Seq with s.
+            apply IHi'. rewrite Heqr1. reflexivity.
+            apply IHi'. assumption.
+        * 
+          discriminate H1.
+
+      + 
+        destruct (beval st b) eqn:Heqr.
+        * 
+          apply E_IfTrue. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+        * 
+          apply E_IfFalse. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+
+      +  destruct (beval st b) eqn :Heqr.
+        * 
+         destruct (ceval_step st c i') eqn:Heqr1.
+         { 
+           apply E_WhileTrue with s. rewrite Heqr.
+           reflexivity.
+           apply IHi'. rewrite Heqr1. reflexivity.
+           apply IHi'. assumption. }
+         {  discriminate H1. }
+        * 
+          injection H1 as H2. rewrite <- H2.
+          apply E_WhileFalse. apply Heqr. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_ceval_step__ceval_inf : option (nat*string) := None.
+
+
+Theorem ceval_step_more: forall i1 i2 st st' c,
+  i1 <= i2 ->
+  ceval_step st c i1 = Some st' ->
+  ceval_step st c i2 = Some st'.
+Proof.
+induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
+  - 
+    simpl in Hceval. discriminate Hceval.
+  - 
+    destruct i2 as [|i2']. inversion Hle.
+    assert (Hle': i1' <= i2') by lia.
+    destruct c.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. simpl.
+      destruct (ceval_step st c1 i1') eqn:Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        discriminate Hceval.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); apply (IHi1' i2') in Hceval;
+        assumption.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); try assumption.
+      destruct (ceval_step st c i1') eqn: Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite -> Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        simpl in Hceval. discriminate Hceval.  Qed.
+
+
+
+
+
+Theorem ceval__ceval_step : forall c st st',
+      st =[ c ]=> st' ->
+      exists i, ceval_step st c i = Some st'.
+
+Proof.
+(* Induction on the derivation of st =[ c ]=> st' *)
+  intros c st st' Hce.
+induction Hce.
+- (* <{skip}> *)
+    exists 1; simpl; reflexivity.
+- (* <{l := a}> *)
+    exists 1; simpl; reflexivity.
+- (* <{c1;c2}> *)
+    (* For the sequential composition, we have to find an i such that
+       the first command takes up to i steps, then show that the second
+       command can be done in one additional step since we will use
+       the result of the first command as the new state *)
+    destruct IHHce1 as [i1 Hce1].
+destruct IHHce2 as [i2 Hce2].
+exists (S (i1 + i2)); simpl.
+rewrite Hce1.
+simpl.
+apply Hce2.
+- (* <{if b then c1 else c2 end}> *)
+    (* For if statements, the situation is similar to the sequence,
+       we just need to account for the additional step for the evaluation
+       of the conditional itself.
+*)
+    destruct IHHce as [i Hce1].
+exists (S i); simpl.
+rewrite H.
+simpl.
+apply Hce1.
+- (* <{while b1 do c1 end}; bas case where b1 is false *)
+    (* For the while loop with the guard evaluating to false initially
+       we can use 1 as the number of required steps.
+*)
+    exists 1.
+simpl.
+rewrite H.
+reflexivity.
+- (* <{while b1 do c1 end}; recursive case where b1 is true initially *)
+    (* For the while loop where the guard evaluates to true, we need to take into
+       account the number of steps the body takes and then show that there is
+       one additional step for one more iteration of the while loop *)
+    destruct IHHce1 as [i1 Hce1].
+destruct IHHce2 as [i2 Hce2].
+exists (S (i1 + i2)).
+simpl.
+rewrite H.
+simpl.
+rewrite Hce1.
+simpl.
+apply Hce2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #342)
+Error in step "exists 1; simpl; reflexivity.".
+Message: In environment
+st : state
+a : aexp
+n : nat
+x : string
+H : aeval st a = n
+Unable to unify "Some (x !-> n; st)" with
+ "Some (x !-> aeval st a; st)"..
+Goal: exists i : nat,
+  ceval_step st <{ x := a }> i = Some (x !-> n; st).
+
+TRYING TO PROVE LEMMA
+Lemma aeval_ceval_step_assignment_existence_0 : forall st : state, forall a : aexp, forall n : nat, forall x : string, forall H : aeval st a = n, exists i : nat,
+  ceval_step st <{ x := a }> i = Some (x !-> n; st).
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven4 :
+  test_ceval (X !-> 4) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Theorem ceval_step__ceval: forall c st st',
+      (exists i, ceval_step st c i = Some st') ->
+      st =[ c ]=> st'.
+Proof.
+  intros c st st' H.
+  inversion H as [i E].
+  clear H.
+  generalize dependent st'.
+  generalize dependent st.
+  generalize dependent c.
+  induction i as [| i' ].
+
+  - 
+    intros c st st' H. discriminate H.
+
+  - 
+    intros c st st' H.
+    destruct c;
+           simpl in H; inversion H; subst; clear H.
+      +  apply E_Skip.
+      +  apply E_Asgn. reflexivity.
+
+      + 
+        destruct (ceval_step st c1 i') eqn:Heqr1.
+        * 
+          apply E_Seq with s.
+            apply IHi'. rewrite Heqr1. reflexivity.
+            apply IHi'. assumption.
+        * 
+          discriminate H1.
+
+      + 
+        destruct (beval st b) eqn:Heqr.
+        * 
+          apply E_IfTrue. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+        * 
+          apply E_IfFalse. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+
+      +  destruct (beval st b) eqn :Heqr.
+        * 
+         destruct (ceval_step st c i') eqn:Heqr1.
+         { 
+           apply E_WhileTrue with s. rewrite Heqr.
+           reflexivity.
+           apply IHi'. rewrite Heqr1. reflexivity.
+           apply IHi'. assumption. }
+         {  discriminate H1. }
+        * 
+          injection H1 as H2. rewrite <- H2.
+          apply E_WhileFalse. apply Heqr. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_ceval_step__ceval_inf : option (nat*string) := None.
+
+
+Theorem ceval_step_more: forall i1 i2 st st' c,
+  i1 <= i2 ->
+  ceval_step st c i1 = Some st' ->
+  ceval_step st c i2 = Some st'.
+Proof.
+induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
+  - 
+    simpl in Hceval. discriminate Hceval.
+  - 
+    destruct i2 as [|i2']. inversion Hle.
+    assert (Hle': i1' <= i2') by lia.
+    destruct c.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. simpl.
+      destruct (ceval_step st c1 i1') eqn:Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        discriminate Hceval.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); apply (IHi1' i2') in Hceval;
+        assumption.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); try assumption.
+      destruct (ceval_step st c i1') eqn: Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite -> Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        simpl in Hceval. discriminate Hceval.  Qed.
+
+
+
+
+
+Lemma aeval_ceval_step_assignment_existence_0 : forall st : state, forall a : aexp, forall n : nat, forall x : string, forall H : aeval st a = n, exists i : nat,
+  ceval_step st <{ x := a }> i = Some (x !-> n; st).
+
+Proof.
+(* Since assignment is a single step in our operational semantics,
+     we can choose i = 1, which means the command will complete in one step.
+*)
+  intros st a n x H.
+exists 1.
+(* We provide 1 as the existential witness *)
+
+  (* And now we prove that ceval_step for assignment evaluates correctly *)
+  simpl.
+(* This unfolds the first step of ceval_step function *)
+  rewrite H.
+(* We apply the hypothesis H to match aeval st a with n *)
+  reflexivity.
+(* The ceval_step with i = 1 evaluates to x !-> n; st, as required *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven4 :
+  test_ceval (X !-> 4) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Theorem ceval_step__ceval: forall c st st',
+      (exists i, ceval_step st c i = Some st') ->
+      st =[ c ]=> st'.
+Proof.
+  intros c st st' H.
+  inversion H as [i E].
+  clear H.
+  generalize dependent st'.
+  generalize dependent st.
+  generalize dependent c.
+  induction i as [| i' ].
+
+  - 
+    intros c st st' H. discriminate H.
+
+  - 
+    intros c st st' H.
+    destruct c;
+           simpl in H; inversion H; subst; clear H.
+      +  apply E_Skip.
+      +  apply E_Asgn. reflexivity.
+
+      + 
+        destruct (ceval_step st c1 i') eqn:Heqr1.
+        * 
+          apply E_Seq with s.
+            apply IHi'. rewrite Heqr1. reflexivity.
+            apply IHi'. assumption.
+        * 
+          discriminate H1.
+
+      + 
+        destruct (beval st b) eqn:Heqr.
+        * 
+          apply E_IfTrue. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+        * 
+          apply E_IfFalse. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+
+      +  destruct (beval st b) eqn :Heqr.
+        * 
+         destruct (ceval_step st c i') eqn:Heqr1.
+         { 
+           apply E_WhileTrue with s. rewrite Heqr.
+           reflexivity.
+           apply IHi'. rewrite Heqr1. reflexivity.
+           apply IHi'. assumption. }
+         {  discriminate H1. }
+        * 
+          injection H1 as H2. rewrite <- H2.
+          apply E_WhileFalse. apply Heqr. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_ceval_step__ceval_inf : option (nat*string) := None.
+
+
+Theorem ceval_step_more: forall i1 i2 st st' c,
+  i1 <= i2 ->
+  ceval_step st c i1 = Some st' ->
+  ceval_step st c i2 = Some st'.
+Proof.
+induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
+  - 
+    simpl in Hceval. discriminate Hceval.
+  - 
+    destruct i2 as [|i2']. inversion Hle.
+    assert (Hle': i1' <= i2') by lia.
+    destruct c.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. simpl.
+      destruct (ceval_step st c1 i1') eqn:Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        discriminate Hceval.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); apply (IHi1' i2') in Hceval;
+        assumption.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); try assumption.
+      destruct (ceval_step st c i1') eqn: Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite -> Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        simpl in Hceval. discriminate Hceval.  Qed.
+
+
+
+
+
+Lemma aeval_ceval_step_assignment_existence_0 : forall st : state, forall a : aexp, forall n : nat, forall x : string, forall H : aeval st a = n, exists i : nat,
+  ceval_step st <{ x := a }> i = Some (x !-> n; st).
+
+Proof.
+(* Since assignment is a single step in our operational semantics,
+     we can choose i = 1, which means the command will complete in one step.
+*)
+  intros st a n x H.
+exists 1.
+(* We provide 1 as the existential witness *)
+
+  (* And now we prove that ceval_step for assignment evaluates correctly *)
+  simpl.
+(* This unfolds the first step of ceval_step function *)
+  rewrite H.
+(* We apply the hypothesis H to match aeval st a with n *)
+  reflexivity.
+(* The ceval_step with i = 1 evaluates to x !-> n; st, as required *)
+
+Qed.
+
+Theorem ceval__ceval_step : forall c st st',
+      st =[ c ]=> st' ->
+      exists i, ceval_step st c i = Some st'.
+
+Proof.
+(* Induction on the derivation of st =[ c ]=> st' *)
+  intros c st st' Hce.
+induction Hce.
+- (* <{skip}> *)
+    exists 1; simpl; reflexivity.
+- (* <{l := a}> *)
+    apply (@aeval_ceval_step_assignment_existence_0 st a n x H).
+- (* <{c1;c2}> *)
+    (* For the sequential composition, we have to find an i such that
+       the first command takes up to i steps, then show that the second
+       command can be done in one additional step since we will use
+       the result of the first command as the new state *)
+    destruct IHHce1 as [i1 Hce1].
+destruct IHHce2 as [i2 Hce2].
+exists (S (i1 + i2)); simpl.
+rewrite Hce1.
+simpl.
+apply Hce2.
+- (* <{if b then c1 else c2 end}> *)
+    (* For if statements, the situation is similar to the sequence,
+       we just need to account for the additional step for the evaluation
+       of the conditional itself.
+*)
+    destruct IHHce as [i Hce1].
+exists (S i); simpl.
+rewrite H.
+simpl.
+apply Hce1.
+- (* <{while b1 do c1 end}; bas case where b1 is false *)
+    (* For the while loop with the guard evaluating to false initially
+       we can use 1 as the number of required steps.
+*)
+    exists 1.
+simpl.
+rewrite H.
+reflexivity.
+- (* <{while b1 do c1 end}; recursive case where b1 is true initially *)
+    (* For the while loop where the guard evaluates to true, we need to take into
+       account the number of steps the body takes and then show that there is
+       one additional step for one more iteration of the while loop *)
+    destruct IHHce1 as [i1 Hce1].
+destruct IHHce2 as [i2 Hce2].
+exists (S (i1 + i2)).
+simpl.
+rewrite H.
+simpl.
+rewrite Hce1.
+simpl.
+apply Hce2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #362)
+Error in step "destruct IHHce1 as [i1 Hce1].".
+Message: Hce1 is already used..
+Goal: exists i : nat,
+  ceval_step st <{ c1; c2 }> i = Some st''.
+
+TRYING TO PROVE LEMMA
+Lemma seq_composition_ceval_step_exists_1 : forall c1 c2 : com, forall st st' st'' : state, forall Hce1 : st =[ c1 ]=> st', forall Hce2 : st' =[ c2 ]=> st'', forall IHHce1 : exists i : nat, ceval_step st c1 i = Some st', forall IHHce2 : exists i : nat,
+  ceval_step st' c2 i = Some st'', exists i : nat,
+  ceval_step st <{ c1; c2 }> i = Some st''.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven4 :
+  test_ceval (X !-> 4) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Theorem ceval_step__ceval: forall c st st',
+      (exists i, ceval_step st c i = Some st') ->
+      st =[ c ]=> st'.
+Proof.
+  intros c st st' H.
+  inversion H as [i E].
+  clear H.
+  generalize dependent st'.
+  generalize dependent st.
+  generalize dependent c.
+  induction i as [| i' ].
+
+  - 
+    intros c st st' H. discriminate H.
+
+  - 
+    intros c st st' H.
+    destruct c;
+           simpl in H; inversion H; subst; clear H.
+      +  apply E_Skip.
+      +  apply E_Asgn. reflexivity.
+
+      + 
+        destruct (ceval_step st c1 i') eqn:Heqr1.
+        * 
+          apply E_Seq with s.
+            apply IHi'. rewrite Heqr1. reflexivity.
+            apply IHi'. assumption.
+        * 
+          discriminate H1.
+
+      + 
+        destruct (beval st b) eqn:Heqr.
+        * 
+          apply E_IfTrue. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+        * 
+          apply E_IfFalse. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+
+      +  destruct (beval st b) eqn :Heqr.
+        * 
+         destruct (ceval_step st c i') eqn:Heqr1.
+         { 
+           apply E_WhileTrue with s. rewrite Heqr.
+           reflexivity.
+           apply IHi'. rewrite Heqr1. reflexivity.
+           apply IHi'. assumption. }
+         {  discriminate H1. }
+        * 
+          injection H1 as H2. rewrite <- H2.
+          apply E_WhileFalse. apply Heqr. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_ceval_step__ceval_inf : option (nat*string) := None.
+
+
+Theorem ceval_step_more: forall i1 i2 st st' c,
+  i1 <= i2 ->
+  ceval_step st c i1 = Some st' ->
+  ceval_step st c i2 = Some st'.
+Proof.
+induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
+  - 
+    simpl in Hceval. discriminate Hceval.
+  - 
+    destruct i2 as [|i2']. inversion Hle.
+    assert (Hle': i1' <= i2') by lia.
+    destruct c.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. simpl.
+      destruct (ceval_step st c1 i1') eqn:Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        discriminate Hceval.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); apply (IHi1' i2') in Hceval;
+        assumption.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); try assumption.
+      destruct (ceval_step st c i1') eqn: Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite -> Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        simpl in Hceval. discriminate Hceval.  Qed.
+
+
+
+
+
+Lemma aeval_ceval_step_assignment_existence_0 : forall st : state, forall a : aexp, forall n : nat, forall x : string, forall H : aeval st a = n, exists i : nat,
+  ceval_step st <{ x := a }> i = Some (x !-> n; st).
+
+Proof.
+(* Since assignment is a single step in our operational semantics,
+     we can choose i = 1, which means the command will complete in one step.
+*)
+  intros st a n x H.
+exists 1.
+(* We provide 1 as the existential witness *)
+
+  (* And now we prove that ceval_step for assignment evaluates correctly *)
+  simpl.
+(* This unfolds the first step of ceval_step function *)
+  rewrite H.
+(* We apply the hypothesis H to match aeval st a with n *)
+  reflexivity.
+(* The ceval_step with i = 1 evaluates to x !-> n; st, as required *)
+
+Qed.
+
+Lemma seq_composition_ceval_step_exists_1 : forall c1 c2 : com, forall st st' st'' : state, forall Hce1 : st =[ c1 ]=> st', forall Hce2 : st' =[ c2 ]=> st'', forall IHHce1 : exists i : nat, ceval_step st c1 i = Some st', forall IHHce2 : exists i : nat,
+  ceval_step st' c2 i = Some st'', exists i : nat,
+  ceval_step st <{ c1; c2 }> i = Some st''.
+
+Proof.
+intros c1 c2 st st' st'' Hce1 Hce2 IHHce1 IHHce2.
+(* We get the witness numbers from the hypotheses IHHce1 and IHHce2 *)
+  destruct IHHce1 as [i1 Hce1_step].
+destruct IHHce2 as [i2 Hce2_step].
+(* We use these witnesses to construct a new witnessing number for the sequential composition *)
+  exists (S (i1 + i2)).
+(* We now proceed by induction on the number of steps in the evaluation.
+We start with the inner command c1.
+*)
+  simpl.
+rewrite <- Hce1_step.
+(* Now we take care of command c2, which should be evaluated in state 'st' coming after c1 *)
+  assert (H: ceval_step st' c2 i2 = Some st'').
+{ apply Hce2_step.
+}
+  clear Hce2_step.
+(* We now reason about nesting of ceval_step to match the structure of <{c1; c2}> *)
+  revert H.
+generalize i2 as n, st'' as st'''.
+induction i1 as [|i1']; intros n st''' H.
+- simpl in Hce1_step.
+discriminate Hce1_step.
+- simpl in Hce1_step.
+simpl.
+remember (ceval_step st c1 i1') as step_res.
+destruct step_res; try discriminate Hce1_step.
+injection Hce1_step as Hce1_step'.
+rewrite Hce1_step'.
+apply IHi1'.
+apply H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #358)
+Error in step "rewrite <- Hce1_step.".
+Message: Found no subterm matching 
+"Some st'" in the current goal..
+Goal: LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+Some st''.
+
+TRYING TO PROVE LEMMA
+Lemma sequential_composition_ceval_step_correctness_2 : forall c1 c2 : com, forall st st' st'' : state, forall Hce1 : st =[ c1 ]=> st', forall Hce2 : st' =[ c2 ]=> st'', forall i1 : nat, forall Hce1_step : ceval_step st c1 i1 = Some st', forall i2 : nat, forall Hce2_step : ceval_step st' c2 i2 = Some st'', LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+Some st''.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven4 :
+  test_ceval (X !-> 4) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Theorem ceval_step__ceval: forall c st st',
+      (exists i, ceval_step st c i = Some st') ->
+      st =[ c ]=> st'.
+Proof.
+  intros c st st' H.
+  inversion H as [i E].
+  clear H.
+  generalize dependent st'.
+  generalize dependent st.
+  generalize dependent c.
+  induction i as [| i' ].
+
+  - 
+    intros c st st' H. discriminate H.
+
+  - 
+    intros c st st' H.
+    destruct c;
+           simpl in H; inversion H; subst; clear H.
+      +  apply E_Skip.
+      +  apply E_Asgn. reflexivity.
+
+      + 
+        destruct (ceval_step st c1 i') eqn:Heqr1.
+        * 
+          apply E_Seq with s.
+            apply IHi'. rewrite Heqr1. reflexivity.
+            apply IHi'. assumption.
+        * 
+          discriminate H1.
+
+      + 
+        destruct (beval st b) eqn:Heqr.
+        * 
+          apply E_IfTrue. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+        * 
+          apply E_IfFalse. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+
+      +  destruct (beval st b) eqn :Heqr.
+        * 
+         destruct (ceval_step st c i') eqn:Heqr1.
+         { 
+           apply E_WhileTrue with s. rewrite Heqr.
+           reflexivity.
+           apply IHi'. rewrite Heqr1. reflexivity.
+           apply IHi'. assumption. }
+         {  discriminate H1. }
+        * 
+          injection H1 as H2. rewrite <- H2.
+          apply E_WhileFalse. apply Heqr. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_ceval_step__ceval_inf : option (nat*string) := None.
+
+
+Theorem ceval_step_more: forall i1 i2 st st' c,
+  i1 <= i2 ->
+  ceval_step st c i1 = Some st' ->
+  ceval_step st c i2 = Some st'.
+Proof.
+induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
+  - 
+    simpl in Hceval. discriminate Hceval.
+  - 
+    destruct i2 as [|i2']. inversion Hle.
+    assert (Hle': i1' <= i2') by lia.
+    destruct c.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. simpl.
+      destruct (ceval_step st c1 i1') eqn:Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        discriminate Hceval.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); apply (IHi1' i2') in Hceval;
+        assumption.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); try assumption.
+      destruct (ceval_step st c i1') eqn: Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite -> Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        simpl in Hceval. discriminate Hceval.  Qed.
+
+
+
+
+
+Lemma aeval_ceval_step_assignment_existence_0 : forall st : state, forall a : aexp, forall n : nat, forall x : string, forall H : aeval st a = n, exists i : nat,
+  ceval_step st <{ x := a }> i = Some (x !-> n; st).
+
+Proof.
+(* Since assignment is a single step in our operational semantics,
+     we can choose i = 1, which means the command will complete in one step.
+*)
+  intros st a n x H.
+exists 1.
+(* We provide 1 as the existential witness *)
+
+  (* And now we prove that ceval_step for assignment evaluates correctly *)
+  simpl.
+(* This unfolds the first step of ceval_step function *)
+  rewrite H.
+(* We apply the hypothesis H to match aeval st a with n *)
+  reflexivity.
+(* The ceval_step with i = 1 evaluates to x !-> n; st, as required *)
+
+Qed.
+
+Lemma sequential_composition_ceval_step_correctness_2 : forall c1 c2 : com, forall st st' st'' : state, forall Hce1 : st =[ c1 ]=> st', forall Hce2 : st' =[ c2 ]=> st'', forall i1 : nat, forall Hce1_step : ceval_step st c1 i1 = Some st', forall i2 : nat, forall Hce2_step : ceval_step st' c2 i2 = Some st'', LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+Some st''.
+
+Proof.
+(* Since `ceval_step st c1 (i1 + i2)` yields `Some st'` and
+     `ceval_step st' c2 (i1 + i2)` yields `Some st''`, we can use 
+     `ceval_step_more` to show `ceval_step st c1 i1` and `ceval_step st' c2 i1`
+     would produce the same states (`st'` and `st''` respectively) given that
+     `i1 + i2` is greater than or equal to both `i1` and `i2`.
+*)
+  intros c1 c2 st st' st'' Hce1 Hce2 i1 Hce1_step i2 Hce2_step.
+assert (H: i1 <= i1 + i2) by lia.
+specialize (ceval_step_more i1 (i1 + i2) st st' c1 H Hce1_step) as Hce1_step_more.
+specialize (ceval_step_more i2 (i1 + i2) st' st'' c2 (le_plus_r i2 i1) Hce2_step).
+congruence.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #354)
+Error in step "specialize (ceval_step_more i2 (i1 + i2) st' st'' c2 (le_plus_r i2 i1) Hce2_step).".
+Message: In environment
+c1, c2 : com
+st, st', st'' : state
+Hce1 : st =[ c1 ]=> st'
+Hce2 : st' =[ c2 ]=> st''
+i1 : nat
+Hce1_step : ceval_step st c1 i1 = Some st'
+i2 : nat
+Hce2_step : ceval_step st' c2 i2 = Some st''
+H : i1 <= i1 + i2
+Hce1_step_more : ceval_step st c1 (i1 + i2) = Some st'
+The term "le_plus_r i2 i1" has type 
+"i1 <= i2 + i1" while it is expected to have type
+ "i2 <= i1 + i2"..
+Goal: LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+Some st''.
+
+TRYING TO PROVE LEMMA
+Lemma ceval_step_sequence_additive_3 : forall c1 c2 : com, forall st st' st'' : state, forall Hce1 : st =[ c1 ]=> st', forall Hce2 : st' =[ c2 ]=> st'', forall i1 : nat, forall Hce1_step : ceval_step st c1 i1 = Some st', forall i2 : nat, forall Hce2_step : ceval_step st' c2 i2 = Some st'', forall H : i1 <= i1 + i2, forall Hce1_step_more : ceval_step st c1 (i1 + i2) = Some st', LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+Some st''.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven4 :
+  test_ceval (X !-> 4) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Theorem ceval_step__ceval: forall c st st',
+      (exists i, ceval_step st c i = Some st') ->
+      st =[ c ]=> st'.
+Proof.
+  intros c st st' H.
+  inversion H as [i E].
+  clear H.
+  generalize dependent st'.
+  generalize dependent st.
+  generalize dependent c.
+  induction i as [| i' ].
+
+  - 
+    intros c st st' H. discriminate H.
+
+  - 
+    intros c st st' H.
+    destruct c;
+           simpl in H; inversion H; subst; clear H.
+      +  apply E_Skip.
+      +  apply E_Asgn. reflexivity.
+
+      + 
+        destruct (ceval_step st c1 i') eqn:Heqr1.
+        * 
+          apply E_Seq with s.
+            apply IHi'. rewrite Heqr1. reflexivity.
+            apply IHi'. assumption.
+        * 
+          discriminate H1.
+
+      + 
+        destruct (beval st b) eqn:Heqr.
+        * 
+          apply E_IfTrue. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+        * 
+          apply E_IfFalse. rewrite Heqr. reflexivity.
+          apply IHi'. assumption.
+
+      +  destruct (beval st b) eqn :Heqr.
+        * 
+         destruct (ceval_step st c i') eqn:Heqr1.
+         { 
+           apply E_WhileTrue with s. rewrite Heqr.
+           reflexivity.
+           apply IHi'. rewrite Heqr1. reflexivity.
+           apply IHi'. assumption. }
+         {  discriminate H1. }
+        * 
+          injection H1 as H2. rewrite <- H2.
+          apply E_WhileFalse. apply Heqr. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_ceval_step__ceval_inf : option (nat*string) := None.
+
+
+Theorem ceval_step_more: forall i1 i2 st st' c,
+  i1 <= i2 ->
+  ceval_step st c i1 = Some st' ->
+  ceval_step st c i2 = Some st'.
+Proof.
+induction i1 as [|i1']; intros i2 st st' c Hle Hceval.
+  - 
+    simpl in Hceval. discriminate Hceval.
+  - 
+    destruct i2 as [|i2']. inversion Hle.
+    assert (Hle': i1' <= i2') by lia.
+    destruct c.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. inversion Hceval.
+      reflexivity.
+    + 
+      simpl in Hceval. simpl.
+      destruct (ceval_step st c1 i1') eqn:Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        discriminate Hceval.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); apply (IHi1' i2') in Hceval;
+        assumption.
+
+    + 
+      simpl in Hceval. simpl.
+      destruct (beval st b); try assumption.
+      destruct (ceval_step st c i1') eqn: Heqst1'o.
+      * 
+        apply (IHi1' i2') in Heqst1'o; try assumption.
+        rewrite -> Heqst1'o. simpl. simpl in Hceval.
+        apply (IHi1' i2') in Hceval; try assumption.
+      * 
+        simpl in Hceval. discriminate Hceval.  Qed.
+
+
+
+
+
+Lemma aeval_ceval_step_assignment_existence_0 : forall st : state, forall a : aexp, forall n : nat, forall x : string, forall H : aeval st a = n, exists i : nat,
+  ceval_step st <{ x := a }> i = Some (x !-> n; st).
+
+Proof.
+(* Since assignment is a single step in our operational semantics,
+     we can choose i = 1, which means the command will complete in one step.
+*)
+  intros st a n x H.
+exists 1.
+(* We provide 1 as the existential witness *)
+
+  (* And now we prove that ceval_step for assignment evaluates correctly *)
+  simpl.
+(* This unfolds the first step of ceval_step function *)
+  rewrite H.
+(* We apply the hypothesis H to match aeval st a with n *)
+  reflexivity.
+(* The ceval_step with i = 1 evaluates to x !-> n; st, as required *)
+
+Qed.
+
+Lemma ceval_step_sequence_additive_3 : forall c1 c2 : com, forall st st' st'' : state, forall Hce1 : st =[ c1 ]=> st', forall Hce2 : st' =[ c2 ]=> st'', forall i1 : nat, forall Hce1_step : ceval_step st c1 i1 = Some st', forall i2 : nat, forall Hce2_step : ceval_step st' c2 i2 = Some st'', forall H : i1 <= i1 + i2, forall Hce1_step_more : ceval_step st c1 (i1 + i2) = Some st', LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+Some st''.
+
+Proof.
+(* We are given the premise that st evaluates to st' with command c1 after i1 steps.
+Also, we are given that st' evaluates to st'' with command c2 after i2 steps.
+We need to show that if we first execute c1 for i1 steps and then c2 for i2 steps, we get st'',
+     assuming that i1 steps are enough for c1 so that executing it for (i1 + i2) steps also gives st'.
+We use the theorem `ceval_step_more` to extend the execution of c1
+     from i1 to (i1 + i2) steps and then use this to show that c2 can execute for (i1 + i2) steps after c1 to get st''.
+*)
+  intros c1 c2 st st' st'' Hce1 Hce2 i1 Hce1_step i2 Hce2_step H Hce1_step_more.
+rewrite <- Hce2_step.
+apply (ceval_step_more _ _ _ _ _ H) in Hce1_step_more.
+rewrite Hce1_step_more.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #352)
+Error in step "apply (ceval_step_more _ _ _ _ _ H) in Hce1_step_more.".
+Message: Unable to apply lemma of type
+ "ceval_step ?st ?c i1 = Some ?st' ->
+  ceval_step ?st ?c (i1 + i2) = Some ?st'"
+on hypothesis of type
+ "ceval_step st c1 (i1 + i2) = Some st'"..
+Goal: LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+ceval_step st' c2 i2.
+
+TRYING TO PROVE LEMMA
+Lemma eval_step_deterministic_with_additional_steps_4 : forall c1 c2 : com, forall st st' st'' : state, forall Hce1 : st =[ c1 ]=> st', forall Hce2 : st' =[ c2 ]=> st'', forall i1 : nat, forall Hce1_step : ceval_step st c1 i1 = Some st', forall i2 : nat, forall Hce2_step : ceval_step st' c2 i2 = Some st'', forall H : i1 <= i1 + i2, forall Hce1_step_more : ceval_step st c1 (i1 + i2) = Some st', LETOPT st' <== ceval_step st c1 (i1 + i2)
+IN ceval_step st' c2 (i1 + i2) = 
+ceval_step st' c2 i2.
+
+Error proving ceval__ceval_step
+MAX LEMMA DEPTH REACHED. GIVING UP.

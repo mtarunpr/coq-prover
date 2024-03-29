@@ -1,0 +1,1115 @@
+PROVING add_comm
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+
+Proof.
+(* We prove this lemma by induction on n.
+*)
+  intros n.
+induction n as [| n' IHn'].
+- (* The base case: 0 + 0 = 0 *)
+    reflexivity.
+- (* The inductive case: S n' + 0 = S n' *)
+    simpl.
+rewrite IHn'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #134)
+Error in step "reflexivity.".
+Message: In environment
+m : nat
+Unable to unify "m + 0" with 
+"0 + m"..
+Goal: forall m : nat, 0 + m = m + 0.
+
+TRYING TO PROVE LEMMA
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+(* We use induction on `n` to prove that for all natural numbers `n`, `n + 0 = n`.
+*)
+  induction n as [| n' IHn'].
+- (* Case `n = 0`.
+In this case, the goal simplifies to `0 + 0 = 0`,
+       which holds by the definition of `plus`.
+*)
+    reflexivity.
+- (* Case `n = S n'`.
+Assume the induction hypothesis `n' + 0 = n'`,
+       we need to show `S n' + 0 = S n'`.
+By the definition of `plus`, this simplifies to `S (n' + 0) = S n'`,
+       and by applying the induction hypothesis, we have `S n' = S n'`, which is true.
+*)
+    simpl.
+rewrite -> IHn'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #128)
+Error in step "induction n as [| n' IHn'].".
+Message: The variable n was not found in the current
+environment..
+Goal: forall m : nat, 0 + m = m + 0.
+
+TRYING TO PROVE LEMMA
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+intros m.
+rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+intros m.
+rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+(* We use induction on `n` to prove that for all natural numbers `n`, `n + 0 = n`.
+*)
+  apply (@add_zero_comm_1 ).
+- (* Case `n = 0`.
+In this case, the goal simplifies to `0 + 0 = 0`,
+       which holds by the definition of `plus`.
+*)
+    reflexivity.
+- (* Case `n = S n'`.
+Assume the induction hypothesis `n' + 0 = n'`,
+       we need to show `S n' + 0 = S n'`.
+By the definition of `plus`, this simplifies to `S (n' + 0) = S n'`,
+       and by applying the induction hypothesis, we have `S n' = S n'`, which is true.
+*)
+    simpl.
+rewrite -> IHn'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+intros m.
+rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+
+
+
+Proof.
+(* We use induction on `n` to prove that for all natural numbers `n`, `n + 0 = n`.
+*)
+  
+apply (@add_zero_comm_1 ).
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+
+Proof.
+(* We prove this lemma by induction on n.
+*)
+  intros n.
+induction n as [| n' IHn'].
+- (* The base case: 0 + 0 = 0 *)
+    apply (@add_zero_comm_0 ).
+- (* The inductive case: S n' + 0 = S n' *)
+    simpl.
+rewrite IHn'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #160)
+Error in step "rewrite IHn'.".
+Message: Found no subterm matching 
+"n' + ?M1094" in the current goal..
+Goal: forall m : nat, S (n' + m) = m + S n'.
+
+TRYING TO PROVE LEMMA
+Lemma succ_plus_comm_1 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+intros m.
+rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+
+
+
+Proof.
+(* We use induction on `n` to prove that for all natural numbers `n`, `n + 0 = n`.
+*)
+  
+apply (@add_zero_comm_1 ).
+Qed.
+
+Lemma succ_plus_comm_1 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+Proof.
+(* Let's prove the lemma by introducing the necessary variables.
+*)
+  intros n' IHn' m.
+(* Use the provided induction hypothesis (IHn').
+*)
+  rewrite <- IHn'.
+(* Now we can apply the result from the lemma add_zero_comm_1 which states 0 + m = m + 0.
+*)
+  apply add_zero_comm_1.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #150)
+Error in step "rewrite <- IHn'.".
+Message: Found no subterm matching 
+"?M1090 + n'" in the current goal..
+Goal: S (n' + m) = m + S n'.
+
+TRYING TO PROVE LEMMA
+Lemma succ_plus_comm_2 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+intros m.
+rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+
+
+
+Proof.
+(* We use induction on `n` to prove that for all natural numbers `n`, `n + 0 = n`.
+*)
+  
+apply (@add_zero_comm_1 ).
+Qed.
+
+Lemma succ_plus_comm_2 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+Proof.
+(* n' is fixed by forall so we can introduce the second premise (IHn') which is the inductive hypothesis that will be used later in the proof *)
+  intros n' IHn' m.
+(* Apply the previously introduced plus_n_Sm theorem which states that S (n + m) = n + S m *)
+  rewrite <- plus_n_Sm.
+(* Now apply our inductive hypothesis which will transform n' + m into m + n' *)
+  rewrite IHn'.
+(* At this point we have S m + n', which we want to show is equal to m + S n'.*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+intros m.
+rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+
+
+
+Proof.
+(* We use induction on `n` to prove that for all natural numbers `n`, `n + 0 = n`.
+*)
+  
+apply (@add_zero_comm_1 ).
+Qed.
+
+Lemma succ_plus_comm_2 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+Proof.
+(* n' is fixed by forall so we can introduce the second premise (IHn') which is the inductive hypothesis that will be used later in the proof *)
+  intros n' IHn' m.
+(* Apply the previously introduced plus_n_Sm theorem which states that S (n + m) = n + S m *)
+  rewrite <- plus_n_Sm.
+(* Now apply our inductive hypothesis which will transform n' + m into m + n' *)
+  rewrite IHn'.
+(* At this point we have S m + n', which we want to show is equal to m + S n'.*)
+  reflexivity.
+Qed.
+
+Lemma succ_plus_comm_1 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+Proof.
+(* Let's prove the lemma by introducing the necessary variables.
+*)
+  intros n' IHn' m.
+(* Use the provided induction hypothesis (IHn').
+*)
+  apply (@succ_plus_comm_2 n' IHn' m).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma add_zero_comm_1 : forall m : nat, 0 + m = m + 0.
+
+Proof.
+intros m.
+rewrite <- plus_n_O.
+reflexivity.
+Qed.
+
+Lemma add_zero_comm_0 : forall m : nat, 0 + m = m + 0.
+
+
+
+
+Proof.
+(* We use induction on `n` to prove that for all natural numbers `n`, `n + 0 = n`.
+*)
+  
+apply (@add_zero_comm_1 ).
+Qed.
+
+Lemma succ_plus_comm_2 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+Proof.
+(* n' is fixed by forall so we can introduce the second premise (IHn') which is the inductive hypothesis that will be used later in the proof *)
+  intros n' IHn' m.
+(* Apply the previously introduced plus_n_Sm theorem which states that S (n + m) = n + S m *)
+  rewrite <- plus_n_Sm.
+(* Now apply our inductive hypothesis which will transform n' + m into m + n' *)
+  rewrite IHn'.
+(* At this point we have S m + n', which we want to show is equal to m + S n'.*)
+  reflexivity.
+Qed.
+
+Lemma succ_plus_comm_1 : forall n' : nat, forall IHn' : forall m : nat, n' + m = m + n', forall m : nat, S (n' + m) = m + S n'.
+
+Proof.
+(* Let's prove the lemma by introducing the necessary variables.
+*)
+  intros n' IHn' m.
+(* Use the provided induction hypothesis (IHn').
+*)
+  apply (@succ_plus_comm_2 n' IHn' m).
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+
+Proof.
+(* We prove this lemma by induction on n.
+*)
+  intros n.
+induction n as [| n' IHn'].
+- (* The base case: 0 + 0 = 0 *)
+    apply (@add_zero_comm_0 ).
+- (* The inductive case: S n' + 0 = S n' *)
+    simpl.
+apply (@succ_plus_comm_1 n' IHn').
+Qed.
+
+Outdated contents in ..cache: recomputing
+THEOREM PROOF IS VALID
+

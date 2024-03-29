@@ -1,0 +1,2567 @@
+PROVING factor_is_O
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma factor_is_O : forall n m : nat, n = 0 \/ m = 0 -> n * m = 0.
+
+Proof.
+intros n m H.
+(* Introduce the variables and hypothesis *)
+  destruct H as [Hn | Hm].
+(* Case analysis on whether n = 0 or m = 0, gives us two cases to prove *)
+  - (* Case where n = 0 *)
+    rewrite Hn.
+(* Replace n with 0 *)
+    simpl.
+(* Simplify the expression 0 * m *)
+    reflexivity.
+(* Conclude that 0 * m = 0 *)
+  - (* Case where m = 0 *)
+    rewrite Hm.
+(* Replace m with 0 *)
+    rewrite Nat.mul_0_r.
+(* Use the theorem that n * 0 = 0 for any n *)
+    reflexivity.
+(* Conclude that n * 0 = 0 *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #296)
+Error in step "rewrite Nat.mul_0_r.".
+Message: The reference Nat.mul_0_r was not found in the current
+environment..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_0 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_0 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+intros n m Hm.
+(* Using the standard library theorem that n * 0 is 0 *)
+  apply Nat.mul_0_r.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #282)
+Error in step "apply Nat.mul_0_r.".
+Message: The reference Nat.mul_0_r was not found in the current
+environment..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_1 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_1 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+intros n m Hm.
+(* Introduce variables and hypothesis *)
+  rewrite Hm.
+(* Use the hypothesis that `m` is 0 *)
+  simpl.
+(* n * 0 simplifies to 0 *)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #282)
+Error in step "rewrite Hm.".
+Message: Found no subterm matching "m" in the current goal..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_2 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_2 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+intros n m Hm.
+rewrite Hm.
+(* Replace m with 0 *)
+  rewrite <- mult_n_O.
+(* Use the fact that for all n, n * 0 = 0 *)
+  reflexivity.
+(* Both sides now read n * 0, which are equal *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #282)
+Error in step "rewrite Hm.".
+Message: Found no subterm matching "m" in the current goal..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_3 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_3 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+(* We prove the lemma by directly applying the fact that for any natural number n, n * 0 is indeed 0.
+*)
+  intros n m Hm.
+rewrite -> Hm.
+(* Now we reduce n * 0 to 0 using the arithmetic simplification rule for multiplication by zero.
+*)
+  simpl.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #282)
+Error in step "rewrite -> Hm.".
+Message: Found no subterm matching "m" in the current goal..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_4 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_4 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+intros n m Hm.
+(* Introduce n, m, and the hypothesis Hm which states m = 0 *)
+  rewrite <- Hm.
+(* Replace m by 0 using the hypothesis Hm *)
+  simpl.
+(* Simplify the expression n * 0 to just 0 *)
+  reflexivity.
+(* Conclude that 0 = 0 is trivially true *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #286)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+Hm : m = 0
+Unable to unify "m" with "n * m"..
+Goal: n * m = m.
+
+TRYING TO PROVE LEMMA
+Lemma multiply_by_zero_5 : forall n m : nat, forall Hm : m = 0, n * m = m.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma multiply_by_zero_5 : forall n m : nat, forall Hm : m = 0, n * m = m.
+
+Proof.
+(* We use the hypothesis Hm which states m = 0, then we rewrite the goal with this equality.
+*)
+  intros n m Hm.
+rewrite Hm.
+(* Now the goal is n * 0 = 0.
+We use the fact that any number multiplied by 0 is 0.
+*)
+  apply Nat.mul_0_r.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #284)
+Error in step "apply Nat.mul_0_r.".
+Message: The reference Nat.mul_0_r was not found in the current
+environment..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_6 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_6 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+intros n m Hm.
+rewrite -> Hm.
+rewrite <- mult_n_O.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #282)
+Error in step "rewrite -> Hm.".
+Message: Found no subterm matching "m" in the current goal..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_7 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_7 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+intros n m Hm.
+rewrite -> Hm.
+(* Use the fact that m = 0 to rewrite n * m to n * 0 *)
+  apply mult_n_O.
+(* Conclude n * 0 = 0 by the multiplication by 0 property *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #282)
+Error in step "rewrite -> Hm.".
+Message: Found no subterm matching "m" in the current goal..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_8 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_8 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+(* We can apply simplification to n * 0 to directly solve the goal *)
+  intros n m Hm.
+simpl.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #284)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+Hm : m = 0
+Unable to unify "0" with "n * 0"..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_9 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+
+
+Lemma mult_n_0_is_0_9 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Proof.
+intros n m Hm.
+rewrite -> Hm.
+simpl.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #282)
+Error in step "rewrite -> Hm.".
+Message: Found no subterm matching "m" in the current goal..
+Goal: n * 0 = 0.
+
+TRYING TO PROVE LEMMA
+Lemma mult_n_0_is_0_10 : forall n m : nat, forall Hm : m = 0, n * 0 = 0.
+
+Error proving factor_is_O
+MAX LEMMA DEPTH REACHED. GIVING UP.

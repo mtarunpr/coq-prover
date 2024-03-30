@@ -7,6 +7,9 @@ import csv
 import argparse
 
 
+ADD_IMPORTED_DECLARATIONS = True
+
+
 def parse_file(
     file_name: str,
     path: Path,
@@ -115,15 +118,16 @@ def parse_all_files(
 
     # Add definitions and theorems from imported files to the preamble
     # if the imported file is also from the same project
-    for file_name in coq_file_names:
-        imports, defns_and_thms = file_name_to_parsed[file_name]
-        for import_name in reversed(imports):
-            if f"{import_name}.v" in coq_file_names:
-                for defn_or_thm in defns_and_thms:
-                    defn_or_thm.preamble = (
-                        file_name_to_parsed[f"{import_name}.v"][1]
-                        + defn_or_thm.preamble
-                    )
+    if ADD_IMPORTED_DECLARATIONS:
+        for file_name in coq_file_names:
+            imports, defns_and_thms = file_name_to_parsed[file_name]
+            for import_name in reversed(imports):
+                if f"{import_name}.v" in coq_file_names:
+                    for defn_or_thm in defns_and_thms:
+                        defn_or_thm.preamble = (
+                            file_name_to_parsed[f"{import_name}.v"][1]
+                            + defn_or_thm.preamble
+                        )
 
     return file_name_to_parsed
 

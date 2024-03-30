@@ -19,6 +19,8 @@ from coq import Theorem
 import os
 import re
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 memory = Memory("cachegpt", verbose=0)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -38,7 +40,10 @@ class BaseLLM:
             },
             {
                 "role": "user",
-                "content": "#### CONTEXT\n\n" + theorem.get_preamble_string() + "\n\n#### THEOREM TO BE PROVEN\n\n" + str(theorem),
+                "content": "#### CONTEXT\n\n"
+                + theorem.get_preamble_string()
+                + "\n\n#### THEOREM TO BE PROVEN\n\n"
+                + str(theorem),
             },
         ]
         if prev_attempt_error_msg is not None:
@@ -134,7 +139,9 @@ class LocalModel(BaseLLM):
         with torch.no_grad():
             r = self.tokenizer.decode(
                 self.model.generate(
-                    **model_input, streamer=self.streamer, max_new_tokens=500
+                    **model_input,
+                    max_new_tokens=1000,
+                    pad_token_id=self.tokenizer.eos_token_id,
                 )[0],
                 skip_special_tokens=True,
             )
@@ -152,21 +159,16 @@ class LocalModel(BaseLLM):
             else:
                 raise ValueError("Invalid message role: " + message["role"])
         prompt += "### Assistant\n"
-        return self._generate(prompt)
+        return self._generate(prompt).split("### Assistant\n")[-1]
 
 
 if __name__ == "__main__":
     with open("data/datasets/software_foundations.csv", "r") as file:
         reader = csv.DictReader(file)
         for example in reader:
-            # if example["file_name"] != 'Logic.v':
-            #     continue
-            # if random.random() < 0.9:
-            #     continue
             prompt = f"Given the following context and theorem statement in Coq, generate a proof.\n\n#### Context\n{example['preamble']}\n\n#### Theorem\n{example['theorem']}\n\n#### Proof\n"
             llm = LocalModel(
                 "Phind/Phind-CodeLlama-34B-v2",
-                "./checkpoints/checkpoint-500",
             )
             print(llm._generate(prompt))
             break

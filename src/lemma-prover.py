@@ -13,12 +13,13 @@ load_dotenv()
 from infer import GPT, LocalModel
 
 
-LLM_TYPE = "GPT"  # GPT | LocalModel
+LLM_TYPE = "LocalModel"  # GPT | LocalModel
 GPT_MODEL_NAME = "gpt-4-1106-preview"
 LOCAL_MODEL_NAME = "Phind/Phind-CodeLlama-34B-v2"
 LOCAL_MODEL_CHECKPOINT = None
 MAX_LEMMA_RETRIES = 5
-MAX_LEMMA_DEPTH = 10
+MAX_LEMMA_DEPTH = 5
+MODULE_NAME = "LF"  # for imports, passed to coq through -Q flag
 
 warning_indicators = ["deprecated", "Loading ML file", "(* debug"]
 ignore_messages_keywords = [
@@ -75,7 +76,7 @@ def annotate_and_fetch_error(theorem: Theorem):
                 "xz",
                 "coq",
                 "sertop",
-                ["-Q", f"{project_dir},LF"],
+                ["-Q", f"{project_dir},{MODULE_NAME}"],
                 cli.ExitCode(0),
             )
 
@@ -428,7 +429,9 @@ if __name__ == "__main__":
         theorem_str_split = theorem_str.split(" ")
         theorem_keyword = theorem_str_split[0]
         theorem_name = theorem_str_split[1]
-        theorem_statement = re.search(r":\s*(.+?)\.", theorem_str, re.DOTALL).group(1).strip()
+        theorem_statement = (
+            re.search(r":\s*(.+?)\.", theorem_str, re.DOTALL).group(1).strip()
+        )
 
         _, preamble = parse_file("context.v", project_dir)
         theorem = Theorem(
@@ -475,6 +478,7 @@ if __name__ == "__main__":
             llm.ask_for_proof(theorem)
 
             try:
+                (project_dir / "proofs").mkdir(exist_ok=True)
                 with open(
                     project_dir / "proofs" / f"thm{thm_ct}_{theorem.name}.out", "w"
                 ) as f_out:

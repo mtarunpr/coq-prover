@@ -1,0 +1,2701 @@
+PROVING auto_example_7
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Example auto_example_7 : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+
+Proof.
+(* The theorem to be proven is of the form P -> Q, where P is a conjunction of two propositions.
+The goal is to prove Q given P.
+*)
+  intros x H.
+(* H is a conjunction of two propositions.
+We can destruct it into its two components.
+*)
+  destruct H as [H1 H2].
+(* Now we have H1: x <= 42 and H2: 42 <= x.
+We want to prove is_fortytwo x, which is equivalent to x = 42.
+*)
+  (* To prove equality in Coq, we can use the reflexivity principle, which states that any term is equal to itself.
+*)
+  (* However, we have H1 and H2, which state that x is less than or equal to 42 and 42 is less than or equal to x, respectively.
+*)
+  (* We can use the le_antisym lemma, which states that if a number is less than or equal to another and the other is less than or equal to it, then they are equal.
+*)
+  (* We apply the le_antisym lemma with H1 and H2 as the arguments.
+*)
+  apply le_antisym in H1.
+(* Now we have H1: x = 42.
+This is exactly what we wanted to prove.
+*)
+  (* We can now use the equality proof we have to finish the proof.
+*)
+  exact H1.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #188)
+Error in step "apply le_antisym in H1.".
+Message: Unable to apply lemma of type
+ "forall n m : nat, n <= m <= n -> n = m"
+on hypothesis of type "x <= 42"..
+Goal: is_fortytwo x.
+
+
+TRYING TO PROVE LEMMA
+Lemma fortytwo_property_0 : forall x : nat, forall H1 : x <= 42, forall H2 : 42 <= x, is_fortytwo x.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma fortytwo_property_0 : forall x : nat, forall H1 : x <= 42, forall H2 : 42 <= x, is_fortytwo x.
+
+Proof.
+(*
+     The goal is to prove that for all natural numbers x, if x is less than or equal to 42 and 42 is less than or equal to x, then x is equal to 42.
+We will proceed by induction on x.
+*)
+  intros x H1 H2.
+induction x as [| x' IHx'].
+(*
+     Base case: x = 0.
+Since 42 is not less than or equal to 0, we have a contradiction.
+Therefore, the base case is not possible.
+*)
+  (*
+     Inductive case: x = S x'.
+We have two subgoals:
+     1.
+x' <= 42 and 42 <= x' -> is_fortytwo x'
+     2.
+x' <= 42 and 42 <= S x' -> is_fortytwo (S x')
+  *)
+  (*
+     For the first subgoal, we have x' <= 42 and 42 <= x'.
+By the induction hypothesis, we know that x' = 42.
+Therefore, S x' = 42 + 1 = 43.
+Since 42 is not less than or equal to 43, we have a contradiction.
+Therefore, the first subgoal is not possible.
+*)
+  (*
+     For the second subgoal, we have x' <= 42 and 42 <= S x'.
+By the induction hypothesis, we know that x' = 42.
+Therefore, S x' = 42 + 1 = 43.
+Since 42 is not less than or equal to 43, we have a contradiction.
+Therefore, the second subgoal is not possible.
+*)
+  (*
+     Since both subgoals are impossible, the theorem is proved by contradiction.
+*)
+  discriminate.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #188)
+Error in step "discriminate.".
+Message: No primitive equality found..
+Goal: is_fortytwo 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma fortytwo_non_negative_1 : forall H1 : 0 <= 42, forall H2 : 42 <= 0, is_fortytwo 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma fortytwo_non_negative_1 : forall H1 : 0 <= 42, forall H2 : 42 <= 0, is_fortytwo 0.
+
+Proof.
+intros H1 H2.
+unfold is_fortytwo.
+rewrite H1, H2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #188)
+Error in step "rewrite H1, H2.".
+Message: setoid rewrite failed: Unable to satisfy the following constraints:
+UNDEFINED EVARS:
+ ?X71==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r}
+ ?X72==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper (Morphisms.respectful le ?r)
+           S] (internal placeholder) {?p}
+ ?X73==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r0}
+ ?X74==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r ?r0) S]
+         (internal placeholder) {?p0}
+ ?X75==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r1}
+ ?X76==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r0 ?r1) S]
+         (internal placeholder) {?p1}
+ ?X77==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r2}
+ ?X78==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r1 ?r2) S]
+         (internal placeholder) {?p2}
+ ?X79==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r3}
+ ?X80==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r2 ?r3) S]
+         (internal placeholder) {?p3}
+ ?X81==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r4}
+ ?X82==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r3 ?r4) S]
+         (internal placeholder) {?p4}
+ ?X83==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r5}
+ ?X84==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r4 ?r5) S]
+         (internal placeholder) {?p5}
+ ?X85==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r6}
+ ?X86==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r5 ?r6) S]
+         (internal placeholder) {?p6}
+ ?X87==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r7}
+ ?X88==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r6 ?r7) S]
+         (internal placeholder) {?p7}
+ ?X89==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r8}
+ ?X90==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r7 ?r8) S]
+         (internal placeholder) {?p8}
+ ?X91==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r9}
+ ?X92==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r8 ?r9) S]
+         (internal placeholder) {?p9}
+ ?X93==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r10}
+ ?X94==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r9 ?r10) S]
+         (internal placeholder) {?p10}
+ ?X95==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r11}
+ ?X96==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r10 ?r11) S]
+         (internal placeholder) {?p11}
+ ?X97==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r12}
+ ?X98==[H1 H2
+         (do_subrelation:=Morphisms.do_subrelation) |-
+         Morphisms.Proper
+           (Morphisms.respectful ?r11 ?r12) S]
+         (internal placeholder) {?p12}
+ ?X99==[H1 H2 |- Relation_Definitions.relation nat]
+         (internal placeholder) {?r13}
+ ?X100==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r12 ?r13) S]
+          (internal placeholder) {?p13}
+ ?X101==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r14}
+ ?X102==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r13 ?r14) S]
+          (internal placeholder) {?p14}
+ ?X103==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r15}
+ ?X104==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r14 ?r15) S]
+          (internal placeholder) {?p15}
+ ?X105==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r16}
+ ?X106==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r15 ?r16) S]
+          (internal placeholder) {?p16}
+ ?X107==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r17}
+ ?X108==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r16 ?r17) S]
+          (internal placeholder) {?p17}
+ ?X109==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r18}
+ ?X110==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r17 ?r18) S]
+          (internal placeholder) {?p18}
+ ?X111==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r19}
+ ?X112==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r18 ?r19) S]
+          (internal placeholder) {?p19}
+ ?X113==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r20}
+ ?X114==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r19 ?r20) S]
+          (internal placeholder) {?p20}
+ ?X115==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r21}
+ ?X116==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r20 ?r21) S]
+          (internal placeholder) {?p21}
+ ?X117==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r22}
+ ?X118==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r21 ?r22) S]
+          (internal placeholder) {?p22}
+ ?X119==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r23}
+ ?X120==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r22 ?r23) S]
+          (internal placeholder) {?p23}
+ ?X121==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r24}
+ ?X122==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r23 ?r24) S]
+          (internal placeholder) {?p24}
+ ?X123==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r25}
+ ?X124==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r24 ?r25) S]
+          (internal placeholder) {?p25}
+ ?X125==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r26}
+ ?X126==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r25 ?r26) S]
+          (internal placeholder) {?p26}
+ ?X127==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r27}
+ ?X128==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r26 ?r27) S]
+          (internal placeholder) {?p27}
+ ?X129==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r28}
+ ?X130==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r27 ?r28) S]
+          (internal placeholder) {?p28}
+ ?X131==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r29}
+ ?X132==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r28 ?r29) S]
+          (internal placeholder) {?p29}
+ ?X133==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r30}
+ ?X134==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r29 ?r30) S]
+          (internal placeholder) {?p30}
+ ?X135==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r31}
+ ?X136==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r30 ?r31) S]
+          (internal placeholder) {?p31}
+ ?X137==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r32}
+ ?X138==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r31 ?r32) S]
+          (internal placeholder) {?p32}
+ ?X139==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r33}
+ ?X140==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r32 ?r33) S]
+          (internal placeholder) {?p33}
+ ?X141==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r34}
+ ?X142==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r33 ?r34) S]
+          (internal placeholder) {?p34}
+ ?X143==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r35}
+ ?X144==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r34 ?r35) S]
+          (internal placeholder) {?p35}
+ ?X145==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r36}
+ ?X146==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r35 ?r36) S]
+          (internal placeholder) {?p36}
+ ?X147==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r37}
+ ?X148==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r36 ?r37) S]
+          (internal placeholder) {?p37}
+ ?X149==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r38}
+ ?X150==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r37 ?r38) S]
+          (internal placeholder) {?p38}
+ ?X151==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r39}
+ ?X152==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r38 ?r39) S]
+          (internal placeholder) {?p39}
+ ?X153==[H1 H2 |- Relation_Definitions.relation nat]
+          (internal placeholder) {?r40}
+ ?X154==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful ?r39 ?r40) S]
+          (internal placeholder) {?p40}
+ ?X155==[H1 H2
+          (do_subrelation:=Morphisms.do_subrelation)
+          |-
+          Morphisms.Proper
+            (Morphisms.respectful le
+               (Morphisms.respectful ?r40
+                  (Basics.flip Basics.impl))) eq]
+          (internal placeholder) {?p41}
+TYPECLASSES:?X71 ?X72 ?X73 ?X74 ?X75 ?X76 ?X77 ?X78
+?X79 ?X80 ?X81 ?X82 ?X83 ?X84 ?X85 ?X86 ?X87 ?X88 ?X89
+?X90 ?X91 ?X92 ?X93 ?X94 ?X95 ?X96 ?X97 ?X98 ?X99
+?X100 ?X101 ?X102 ?X103 ?X104 ?X105 ?X106 ?X107 ?X108
+?X109 ?X110 ?X111 ?X112 ?X113 ?X114 ?X115 ?X116 ?X117
+?X118 ?X119 ?X120 ?X121 ?X122 ?X123 ?X124 ?X125 ?X126
+?X127 ?X128 ?X129 ?X130 ?X131 ?X132 ?X133 ?X134 ?X135
+?X136 ?X137 ?X138 ?X139 ?X140 ?X141 ?X142 ?X143 ?X144
+?X145 ?X146 ?X147 ?X148 ?X149 ?X150 ?X151 ?X152 ?X153
+?X154 ?X155
+SHELF:||
+FUTURE GOALS STACK:?X155 ?X154 ?X153 ?X152 ?X151 ?X150
+?X149 ?X148 ?X147 ?X146 ?X145 ?X144 ?X143 ?X142 ?X141
+?X140 ?X139 ?X138 ?X137 ?X136 ?X135 ?X134 ?X133 ?X132
+?X131 ?X130 ?X129 ?X128 ?X127 ?X126 ?X125 ?X124 ?X123
+?X122 ?X121 ?X120 ?X119 ?X118 ?X117 ?X116 ?X115 ?X114
+?X113 ?X112 ?X111 ?X110 ?X109 ?X108 ?X107 ?X106 ?X105
+?X104 ?X103 ?X102 ?X101 ?X100 ?X99 ?X98 ?X97 ?X96 ?X95
+?X94 ?X93 ?X92 ?X91 ?X90 ?X89 ?X88 ?X87 ?X86 ?X85 ?X84
+?X83 ?X82 ?X81 ?X80 ?X79 ?X78 ?X77 ?X76 ?X75 ?X74 ?X73
+?X72 ?X71||
+.
+Goal: 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_equals_forty_two_2 : forall H1 : 0 <= 42, forall H2 : 42 <= 0, 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_equals_forty_two_2 : forall H1 : 0 <= 42, forall H2 : 42 <= 0, 0 = 42.
+
+Proof.
+(*
+     We will prove the lemma by contradiction.
+Assume the negation of the conclusion, that is, 0 <> 42.
+Then we will derive a contradiction from the assumptions H1 and H2.
+*)
+  intros H1 H2 contra.
+(*
+     We have H1 : 0 <= 42 and H2 : 42 <= 0.
+By applying the definition of "leq" to H1 and H2, we obtain:
+     - H1' : exists n, 0 + n = 42
+     - H2' : exists m, 42 + m = 0
+  *)
+  destruct H1 as [n Hn]; destruct H2 as [m Hm].
+(*
+     We now have:
+     - n : nat
+     - Hn : 0 + n = 42
+     - m : nat
+     - Hm : 42 + m = 0
+  *)
+  (*
+     We want to prove 0 = 42, which is equivalent to n = m.
+We have Hn and Hm, which state that 0 + n = 42 and 42 + m = 0, respectively.
+We can subtract 42 from both sides of Hm to obtain:
+     - 42 + m - 42 = 0 - 42
+     - m = -42
+     Therefore, we have n = -42, which contradicts the fact that n is a natural number.
+*)
+  simpl in Hm.
+simpl.
+(*
+     Now we have:
+     - n : nat
+     - Hn : 0 + n = 42
+     - m : nat
+     - Hm : m = -42
+  *)
+  (*
+     We can now derive the contradiction.
+We have n = -42 and m = -42, which contradicts the fact that n and m are natural numbers.
+*)
+  discriminate.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #184)
+Error in step "intros H1 H2 contra.".
+Message: No product even after head-reduction..
+Goal: 0 <= 42 -> 42 <= 0 -> 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_3 : 0 <= 42 -> 42 <= 0 -> 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_less_or_equal_to_forty_two_3 : 0 <= 42 -> 42 <= 0 -> 0 = 42.
+
+Proof.
+(* The theorem to be proven is of the form "A -> B -> C", where A is "0 <= 42", B is "42 <= 0", and C is "0 = 42".
+We will proceed by contradiction.
+Assume the negation of C, that is, "0 <> 42".
+Then, we will derive a contradiction from A and B.
+*)
+  intros contra.
+(* We now have the context:
+      A : 0 <= 42
+      B : 42 <= 0
+      contra : 0 <> 42
+  *)
+  (* By A, we have either "0 < 42" or "0 = 42".
+Since we have assumed "0 <> 42", we must have "0 < 42".
+*)
+  destruct A as [A_lt_42 | A_eq_42].
+(* We now have the context:
+      A_lt_42 : 0 < 42
+      A_eq_42 : 0 = 42
+      B : 42 <= 0
+      contra : 0 <> 42
+  *)
+  (* By B, we have either "42 < 0" or "42 = 0".
+Since we have assumed "0 <> 42", we must have "42 < 0".
+*)
+  destruct B as [B_lt_0 | B_eq_0].
+(* We now have the context:
+      A_lt_42 : 0 < 42
+      A_eq_42 : 0 = 42
+      B_lt_0 : 42 < 0
+      B_eq_0 : 42 = 0
+      contra : 0 <> 42
+  *)
+  (* From A_eq_42 and B_eq_0, we have a contradiction: "0 = 42" and "42 = 0".
+*)
+  contradiction.
+(* This contradiction shows that our initial assumption "0 <> 42" was incorrect.
+Therefore, we must have "0 = 42".
+*)
+  exact A_eq_42.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #186)
+Error in step "destruct A as [A_lt_42 | A_eq_42].".
+Message: The variable A was not found in the current
+environment..
+Goal: 42 <= 0 -> 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_4 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_less_or_equal_to_forty_two_4 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+Proof.
+(* The theorem states that if 0 is less than or equal to 42 and 42 is less than or equal to 0, then 0 is equal to 42.
+We will proceed by contradiction.
+Assume the negation of the conclusion, that is, 0 is not equal to 42.
+*)
+  intros contra.
+(* We now have two goals: 0 <= 42 and 42 <= 0.
+We will prove these goals by applying the contra hypothesis.
+*)
+  apply contra in H.
+(* Now we have the goal 0 <= 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H0.
+(* Now we have the goal 42 <= 0.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H1.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H2.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H3.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H4.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H5.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H6.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H7.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H8.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+  apply contra in H9.
+(* Now we have the goal 0 = 42.
+We will prove this by applying the contra hypothesis again.
+*)
+ 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #186)
+Error in step "apply contra in H.".
+Message: No such hypothesis: H.
+Goal: 42 <= 0 -> 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_5 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_less_or_equal_to_forty_two_5 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+Proof.
+(* The theorem states that if 0 is less than or equal to 42 and 42 is less than or equal to 0, then 0 is equal to 42.
+We will proceed by contradiction.
+Assume the negation of the conclusion, that is, 0 is not equal to 42.
+*)
+  intros contra.
+(* We now have two goals: 0 <= 42 and 42 <= 0.
+We will prove these goals by applying the contra hypothesis.
+*)
+  apply contra in H.
+(* The first goal is now to prove 0 <= 42.
+We have the hypothesis H : 0 = 42, so we can rewrite the goal as 0 <= 0.
+*)
+  rewrite H in H.
+(* Now we have the goal 0 <= 0.
+This is true by the reflexivity of the less than or equal to relation.
+*)
+  reflexivity.
+(* We have now proven the first goal.
+The second goal is to prove 42 <= 0.
+We have the hypothesis H : 0 = 42, so we can rewrite the goal as 42 <= 0.
+*)
+  rewrite H in H0.
+(* Now we have the goal 42 <= 0.
+This is false, so we have a contradiction.
+*)
+  contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #186)
+Error in step "apply contra in H.".
+Message: No such hypothesis: H.
+Goal: 42 <= 0 -> 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_6 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_less_or_equal_to_forty_two_6 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+Proof.
+(* The theorem to be proven is of the form "forall contra : 0 <= 42, 42 <= 0 -> 0 = 42".
+This is a contradiction as 0 is not less than or equal to 42 and 42 is not less than or equal to 0.
+Therefore, we will prove this by contradiction.
+*)
+  intros contra contra'.
+(* We have the hypothesis "0 <= 42" and "42 <= 0".
+We will derive a contradiction from these.
+*)
+  apply le_antisym in contra contra'.
+(* This applies the lemma "le_antisym" to our hypotheses.
+This lemma states that if "n <= m" and "m <= n" 
+     then "n = m".
+In our case, "n" is 0 and "m" is 42.
+This will give us the contradiction that 0 = 42.
+*)
+  (* Now we have derived the contradiction 0 = 42.
+We will now prove the original theorem by contradiction.
+*)
+  intros H.
+(* We have the hypothesis "0 <= 42" and "42 <= 0 -> 0 = 42".
+We will derive a contradiction from these.
+*)
+  apply H in contra.
+(* This applies our hypothesis "0 <= 42" to the hypothesis "42 <= 0 -> 0 = 42".
+This will give us the contradiction that 0 = 42.
+*)
+  (* Now we have derived the contradiction 0 = 42.
+We will now prove the original theorem by contradiction.
+*)
+  intros H'.
+(* We have the hypothesis "42 <= 0" and "0 <= 42 -> 0 = 42".
+We will derive a contradiction from these.
+*)
+  apply H' in contra'.
+(* This applies our hypothesis "42 <= 0" to the hypothesis "0 <= 42 -> 0 = 42".
+This will give us the contradiction that 0 = 42.
+*)
+  (* Now we have derived the contradiction 0 = 42.
+We will now prove the original theorem by contradiction.
+*)
+  intros H''.
+(* We have the hypothesis
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #186)
+Error after step "intros contra contra'.".
+Message: There are still unproven goals.
+Goal: 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_7 : forall contra : 0 <= 42, forall contra' : 42 <= 0, 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_less_or_equal_to_forty_two_7 : forall contra : 0 <= 42, forall contra' : 42 <= 0, 0 = 42.
+
+Proof.
+(* The theorem to be proven is of the form "forall contra : 0 <= 42, forall contra' : 42 <= 0, 0 = 42".
+We will proceed by contradiction.
+Assume the negation of the conclusion, that is, "0 <> 42".
+*)
+  intros contra contra' H.
+(* We now have the context: 0 <= 42, 42 <= 0, 0 <> 42.
+We will derive a contradiction from this.
+*)
+
+  (* First, we will use the fact that "0 <= 42" to show that "0 <= 0".
+*)
+  apply (le_trans contra).
+(* Now we have the context: 0 <= 0, 42 <= 0, 0 <> 42.
+*)
+
+  (* Next, we will use the fact that "42 <= 0" to show that "42 <= 42".
+*)
+  apply (le_trans contra').
+(* Now we have the context: 0 <= 0, 42 <= 42, 0 <> 42.
+*)
+
+  (* Since "0 <= 0" and "42 <= 42", we can now use the "le_antisym" lemma to show that "0 = 42".
+*)
+  apply (le_antisym H0 H1).
+(* Now we have the context: 0 = 42, 0 <> 42.
+*)
+
+  (* Finally, we will derive a contradiction from "0 = 42" and "0 <> 42".
+*)
+  discriminate H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #184)
+Error in step "intros contra contra' H.".
+Message: No product even after head-reduction..
+Goal: 0 <= 42 -> 42 <= 0 -> 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_8 : 0 <= 42 -> 42 <= 0 -> 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_less_or_equal_to_forty_two_8 : 0 <= 42 -> 42 <= 0 -> 0 = 42.
+
+Proof.
+(* The theorem to be proven is of the form "A -> B -> C", where A is "0 <= 42", B is "42 <= 0", and C is "0 = 42".
+We will proceed by contradiction.
+Assume the negation of C, that is, "0 <> 42".
+Then, we will derive a contradiction from A and B.
+*)
+  intros contra.
+(* We now have the context:
+      A : 0 <= 42
+      B : 42 <= 0
+      contra : 0 <> 42
+  *)
+  (* By A, we have either "0 = 42" or "Suc n <= 42" for some n.
+We will first consider the case "0 = 42".
+In this case, we have a contradiction with contra.
+*)
+  destruct A as [eq_42 | le_Suc_n_42].
+- (* A1 : 0 = 42 *)
+    subst eq_42.
+(* Now we have the context:
+        B : 42 <= 0
+        contra : 0 <> 42
+    *)
+    (* We know that "0 <= 0" by reflexivity of <=.
+So, we have a contradiction with B.
+*)
+    apply le_Suc_n_42 in B.
+(* Now we have the context:
+        B : Suc n <= 0
+        contra : 0 <> 42
+    *)
+    (* By B, we have either "Suc n = 0" or "Suc (Suc n) <= 0" for some n.
+We will first consider the case "Suc n = 0".
+In this case, we have a contradiction with the fact that n is a natural number.
+*)
+    destruct B as [eq_n_0 | le_Suc_Suc_n_0].
+- (* B1 : Suc n = 0 *)
+      subst eq_n_0.
+(* Now we have the context:
+          contra : 0 <> 42
+      *)
+      (* We
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #186)
+Error in step "destruct A as [eq_42 | le_Suc_n_42].".
+Message: The variable A was not found in the current
+environment..
+Goal: 42 <= 0 -> 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_9 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+
+
+Lemma zero_less_or_equal_to_forty_two_9 : forall contra : 0 <= 42, 42 <= 0 -> 0 = 42.
+
+Proof.
+(* The theorem to be proven is of the form "forall contra : 0 <= 42, 42 <= 0 -> 0 = 42".
+This is a contradiction as 0 is not less than or equal to 42 and 42 is not less than or equal to 0.
+Therefore, we will prove this by contradiction.
+*)
+  intros contra contra'.
+(* We have the hypothesis "0 <= 42" and "42 <= 0".
+We will derive a contradiction from these.
+*)
+  apply le_antisym in contra.
+(* Now we have the goal "0 = 42", which is a contradiction as we know "0 <= 42" and "42 <= 0".
+*)
+  apply le_antisym in contra'.
+(* Now we have the goal "42 = 0", which is a contradiction as we know "0 <= 42" and "42 <= 0".
+*)
+  (* We have derived a contradiction from our hypotheses.
+Therefore, by proof by contradiction, 
+     we can conclude that the original theorem is true.
+*)
+  tauto.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #186)
+Error in step "apply le_antisym in contra.".
+Message: Unable to apply lemma of type
+ "forall n m : nat, n <= m <= n -> n = m"
+on hypothesis of type "0 <= 42"..
+Goal: 0 = 42.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_less_or_equal_to_forty_two_10 : forall contra : 0 <= 42, forall contra' : 42 <= 0, 0 = 42.
+
+
+Error proving auto_example_7
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,573 @@
+PROVING le_not_a_partial_function
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+
+
+Theorem le_not_a_partial_function : ~ (partial_function le).
+
+Proof.
+(* We will prove the theorem by contradiction.
+Assume that le is a partial function.
+*)
+  intros contra.
+(* Then, we can apply the definition of partial_function to le.
+*)
+  apply (partial_function_def le).
+(* This gives us two goals: to prove that le is total and that le is injective.
+*)
+
+  (* Proving that le is total.
+*)
+  intros x y.
+(* We will use the classical axiom to reason about the negation of the existence of a witness.
+*)
+  classical.
+(* Assume that there is no witness for the existence of le x y.
+*)
+  intro H.
+(* Then, we can derive a contradiction from the assumption that le is a partial function.
+*)
+  apply contra in H.
+(* This contradiction shows that there must be a witness for the existence of le x y.
+*)
+  (* Therefore, le is total.
+*)
+
+  (* Proving that le is injective.
+*)
+  intros x y Hle_xy y' Hle_xy'.
+(* We will again use the classical axiom.
+*)
+  classical.
+(* Assume that there is no witness for the existence of an equality between x and y'.
+*)
+  intro H.
+(* Then, we can derive a contradiction from the assumption that le is a partial function.
+*)
+  apply contra in H.
+(* This contradiction shows that there must be a witness for the existence of an equality between x and y'.
+*)
+  (* Therefore, le is injective.
+*)
+
+  (* Since le is both total and injective, it is a partial function.
+*)
+  (* But this contradicts our initial assumption that le is not a partial function.
+*)
+
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #46)
+Error in step "apply (partial_function_def le).".
+Message: The variable partial_function_def was not found
+in the current environment..
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma partial_function_contradiction_0 : forall contra : partial_function le, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+
+
+Lemma partial_function_contradiction_0 : forall contra : partial_function le, False.
+
+Proof.
+intros contra.
+unfold partial_function in contra.
+destruct contra as [H1 H2].
+intros n m H3.
+destruct (H1 n m H3) as [H4 | H5].
+- inversion H4.
+- inversion H5.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #48)
+Error in step "destruct contra as [H1 H2].".
+Message: Unable to find an instance for the variables x, y1,
+y2..
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma no_strict_order_implies_equality_1 : forall contra : forall x y1 y2 : nat,
+x <= y1 -> x <= y2 -> y1 = y2, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+
+
+Lemma no_strict_order_implies_equality_1 : forall contra : forall x y1 y2 : nat,
+x <= y1 -> x <= y2 -> y1 = y2, False.
+
+Proof.
+(* We will prove the lemma by contradiction.
+Assume the negation of the statement
+     to be proven, i.e., there exists a strict order between two natural numbers.
+*)
+  intros contra.
+exists 0 1.
+(* We have assumed that 0 is less than or equal to 1, and 0 is less than or equal to 2.
+*)
+  apply contra.
+(* This contradicts our assumption that there is no strict order between two natural numbers.
+*)
+  (* Therefore, the lemma holds.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #46)
+Error in step "exists 0 1.".
+Message: Not an inductive goal with 1 constructor..
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma no_strict_order_implies_equality_2 : forall contra : forall x y1 y2 : nat,
+x <= y1 -> x <= y2 -> y1 = y2, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+
+
+Lemma no_strict_order_implies_equality_2 : forall contra : forall x y1 y2 : nat,
+x <= y1 -> x <= y2 -> y1 = y2, False.
+
+Proof.
+(* We will prove the lemma by contradiction.
+Assume the negation of the statement
+     to be proven, i.e., there exists a strict order between two natural numbers.
+*)
+  intros contra.
+exists 0 1.
+(* We have chosen 0 and 1 as our witnesses for a strict order.
+Now, we will show
+     that 0 <= 0 and 0 <= 1, which contradicts our assumption that x <= y1 -> x <= y2 -> y1 = y2.
+*)
+  split.
+- (* Proving 0 <= 0 *)
+    apply le_refl.
+- (* Proving 0 <= 1 *)
+    apply le_n_S.
+(* Now, we have our contradiction.
+We can apply the contradiction tactic to finish the proof.
+*)
+  contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #46)
+Error in step "exists 0 1.".
+Message: Not an inductive goal with 1 constructor..
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma no_strict_order_implies_equality_3 : forall contra : forall x y1 y2 : nat,
+x <= y1 -> x <= y2 -> y1 = y2, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+
+
+Lemma no_strict_order_implies_equality_3 : forall contra : forall x y1 y2 : nat,
+x <= y1 -> x <= y2 -> y1 = y2, False.
+
+Proof.
+(* We will prove the lemma by contradiction.
+Assume the negation of the conclusion,
+     which is that there exists a counterexample where x <= y1 and x <= y2, but y1 <> y2.
+*)
+  intros contra.
+(* We will now derive a contradiction from this assumption.
+To do this, we will
+     first show that the relation next_nat is a strict order.
+*)
+  assert (H : forall x y1 y2, x <= y1 -> x <= y2 -> y1 = y2).
+{ intros x y1 y2 H1 H2.
+(* We have the assumption that x <= y1 and x <= y2.
+We want to show that y1 = y2.
+*)
+    (* We will do this by applying the contra assumption to x, y1, and y2.
+*)
+    specialize (contra x y1 y2 H1 H2).
+(* This gives us a proof of False.
+But since we have assumed H : x <= y1 -> x <= y2 -> y1 = y2,
+       we can now apply this assumption to derive a contradiction.
+*)
+    apply H in H.
+(* This gives us a proof of y1 = y2, which is what we wanted to show.
+*)
+  }
+  (* Now we have shown that the relation next_nat is a strict order.
+But this contradicts
+     the assumption that next_nat is a partial function, because a strict order cannot be
+     a partial function.
+*)
+  assert (H2 : partial_function next_nat).
+{ apply next_nat_partial_function.
+}
+  (* This gives us a proof of False, which is what we wanted.
+*)
+  contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #54)
+Error in step "apply H in H.".
+Message: No such hypothesis: H.
+Goal: y1 = y2.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_preserves_inequality_4 : forall y1 y2 : nat, forall contra : y1 = y2, forall x : nat, forall H1 : x <= y1, forall H2 : x <= y2, y1 = y2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+
+
+Lemma nat_equality_preserves_inequality_4 : forall y1 y2 : nat, forall contra : y1 = y2, forall x : nat, forall H1 : x <= y1, forall H2 : x <= y2, y1 = y2.
+
+Proof.
+intros y1 y2 contra x H1 H2.
+rewrite contra in H1.
+rewrite contra in H2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #48)
+Error in step "rewrite contra in H2.".
+Message: Found no subterm matching "y1" in H2..
+Goal: y1 = y2.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_preserves_inequality_5 : forall y1 y2 : nat, forall contra : y1 = y2, forall x : nat, forall H1 H2 : x <= y2, y1 = y2.
+
+
+Error proving le_not_a_partial_function
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,735 @@
+PROVING and_example
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+Proof.
+(* We will prove the theorem by and_introduction.
+We first prove the left side of the and.
+*)
+  apply and_introduction.
+(* We will now prove 3 + 4 = 7.
+We will use the plus_n_Sm equation.
+*)
+  apply eq_refl.
+(* Now we will prove the right side of the and, 2 * 2 = 4.
+We will use the times_n_Sm equation.
+*)
+  apply eq_refl.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #64)
+Error in step "apply and_introduction.".
+Message: The variable and_introduction was not found
+in the current environment..
+Goal: 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_3_and_4_equals_7_0 : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma addition_of_3_and_4_equals_7_0 : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+Proof.
+(* We will prove the lemma by splitting it into two subgoals.
+*)
+  split.
+(* The first subgoal is to prove 3 + 4 = 7.
+*)
+  (* We know that 2 + 2 = 4 from the theorem plus_2_2_is_4.
+*)
+  (* We also know that 2 + 2 = 4 from the lemma plus_claim_is_true.
+*)
+  (* Therefore, we can use the fact that 2 + 2 = 4 to prove 3 + 4 = 7.
+*)
+  (* We do this by substituting 2 + 2 with 4 in the equation 3 + (2 + 2) = 3 + 4.
+*)
+  (* This gives us the equation 3 + 4 = 7.
+*)
+  rewrite -> plus_2_2_is_4.
+rewrite -> plus_claim_is_true.
+reflexivity.
+(* The second subgoal is to prove 2 * 2 = 4.
+*)
+  (* This is a basic fact about multiplication, which we can prove using reflexivity.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #66)
+Error in step "rewrite -> plus_2_2_is_4.".
+Message: Found no subterm matching "2 + 2" in the current goal..
+Goal: 3 + 4 = 7.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_3_and_4_is_7_1 : 3 + 4 = 7.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma addition_of_3_and_4_is_7_1 : 3 + 4 = 7.
+
+Proof.
+(* We will use the previously proven lemmas and theorems to prove this new lemma.
+*)
+  (* First, we will rewrite the goal to be proved as a claim about natural numbers.
+*)
+  (* This is done by applying the definition of equality for natural numbers.
+*)
+  rewrite -> plus_n_O_n.
+(* Now, we have the goal: S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #64)
+Error in step "rewrite -> plus_n_O_n.".
+Message: The variable plus_n_O_n was not found in the current
+environment..
+Goal: 3 + 4 = 7.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_3_and_4_is_7_2 : 3 + 4 = 7.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma addition_of_3_and_4_is_7_2 : 3 + 4 = 7.
+
+Proof.
+(* We will use the previously proven lemmas and theorems to prove this new lemma.
+*)
+
+(* We know that 2 + 2 = 4 from the theorem plus_2_2_is_4.
+*)
+(* We also know that S (successor) is injective from the lemma succ_inj.
+*)
+
+(* We want to prove that 3 + 4 = 7.
+*)
+(* We can start by proving that 3 = 4 using the injective property of S.
+*)
+
+(* We apply the injective property of S to 3 and 4.
+*)
+apply (injective_S 3 4).
+(* Now we have to prove that 3 = 4.
+*)
+(* We know that 2 + 2 = 4 from the theorem plus_2_2_is_4.
+*)
+(* We can use this fact to prove that 3 = 4.
+*)
+
+(* We rewrite the goal to be 3 + 2 = 4 + 2.
+*)
+rewrite <- plus_2_2_is_4.
+(* Now we have to prove that 3 + 2 = 4 + 2.
+*)
+(* We know that S (successor) is injective from the lemma succ_inj.
+*)
+(* We can use this fact to prove that 3 + 2 = 4 + 2.
+*)
+
+(* We apply the injective property of S to 3 and 4.
+*)
+apply (injective_S 3 4).
+(* Now we have to prove that 3 = 4.
+*)
+(* We know that 2 + 2 = 4 from the theorem plus_2_2_is_4.
+*)
+(* We can use this fact to prove that 3 = 4.
+*)
+
+(* We rewrite the goal to be 3 + 2 = 4 + 2.
+*)
+rewrite <- plus_2_2_is_4.
+(* Now we have to prove that 3 + 2 = 4 + 2.
+*)
+(* We know that S (successor) is injective from the lemma succ_inj.
+*)
+(* We can use this fact to prove that 3 + 2 = 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #64)
+Error in step "apply (injective_S 3 4).".
+Message: The variable injective_S was not found in the current
+environment..
+Goal: 3 + 4 = 7.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_3_and_4_is_7_3 : 3 + 4 = 7.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma addition_of_3_and_4_is_7_3 : 3 + 4 = 7.
+
+Proof.
+(* We will use the previously proven lemmas and theorems to prove this new lemma.
+*)
+
+(* We know that 2 + 2 = 4 from the theorem plus_2_2_is_4.
+*)
+(* We also know that S (successor) is injective from the lemma succ_inj.
+*)
+
+(* We want to prove that 3 + 4 = 7.
+*)
+(* We can start by proving that 3 = 4 using the injective property of S.
+*)
+
+(* We apply the injective property of S to 3 and 4.
+*)
+apply (injective_S 3 4).
+(* This gives us the goal of proving S 3 = S 4.
+*)
+
+(* We know that S 3 = 4 from the theorem plus_2_2_is_4.
+*)
+(* We also know that S 4 = 7 from the theorem plus_2_2_is_4.
+*)
+(* Therefore, S 3 = S 4 implies 3 = 4 and 4 = 7.
+*)
+
+(* We can now rewrite the goal to prove 3 = 4 and 4 = 7.
+*)
+rewrite -> plus_2_2_is_4.
+rewrite -> plus_2_2_is_4.
+(* Now we have the goal of proving 3 = 4 and 4 = 7.
+*)
+(* We know that 3 = 4 from the theorem plus_2_2_is_4.
+*)
+(* Therefore, 3 = 4 and 4 = 7 implies 3 + 4 = 7.
+*)
+
+(* We can now rewrite the goal to prove 3 + 4 = 7.
+*)
+rewrite -> plus_2_2_is_4.
+(* Now we have the goal of proving 3 + 4 = 7.
+*)
+(* We know that 3 + 4 = 7 from the theorem plus_2_2_is_4.
+*)
+(* Therefore, 3 + 4 = 7.
+*)
+
+(* 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #64)
+Error in step "apply (injective_S 3 4).".
+Message: The variable injective_S was not found in the current
+environment..
+Goal: 3 + 4 = 7.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_3_and_4_is_7_4 : 3 + 4 = 7.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma addition_of_3_and_4_is_7_4 : 3 + 4 = 7.
+
+Proof.
+(* We will use the previously proven lemmas and theorems to prove this new lemma.
+*)
+
+(* We know that 2 + 2 = 4 from the theorem plus_2_2_is_4.
+*)
+(* We also know that S (successor) is injective from the lemma succ_inj.
+*)
+
+(* We want to prove that 3 + 4 = 7.
+*)
+(* We can start by applying the injective property of S to the equation 2 + 2 = 4.
+*)
+apply (injective_eq S _ _ _).
+(* This will give us two subgoals: *)
+(* 1.
+2 = 3 *)
+(* 2.
+4 = 7 *)
+
+(* Now we will prove the first subgoal: 2 = 3.
+*)
+(* We know that 2 + 2 = 4 from the theorem plus_2_2_is_4.
+*)
+(* We also know that 3 + 4 = 7 from the lemma addition_of_3_and_4_is_7_4.
+*)
+(* So, we can rewrite the first subgoal as: *)
+rewrite <- plus_2_2_is_4.
+(* Now we have: *)
+(* 2 = 4 *)
+
+(* We also know that S (successor) is injective from the lemma succ_inj.
+*)
+(* We can apply the injective property of S to the equation 2 = 4.
+*)
+apply (injective_eq S _ _ _).
+(* This will give us a subgoal: *)
+(* 1.
+True *)
+
+(* Now we will prove the second subgoal: 4 = 7.
+*)
+(* We know that 3 + 4 = 7 from the lemma addition_of_3_and_4_is_7_4.
+*)
+(* So, we can rewrite the second subgoal as: *)
+rewrite <- addition_of_3_and_4_is_7_4.
+(* Now we have: *)
+(* 4 = 7 *)
+
+(* We also know that S (successor) is injective from the lemma succ_inj.
+*)
+(* We can apply the injective property of
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #64)
+Error in step "apply (injective_eq S _ _ _).".
+Message: The variable injective_eq was not found in the current
+environment..
+Goal: 3 + 4 = 7.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_3_and_4_is_7_5 : 3 + 4 = 7.
+
+
+Error proving and_example
+MAX LEMMA DEPTH REACHED. GIVING UP.

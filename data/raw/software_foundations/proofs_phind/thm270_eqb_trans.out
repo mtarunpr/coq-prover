@@ -1,0 +1,5239 @@
+PROVING eqb_trans
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+Theorem eq_implies_succ_equal : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. apply f_equal. apply H. Qed.
+
+
+
+Theorem eq_implies_succ_equal' : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. f_equal. apply H. Qed.
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+Proof.
+  intros n m b H. simpl in H. apply H.  Qed.
+
+
+
+Theorem silly4 : forall (n m p q : nat),
+  (n = m -> p = q) ->
+  m = n ->
+  q = p.
+Proof.
+  intros n m p q EQ H.
+  symmetry in H. apply EQ in H. symmetry in H.
+  apply H.  Qed.
+
+
+
+
+
+
+
+
+Theorem double_injective_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  -  simpl. intros eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct m as [| m'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+
+
+
+Abort.
+
+
+
+
+
+
+
+
+
+Theorem double_injective : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -  simpl. intros m eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+
+  - 
+
+
+
+    intros m eq.
+
+
+
+    destruct m as [| m'] eqn:E.
+    + 
+
+
+
+    discriminate eq.
+    + 
+      apply f_equal.
+
+
+
+      apply IHn'. simpl in eq. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+
+Theorem eqb_true : forall n m,
+  n =? m = true -> n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra. discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H. apply IHn' in H.
+      rewrite -> H. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+
+
+
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra.
+      discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H1.
+      apply IHn' in H1.
+      rewrite <- H1.
+      reflexivity.
+Qed.
+
+
+
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction m as [| m' IHm'].
+  -  simpl. intros eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+        
+Abort.
+
+
+
+
+
+
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m.
+  
+  generalize dependent n.
+  
+  induction m as [| m' IHm'].
+  -  simpl. intros n eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros n eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+      apply IHm'. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
+  length l = n ->
+  nth_error l n = None.
+Proof.
+  intros n X l.
+  generalize dependent n.
+  induction l as [| x l'].
+  - reflexivity.
+  - destruct n.
+    + intros contra. discriminate contra.
+    + intros H. injection H as H1. simpl. apply IHl' in H1. apply H1.
+Qed.
+
+
+
+
+
+
+
+Definition square n := n * n.
+
+
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m.
+  simpl.
+
+
+
+
+
+  unfold square.
+
+
+
+  rewrite mult_assoc.
+  assert (H : n * m * n = n * n * m).
+    { rewrite mul_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity.
+Qed.
+
+
+
+Definition foo (x: nat) := 5.
+
+
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m.
+  simpl.
+  reflexivity.
+Qed.
+
+
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  simpl. 
+Abort.
+
+
+
+
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  destruct m eqn:E.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+
+
+
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  unfold bar.
+
+
+
+  destruct m eqn:E.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+
+
+
+
+
+Definition sillyfun (n : nat) : bool :=
+  if n =? 3 then false
+  else if n =? 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun.
+  destruct (n =? 3) eqn:E1.
+    -  reflexivity.
+    -  destruct (n =? 5) eqn:E2.
+      +  reflexivity.
+      +  reflexivity.  Qed.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y))
+               : (list X) * (list Y) :=
+  match l with
+  | [] => ([], [])
+  | (x, y) :: t =>
+      match split t with
+      | (lx, ly) => (x :: lx, y :: ly)
+      end
+  end.
+
+
+
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) ->
+  combine l1 l2 = l.
+Proof.
+  intros X Y l.
+  induction l.
+  - intros l1 l2 H. simpl in H. injection H as H. rewrite <- H. rewrite <- H0. reflexivity.
+  - destruct x as (x, y).
+    destruct l1 as [| x'].
+    + intros l2 H. simpl in H. destruct (split l) in H. discriminate H.
+    + destruct l2 as [| y'].
+      * intros H. simpl in H. destruct (split l) in H. discriminate H.
+      * intros H.
+        simpl.
+        assert (G: split l = (l1, l2)). {
+          simpl in H. destruct (split l).
+          injection H as H. rewrite -> H0. rewrite -> H2. reflexivity.
+        }
+        apply IHl in G.
+        simpl in H. destruct (split l) in H. injection H as H.
+        rewrite -> G. rewrite <- H. rewrite <- H1. reflexivity.
+Qed.
+
+
+
+
+Definition sillyfun1 (n : nat) : bool :=
+  if n =? 3 then true
+  else if n =? 5 then true
+  else false.
+
+
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3).
+  
+Abort.
+
+
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3) eqn:Heqe3.
+  
+    -  apply eqb_true in Heqe3.
+      rewrite -> Heqe3. reflexivity.
+    - 
+     
+      destruct (n =? 5) eqn:Heqe5.
+        + 
+          apply eqb_true in Heqe5.
+          rewrite -> Heqe5. reflexivity.
+        +  discriminate eq.  Qed.
+
+
+Theorem bool_fn_applied_thrice :
+  forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b.
+  destruct b.
+  + destruct (f true) eqn:T.
+    - rewrite -> T. rewrite -> T. reflexivity.
+    - destruct (f false) eqn:F.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+  + destruct (f false) eqn:F.
+    - destruct (f true) eqn:T.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+    - rewrite -> F. rewrite -> F. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem eqb_sym : forall (n m : nat),
+  (n =? m) = (m =? n).
+Proof.
+  intros n m.
+  destruct (n =? m) eqn:E.
+  + 
+    symmetry. apply eqb_true in E. rewrite -> E. apply eqb_refl.
+  + 
+    generalize dependent m.
+    induction n.
+    - destruct m.
+      * intros E. discriminate E.
+      * reflexivity.
+    - destruct m.
+      * reflexivity.
+      * intros E. simpl in E. apply IHn in E. simpl. rewrite <- E. reflexivity.
+Qed.
+
+
+
+   
+
+
+
+
+Theorem eqb_trans : forall n m p,
+  n =? m = true ->
+  m =? p = true ->
+  n =? p = true.
+
+Proof.
+(*
+     We will proceed by induction on the equality of n and m.
+If n = m, then n =? m = true.
+We will then proceed by induction on the equality of m and p.
+If m = p, then m =? p = true.
+In this case, we have n = m and m = p, so n = p.
+Therefore, n =? p = true.
+*)
+  intros n m p.
+induction (eq_nat n m) as [ | n' m' eq_nm' IH_nm'].
+- (* n = m *)
+    intros H_nm_eq_mp.
+(* m = p *)
+    induction (eq_nat m p) as [ | m' p' eq_mp' IH_mp'].
+- (* m = p *)
+      reflexivity.
+- (* m <> p *)
+      inversion H_nm_eq_mp.
+- (* n <> m *)
+    intros H_nm_eq_mp.
+inversion H_nm_eq_mp.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #1066)
+Error in step "induction (eq_nat n m) as [ | n' m' eq_nm' IH_nm'].".
+Message: The variable eq_nat was not found in the current
+environment..
+Goal: (n =? m) = true -> (m =? p) = true -> (n =? p) = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma equality_transitivity_0 : forall n m p : nat, (n =? m) = true -> (m =? p) = true -> (n =? p) = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+Theorem eq_implies_succ_equal : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. apply f_equal. apply H. Qed.
+
+
+
+Theorem eq_implies_succ_equal' : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. f_equal. apply H. Qed.
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+Proof.
+  intros n m b H. simpl in H. apply H.  Qed.
+
+
+
+Theorem silly4 : forall (n m p q : nat),
+  (n = m -> p = q) ->
+  m = n ->
+  q = p.
+Proof.
+  intros n m p q EQ H.
+  symmetry in H. apply EQ in H. symmetry in H.
+  apply H.  Qed.
+
+
+
+
+
+
+
+
+Theorem double_injective_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  -  simpl. intros eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct m as [| m'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+
+
+
+Abort.
+
+
+
+
+
+
+
+
+
+Theorem double_injective : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -  simpl. intros m eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+
+  - 
+
+
+
+    intros m eq.
+
+
+
+    destruct m as [| m'] eqn:E.
+    + 
+
+
+
+    discriminate eq.
+    + 
+      apply f_equal.
+
+
+
+      apply IHn'. simpl in eq. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+
+Theorem eqb_true : forall n m,
+  n =? m = true -> n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra. discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H. apply IHn' in H.
+      rewrite -> H. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+
+
+
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra.
+      discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H1.
+      apply IHn' in H1.
+      rewrite <- H1.
+      reflexivity.
+Qed.
+
+
+
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction m as [| m' IHm'].
+  -  simpl. intros eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+        
+Abort.
+
+
+
+
+
+
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m.
+  
+  generalize dependent n.
+  
+  induction m as [| m' IHm'].
+  -  simpl. intros n eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros n eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+      apply IHm'. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
+  length l = n ->
+  nth_error l n = None.
+Proof.
+  intros n X l.
+  generalize dependent n.
+  induction l as [| x l'].
+  - reflexivity.
+  - destruct n.
+    + intros contra. discriminate contra.
+    + intros H. injection H as H1. simpl. apply IHl' in H1. apply H1.
+Qed.
+
+
+
+
+
+
+
+Definition square n := n * n.
+
+
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m.
+  simpl.
+
+
+
+
+
+  unfold square.
+
+
+
+  rewrite mult_assoc.
+  assert (H : n * m * n = n * n * m).
+    { rewrite mul_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity.
+Qed.
+
+
+
+Definition foo (x: nat) := 5.
+
+
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m.
+  simpl.
+  reflexivity.
+Qed.
+
+
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  simpl. 
+Abort.
+
+
+
+
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  destruct m eqn:E.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+
+
+
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  unfold bar.
+
+
+
+  destruct m eqn:E.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+
+
+
+
+
+Definition sillyfun (n : nat) : bool :=
+  if n =? 3 then false
+  else if n =? 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun.
+  destruct (n =? 3) eqn:E1.
+    -  reflexivity.
+    -  destruct (n =? 5) eqn:E2.
+      +  reflexivity.
+      +  reflexivity.  Qed.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y))
+               : (list X) * (list Y) :=
+  match l with
+  | [] => ([], [])
+  | (x, y) :: t =>
+      match split t with
+      | (lx, ly) => (x :: lx, y :: ly)
+      end
+  end.
+
+
+
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) ->
+  combine l1 l2 = l.
+Proof.
+  intros X Y l.
+  induction l.
+  - intros l1 l2 H. simpl in H. injection H as H. rewrite <- H. rewrite <- H0. reflexivity.
+  - destruct x as (x, y).
+    destruct l1 as [| x'].
+    + intros l2 H. simpl in H. destruct (split l) in H. discriminate H.
+    + destruct l2 as [| y'].
+      * intros H. simpl in H. destruct (split l) in H. discriminate H.
+      * intros H.
+        simpl.
+        assert (G: split l = (l1, l2)). {
+          simpl in H. destruct (split l).
+          injection H as H. rewrite -> H0. rewrite -> H2. reflexivity.
+        }
+        apply IHl in G.
+        simpl in H. destruct (split l) in H. injection H as H.
+        rewrite -> G. rewrite <- H. rewrite <- H1. reflexivity.
+Qed.
+
+
+
+
+Definition sillyfun1 (n : nat) : bool :=
+  if n =? 3 then true
+  else if n =? 5 then true
+  else false.
+
+
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3).
+  
+Abort.
+
+
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3) eqn:Heqe3.
+  
+    -  apply eqb_true in Heqe3.
+      rewrite -> Heqe3. reflexivity.
+    - 
+     
+      destruct (n =? 5) eqn:Heqe5.
+        + 
+          apply eqb_true in Heqe5.
+          rewrite -> Heqe5. reflexivity.
+        +  discriminate eq.  Qed.
+
+
+Theorem bool_fn_applied_thrice :
+  forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b.
+  destruct b.
+  + destruct (f true) eqn:T.
+    - rewrite -> T. rewrite -> T. reflexivity.
+    - destruct (f false) eqn:F.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+  + destruct (f false) eqn:F.
+    - destruct (f true) eqn:T.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+    - rewrite -> F. rewrite -> F. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem eqb_sym : forall (n m : nat),
+  (n =? m) = (m =? n).
+Proof.
+  intros n m.
+  destruct (n =? m) eqn:E.
+  + 
+    symmetry. apply eqb_true in E. rewrite -> E. apply eqb_refl.
+  + 
+    generalize dependent m.
+    induction n.
+    - destruct m.
+      * intros E. discriminate E.
+      * reflexivity.
+    - destruct m.
+      * reflexivity.
+      * intros E. simpl in E. apply IHn in E. simpl. rewrite <- E. reflexivity.
+Qed.
+
+
+
+   
+
+
+
+
+Lemma equality_transitivity_0 : forall n m p : nat, (n =? m) = true -> (m =? p) = true -> (n =? p) = true.
+
+Proof.
+(*
+     We will proceed by induction on the equality of n and m.
+If n = m, then we have (n =? m) = true.
+We want to show that (n =? p) = true.
+By the induction hypothesis, we know that (m =? p) = true.
+Therefore, (n =? p) = true.
+*)
+  intros n m p H1 H2.
+destruct (eqb_eq n m) as [H3 | H4].
+- (* n = m *)
+    rewrite H3 in H2.
+reflexivity.
+- (* n <> m *)
+    discriminate H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1066)
+Error in step "destruct (eqb_eq n m) as [H3 | H4].".
+Message: In environment
+n, m, p : nat
+H1 : (n =? m) = true
+H2 : (m =? p) = true
+The term "n" has type "nat"
+while it is expected to have type "string"..
+Goal: (n =? p) = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma equality_transitivity_1 : forall n m p : nat, forall H1 : (n =? m) = true, forall H2 : (m =? p) = true, (n =? p) = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+Theorem eq_implies_succ_equal : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. apply f_equal. apply H. Qed.
+
+
+
+Theorem eq_implies_succ_equal' : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. f_equal. apply H. Qed.
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+Proof.
+  intros n m b H. simpl in H. apply H.  Qed.
+
+
+
+Theorem silly4 : forall (n m p q : nat),
+  (n = m -> p = q) ->
+  m = n ->
+  q = p.
+Proof.
+  intros n m p q EQ H.
+  symmetry in H. apply EQ in H. symmetry in H.
+  apply H.  Qed.
+
+
+
+
+
+
+
+
+Theorem double_injective_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  -  simpl. intros eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct m as [| m'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+
+
+
+Abort.
+
+
+
+
+
+
+
+
+
+Theorem double_injective : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -  simpl. intros m eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+
+  - 
+
+
+
+    intros m eq.
+
+
+
+    destruct m as [| m'] eqn:E.
+    + 
+
+
+
+    discriminate eq.
+    + 
+      apply f_equal.
+
+
+
+      apply IHn'. simpl in eq. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+
+Theorem eqb_true : forall n m,
+  n =? m = true -> n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra. discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H. apply IHn' in H.
+      rewrite -> H. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+
+
+
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra.
+      discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H1.
+      apply IHn' in H1.
+      rewrite <- H1.
+      reflexivity.
+Qed.
+
+
+
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction m as [| m' IHm'].
+  -  simpl. intros eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+        
+Abort.
+
+
+
+
+
+
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m.
+  
+  generalize dependent n.
+  
+  induction m as [| m' IHm'].
+  -  simpl. intros n eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros n eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+      apply IHm'. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
+  length l = n ->
+  nth_error l n = None.
+Proof.
+  intros n X l.
+  generalize dependent n.
+  induction l as [| x l'].
+  - reflexivity.
+  - destruct n.
+    + intros contra. discriminate contra.
+    + intros H. injection H as H1. simpl. apply IHl' in H1. apply H1.
+Qed.
+
+
+
+
+
+
+
+Definition square n := n * n.
+
+
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m.
+  simpl.
+
+
+
+
+
+  unfold square.
+
+
+
+  rewrite mult_assoc.
+  assert (H : n * m * n = n * n * m).
+    { rewrite mul_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity.
+Qed.
+
+
+
+Definition foo (x: nat) := 5.
+
+
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m.
+  simpl.
+  reflexivity.
+Qed.
+
+
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  simpl. 
+Abort.
+
+
+
+
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  destruct m eqn:E.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+
+
+
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  unfold bar.
+
+
+
+  destruct m eqn:E.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+
+
+
+
+
+Definition sillyfun (n : nat) : bool :=
+  if n =? 3 then false
+  else if n =? 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun.
+  destruct (n =? 3) eqn:E1.
+    -  reflexivity.
+    -  destruct (n =? 5) eqn:E2.
+      +  reflexivity.
+      +  reflexivity.  Qed.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y))
+               : (list X) * (list Y) :=
+  match l with
+  | [] => ([], [])
+  | (x, y) :: t =>
+      match split t with
+      | (lx, ly) => (x :: lx, y :: ly)
+      end
+  end.
+
+
+
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) ->
+  combine l1 l2 = l.
+Proof.
+  intros X Y l.
+  induction l.
+  - intros l1 l2 H. simpl in H. injection H as H. rewrite <- H. rewrite <- H0. reflexivity.
+  - destruct x as (x, y).
+    destruct l1 as [| x'].
+    + intros l2 H. simpl in H. destruct (split l) in H. discriminate H.
+    + destruct l2 as [| y'].
+      * intros H. simpl in H. destruct (split l) in H. discriminate H.
+      * intros H.
+        simpl.
+        assert (G: split l = (l1, l2)). {
+          simpl in H. destruct (split l).
+          injection H as H. rewrite -> H0. rewrite -> H2. reflexivity.
+        }
+        apply IHl in G.
+        simpl in H. destruct (split l) in H. injection H as H.
+        rewrite -> G. rewrite <- H. rewrite <- H1. reflexivity.
+Qed.
+
+
+
+
+Definition sillyfun1 (n : nat) : bool :=
+  if n =? 3 then true
+  else if n =? 5 then true
+  else false.
+
+
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3).
+  
+Abort.
+
+
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3) eqn:Heqe3.
+  
+    -  apply eqb_true in Heqe3.
+      rewrite -> Heqe3. reflexivity.
+    - 
+     
+      destruct (n =? 5) eqn:Heqe5.
+        + 
+          apply eqb_true in Heqe5.
+          rewrite -> Heqe5. reflexivity.
+        +  discriminate eq.  Qed.
+
+
+Theorem bool_fn_applied_thrice :
+  forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b.
+  destruct b.
+  + destruct (f true) eqn:T.
+    - rewrite -> T. rewrite -> T. reflexivity.
+    - destruct (f false) eqn:F.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+  + destruct (f false) eqn:F.
+    - destruct (f true) eqn:T.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+    - rewrite -> F. rewrite -> F. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem eqb_sym : forall (n m : nat),
+  (n =? m) = (m =? n).
+Proof.
+  intros n m.
+  destruct (n =? m) eqn:E.
+  + 
+    symmetry. apply eqb_true in E. rewrite -> E. apply eqb_refl.
+  + 
+    generalize dependent m.
+    induction n.
+    - destruct m.
+      * intros E. discriminate E.
+      * reflexivity.
+    - destruct m.
+      * reflexivity.
+      * intros E. simpl in E. apply IHn in E. simpl. rewrite <- E. reflexivity.
+Qed.
+
+
+
+   
+
+
+
+
+Lemma equality_transitivity_1 : forall n m p : nat, forall H1 : (n =? m) = true, forall H2 : (m =? p) = true, (n =? p) = true.
+
+Proof.
+(*
+     We will proceed by induction on the equality of n and m.
+If n = m, then we can directly use H2 to prove (n =? p) = true.
+If n ≠ m, then we can use the induction hypothesis to prove (S n =? S m) = true,
+     and then use H2 to prove (S n =? p) = true.
+*)
+  intros n m p H1 H2.
+destruct (eqb_eq_true H1) as [H3 | H3].
+- (* n = m *)
+    exact (eqb_eq_true H2).
+- (* n ≠ m *)
+    (* We need to prove (S n =? S m) = true *)
+    apply H3 in H1.
+(* Now we have H1 : (S n =? S m) = true *)
+    (* We need to prove (S n =? p) = true *)
+    apply H3 in H2.
+(* Now we have H2 : (S m =? p) = true *)
+    (* We can now use the induction hypothesis to prove (S n =? p) = true *)
+    apply (IHn m p H1 H2).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1066)
+Error in step "destruct (eqb_eq_true H1) as [H3 | H3].".
+Message: The variable eqb_eq_true was not found in the current
+environment..
+Goal: (n =? p) = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma equality_transitivity_2 : forall n m p : nat, forall H1 : (n =? m) = true, forall H2 : (m =? p) = true, (n =? p) = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+Theorem eq_implies_succ_equal : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. apply f_equal. apply H. Qed.
+
+
+
+Theorem eq_implies_succ_equal' : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. f_equal. apply H. Qed.
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+Proof.
+  intros n m b H. simpl in H. apply H.  Qed.
+
+
+
+Theorem silly4 : forall (n m p q : nat),
+  (n = m -> p = q) ->
+  m = n ->
+  q = p.
+Proof.
+  intros n m p q EQ H.
+  symmetry in H. apply EQ in H. symmetry in H.
+  apply H.  Qed.
+
+
+
+
+
+
+
+
+Theorem double_injective_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  -  simpl. intros eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct m as [| m'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+
+
+
+Abort.
+
+
+
+
+
+
+
+
+
+Theorem double_injective : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -  simpl. intros m eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+
+  - 
+
+
+
+    intros m eq.
+
+
+
+    destruct m as [| m'] eqn:E.
+    + 
+
+
+
+    discriminate eq.
+    + 
+      apply f_equal.
+
+
+
+      apply IHn'. simpl in eq. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+
+Theorem eqb_true : forall n m,
+  n =? m = true -> n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra. discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H. apply IHn' in H.
+      rewrite -> H. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+
+
+
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra.
+      discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H1.
+      apply IHn' in H1.
+      rewrite <- H1.
+      reflexivity.
+Qed.
+
+
+
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction m as [| m' IHm'].
+  -  simpl. intros eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+        
+Abort.
+
+
+
+
+
+
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m.
+  
+  generalize dependent n.
+  
+  induction m as [| m' IHm'].
+  -  simpl. intros n eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros n eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+      apply IHm'. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
+  length l = n ->
+  nth_error l n = None.
+Proof.
+  intros n X l.
+  generalize dependent n.
+  induction l as [| x l'].
+  - reflexivity.
+  - destruct n.
+    + intros contra. discriminate contra.
+    + intros H. injection H as H1. simpl. apply IHl' in H1. apply H1.
+Qed.
+
+
+
+
+
+
+
+Definition square n := n * n.
+
+
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m.
+  simpl.
+
+
+
+
+
+  unfold square.
+
+
+
+  rewrite mult_assoc.
+  assert (H : n * m * n = n * n * m).
+    { rewrite mul_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity.
+Qed.
+
+
+
+Definition foo (x: nat) := 5.
+
+
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m.
+  simpl.
+  reflexivity.
+Qed.
+
+
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  simpl. 
+Abort.
+
+
+
+
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  destruct m eqn:E.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+
+
+
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  unfold bar.
+
+
+
+  destruct m eqn:E.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+
+
+
+
+
+Definition sillyfun (n : nat) : bool :=
+  if n =? 3 then false
+  else if n =? 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun.
+  destruct (n =? 3) eqn:E1.
+    -  reflexivity.
+    -  destruct (n =? 5) eqn:E2.
+      +  reflexivity.
+      +  reflexivity.  Qed.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y))
+               : (list X) * (list Y) :=
+  match l with
+  | [] => ([], [])
+  | (x, y) :: t =>
+      match split t with
+      | (lx, ly) => (x :: lx, y :: ly)
+      end
+  end.
+
+
+
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) ->
+  combine l1 l2 = l.
+Proof.
+  intros X Y l.
+  induction l.
+  - intros l1 l2 H. simpl in H. injection H as H. rewrite <- H. rewrite <- H0. reflexivity.
+  - destruct x as (x, y).
+    destruct l1 as [| x'].
+    + intros l2 H. simpl in H. destruct (split l) in H. discriminate H.
+    + destruct l2 as [| y'].
+      * intros H. simpl in H. destruct (split l) in H. discriminate H.
+      * intros H.
+        simpl.
+        assert (G: split l = (l1, l2)). {
+          simpl in H. destruct (split l).
+          injection H as H. rewrite -> H0. rewrite -> H2. reflexivity.
+        }
+        apply IHl in G.
+        simpl in H. destruct (split l) in H. injection H as H.
+        rewrite -> G. rewrite <- H. rewrite <- H1. reflexivity.
+Qed.
+
+
+
+
+Definition sillyfun1 (n : nat) : bool :=
+  if n =? 3 then true
+  else if n =? 5 then true
+  else false.
+
+
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3).
+  
+Abort.
+
+
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3) eqn:Heqe3.
+  
+    -  apply eqb_true in Heqe3.
+      rewrite -> Heqe3. reflexivity.
+    - 
+     
+      destruct (n =? 5) eqn:Heqe5.
+        + 
+          apply eqb_true in Heqe5.
+          rewrite -> Heqe5. reflexivity.
+        +  discriminate eq.  Qed.
+
+
+Theorem bool_fn_applied_thrice :
+  forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b.
+  destruct b.
+  + destruct (f true) eqn:T.
+    - rewrite -> T. rewrite -> T. reflexivity.
+    - destruct (f false) eqn:F.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+  + destruct (f false) eqn:F.
+    - destruct (f true) eqn:T.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+    - rewrite -> F. rewrite -> F. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem eqb_sym : forall (n m : nat),
+  (n =? m) = (m =? n).
+Proof.
+  intros n m.
+  destruct (n =? m) eqn:E.
+  + 
+    symmetry. apply eqb_true in E. rewrite -> E. apply eqb_refl.
+  + 
+    generalize dependent m.
+    induction n.
+    - destruct m.
+      * intros E. discriminate E.
+      * reflexivity.
+    - destruct m.
+      * reflexivity.
+      * intros E. simpl in E. apply IHn in E. simpl. rewrite <- E. reflexivity.
+Qed.
+
+
+
+   
+
+
+
+
+Lemma equality_transitivity_2 : forall n m p : nat, forall H1 : (n =? m) = true, forall H2 : (m =? p) = true, (n =? p) = true.
+
+Proof.
+(*
+     We will prove the lemma by induction on n, m, and p.
+The base case will be when n = m = p, in which case the statement is trivially true.
+The inductive step will be split into two cases: when n = m and m = p, and when n = p.
+*)
+  intros n m p H1 H2.
+(*
+     We first prove the base case when n = m = p.
+Since n = m = p, we have (n =? m) = true and (m =? p) = true.
+Therefore, (n =? p) = true.
+*)
+  induction n as [|n' IHn'].
+- (* n = 0 *)
+    induction m as [|m' IHm'].
+- (* m = 0 *)
+      induction p as [|p' IHp'].
+- (* p = 0 *)
+        reflexivity.
+- (* p = S p' *)
+        inversion H2.
+- (* m = S m' *)
+      inversion H1.
+- (* n = S n' *)
+    inversion H1.
+(*
+     We now prove the inductive step.
+We split into two cases: when n = m and m = p, and when n = p.
+*)
+  destruct (eqb_eq H1) as [H1' | H1'].
+- (* n = m *)
+    destruct (eqb_eq H2) as [H2' | H2'].
+- (* m = p *)
+      (*
+         In this case, we have n = m and m = p.
+Therefore, n = p.
+Since H1' and H2' are true, we have (n =? m) = true and (m =? p) = true.
+Therefore, (n =? p) = true.
+*)
+      reflexivity.
+- (* m ≠ p *)
+      (*
+         In this case, we have n = m but m ≠ p.
+Since H1' is true, we have (n =? m) = true.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1072)
+Error in step "-".
+Message: [Focus]
+Wrong bullet -: Current bullet - is not finished..
+Goal: (0 =? p) = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma eq_reflexivity_and_transitivity_3 : forall p : nat, forall H1 : (0 =? 0) = true, forall H2 : (0 =? p) = true, (0 =? p) = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+Theorem eq_implies_succ_equal : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. apply f_equal. apply H. Qed.
+
+
+
+Theorem eq_implies_succ_equal' : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. f_equal. apply H. Qed.
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+Proof.
+  intros n m b H. simpl in H. apply H.  Qed.
+
+
+
+Theorem silly4 : forall (n m p q : nat),
+  (n = m -> p = q) ->
+  m = n ->
+  q = p.
+Proof.
+  intros n m p q EQ H.
+  symmetry in H. apply EQ in H. symmetry in H.
+  apply H.  Qed.
+
+
+
+
+
+
+
+
+Theorem double_injective_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  -  simpl. intros eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct m as [| m'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+
+
+
+Abort.
+
+
+
+
+
+
+
+
+
+Theorem double_injective : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -  simpl. intros m eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+
+  - 
+
+
+
+    intros m eq.
+
+
+
+    destruct m as [| m'] eqn:E.
+    + 
+
+
+
+    discriminate eq.
+    + 
+      apply f_equal.
+
+
+
+      apply IHn'. simpl in eq. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+
+Theorem eqb_true : forall n m,
+  n =? m = true -> n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra. discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H. apply IHn' in H.
+      rewrite -> H. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+
+
+
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra.
+      discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H1.
+      apply IHn' in H1.
+      rewrite <- H1.
+      reflexivity.
+Qed.
+
+
+
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction m as [| m' IHm'].
+  -  simpl. intros eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+        
+Abort.
+
+
+
+
+
+
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m.
+  
+  generalize dependent n.
+  
+  induction m as [| m' IHm'].
+  -  simpl. intros n eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros n eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+      apply IHm'. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
+  length l = n ->
+  nth_error l n = None.
+Proof.
+  intros n X l.
+  generalize dependent n.
+  induction l as [| x l'].
+  - reflexivity.
+  - destruct n.
+    + intros contra. discriminate contra.
+    + intros H. injection H as H1. simpl. apply IHl' in H1. apply H1.
+Qed.
+
+
+
+
+
+
+
+Definition square n := n * n.
+
+
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m.
+  simpl.
+
+
+
+
+
+  unfold square.
+
+
+
+  rewrite mult_assoc.
+  assert (H : n * m * n = n * n * m).
+    { rewrite mul_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity.
+Qed.
+
+
+
+Definition foo (x: nat) := 5.
+
+
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m.
+  simpl.
+  reflexivity.
+Qed.
+
+
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  simpl. 
+Abort.
+
+
+
+
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  destruct m eqn:E.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+
+
+
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  unfold bar.
+
+
+
+  destruct m eqn:E.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+
+
+
+
+
+Definition sillyfun (n : nat) : bool :=
+  if n =? 3 then false
+  else if n =? 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun.
+  destruct (n =? 3) eqn:E1.
+    -  reflexivity.
+    -  destruct (n =? 5) eqn:E2.
+      +  reflexivity.
+      +  reflexivity.  Qed.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y))
+               : (list X) * (list Y) :=
+  match l with
+  | [] => ([], [])
+  | (x, y) :: t =>
+      match split t with
+      | (lx, ly) => (x :: lx, y :: ly)
+      end
+  end.
+
+
+
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) ->
+  combine l1 l2 = l.
+Proof.
+  intros X Y l.
+  induction l.
+  - intros l1 l2 H. simpl in H. injection H as H. rewrite <- H. rewrite <- H0. reflexivity.
+  - destruct x as (x, y).
+    destruct l1 as [| x'].
+    + intros l2 H. simpl in H. destruct (split l) in H. discriminate H.
+    + destruct l2 as [| y'].
+      * intros H. simpl in H. destruct (split l) in H. discriminate H.
+      * intros H.
+        simpl.
+        assert (G: split l = (l1, l2)). {
+          simpl in H. destruct (split l).
+          injection H as H. rewrite -> H0. rewrite -> H2. reflexivity.
+        }
+        apply IHl in G.
+        simpl in H. destruct (split l) in H. injection H as H.
+        rewrite -> G. rewrite <- H. rewrite <- H1. reflexivity.
+Qed.
+
+
+
+
+Definition sillyfun1 (n : nat) : bool :=
+  if n =? 3 then true
+  else if n =? 5 then true
+  else false.
+
+
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3).
+  
+Abort.
+
+
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3) eqn:Heqe3.
+  
+    -  apply eqb_true in Heqe3.
+      rewrite -> Heqe3. reflexivity.
+    - 
+     
+      destruct (n =? 5) eqn:Heqe5.
+        + 
+          apply eqb_true in Heqe5.
+          rewrite -> Heqe5. reflexivity.
+        +  discriminate eq.  Qed.
+
+
+Theorem bool_fn_applied_thrice :
+  forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b.
+  destruct b.
+  + destruct (f true) eqn:T.
+    - rewrite -> T. rewrite -> T. reflexivity.
+    - destruct (f false) eqn:F.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+  + destruct (f false) eqn:F.
+    - destruct (f true) eqn:T.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+    - rewrite -> F. rewrite -> F. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem eqb_sym : forall (n m : nat),
+  (n =? m) = (m =? n).
+Proof.
+  intros n m.
+  destruct (n =? m) eqn:E.
+  + 
+    symmetry. apply eqb_true in E. rewrite -> E. apply eqb_refl.
+  + 
+    generalize dependent m.
+    induction n.
+    - destruct m.
+      * intros E. discriminate E.
+      * reflexivity.
+    - destruct m.
+      * reflexivity.
+      * intros E. simpl in E. apply IHn in E. simpl. rewrite <- E. reflexivity.
+Qed.
+
+
+
+   
+
+
+
+
+Lemma eq_reflexivity_and_transitivity_3 : forall p : nat, forall H1 : (0 =? 0) = true, forall H2 : (0 =? p) = true, (0 =? p) = true.
+
+Proof.
+(* We will prove the lemma by induction on p.
+*)
+  intros p.
+(* Base case: p = 0 *)
+  induction p as [| p' IHp'].
+- (* p = 0 *)
+    simpl.
+(* We know that 0 =? 0 = true by hypothesis H1 *)
+    rewrite H1.
+(* We also know that 0 =? 0 = true by reflexivity of equality *)
+    reflexivity.
+- (* p = S p' *)
+    (* We know that 0 =? p' = true by hypothesis H2 *)
+    simpl.
+rewrite H2.
+(* We want to prove that 0 =? S p' = true *)
+    (* By the induction hypothesis IHp', we know that 0 =? p' = true implies S 0 =? S p' = true *)
+    apply IHp'.
+(* So, we have S 0 =? S p' = true *)
+    (* But, we also know that S 0 = 0 by reflexivity of equality *)
+    simpl.
+(* So, we have 0 =? p' = true *)
+    (* Therefore, by transitivity of equality, 0 =? S p' = true *)
+    apply eqb_trans.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1072)
+Error in step "rewrite H1.".
+Message: The variable H1 was not found in the current
+environment..
+Goal: true = true -> true = true -> true = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma identity_of_true_4 : true = true -> true = true -> true = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+Theorem eq_implies_succ_equal : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. apply f_equal. apply H. Qed.
+
+
+
+Theorem eq_implies_succ_equal' : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. f_equal. apply H. Qed.
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+Proof.
+  intros n m b H. simpl in H. apply H.  Qed.
+
+
+
+Theorem silly4 : forall (n m p q : nat),
+  (n = m -> p = q) ->
+  m = n ->
+  q = p.
+Proof.
+  intros n m p q EQ H.
+  symmetry in H. apply EQ in H. symmetry in H.
+  apply H.  Qed.
+
+
+
+
+
+
+
+
+Theorem double_injective_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  -  simpl. intros eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct m as [| m'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+
+
+
+Abort.
+
+
+
+
+
+
+
+
+
+Theorem double_injective : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -  simpl. intros m eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+
+  - 
+
+
+
+    intros m eq.
+
+
+
+    destruct m as [| m'] eqn:E.
+    + 
+
+
+
+    discriminate eq.
+    + 
+      apply f_equal.
+
+
+
+      apply IHn'. simpl in eq. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+
+Theorem eqb_true : forall n m,
+  n =? m = true -> n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra. discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H. apply IHn' in H.
+      rewrite -> H. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+
+
+
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra.
+      discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H1.
+      apply IHn' in H1.
+      rewrite <- H1.
+      reflexivity.
+Qed.
+
+
+
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction m as [| m' IHm'].
+  -  simpl. intros eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+        
+Abort.
+
+
+
+
+
+
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m.
+  
+  generalize dependent n.
+  
+  induction m as [| m' IHm'].
+  -  simpl. intros n eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros n eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+      apply IHm'. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
+  length l = n ->
+  nth_error l n = None.
+Proof.
+  intros n X l.
+  generalize dependent n.
+  induction l as [| x l'].
+  - reflexivity.
+  - destruct n.
+    + intros contra. discriminate contra.
+    + intros H. injection H as H1. simpl. apply IHl' in H1. apply H1.
+Qed.
+
+
+
+
+
+
+
+Definition square n := n * n.
+
+
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m.
+  simpl.
+
+
+
+
+
+  unfold square.
+
+
+
+  rewrite mult_assoc.
+  assert (H : n * m * n = n * n * m).
+    { rewrite mul_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity.
+Qed.
+
+
+
+Definition foo (x: nat) := 5.
+
+
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m.
+  simpl.
+  reflexivity.
+Qed.
+
+
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  simpl. 
+Abort.
+
+
+
+
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  destruct m eqn:E.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+
+
+
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  unfold bar.
+
+
+
+  destruct m eqn:E.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+
+
+
+
+
+Definition sillyfun (n : nat) : bool :=
+  if n =? 3 then false
+  else if n =? 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun.
+  destruct (n =? 3) eqn:E1.
+    -  reflexivity.
+    -  destruct (n =? 5) eqn:E2.
+      +  reflexivity.
+      +  reflexivity.  Qed.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y))
+               : (list X) * (list Y) :=
+  match l with
+  | [] => ([], [])
+  | (x, y) :: t =>
+      match split t with
+      | (lx, ly) => (x :: lx, y :: ly)
+      end
+  end.
+
+
+
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) ->
+  combine l1 l2 = l.
+Proof.
+  intros X Y l.
+  induction l.
+  - intros l1 l2 H. simpl in H. injection H as H. rewrite <- H. rewrite <- H0. reflexivity.
+  - destruct x as (x, y).
+    destruct l1 as [| x'].
+    + intros l2 H. simpl in H. destruct (split l) in H. discriminate H.
+    + destruct l2 as [| y'].
+      * intros H. simpl in H. destruct (split l) in H. discriminate H.
+      * intros H.
+        simpl.
+        assert (G: split l = (l1, l2)). {
+          simpl in H. destruct (split l).
+          injection H as H. rewrite -> H0. rewrite -> H2. reflexivity.
+        }
+        apply IHl in G.
+        simpl in H. destruct (split l) in H. injection H as H.
+        rewrite -> G. rewrite <- H. rewrite <- H1. reflexivity.
+Qed.
+
+
+
+
+Definition sillyfun1 (n : nat) : bool :=
+  if n =? 3 then true
+  else if n =? 5 then true
+  else false.
+
+
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3).
+  
+Abort.
+
+
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3) eqn:Heqe3.
+  
+    -  apply eqb_true in Heqe3.
+      rewrite -> Heqe3. reflexivity.
+    - 
+     
+      destruct (n =? 5) eqn:Heqe5.
+        + 
+          apply eqb_true in Heqe5.
+          rewrite -> Heqe5. reflexivity.
+        +  discriminate eq.  Qed.
+
+
+Theorem bool_fn_applied_thrice :
+  forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b.
+  destruct b.
+  + destruct (f true) eqn:T.
+    - rewrite -> T. rewrite -> T. reflexivity.
+    - destruct (f false) eqn:F.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+  + destruct (f false) eqn:F.
+    - destruct (f true) eqn:T.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+    - rewrite -> F. rewrite -> F. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem eqb_sym : forall (n m : nat),
+  (n =? m) = (m =? n).
+Proof.
+  intros n m.
+  destruct (n =? m) eqn:E.
+  + 
+    symmetry. apply eqb_true in E. rewrite -> E. apply eqb_refl.
+  + 
+    generalize dependent m.
+    induction n.
+    - destruct m.
+      * intros E. discriminate E.
+      * reflexivity.
+    - destruct m.
+      * reflexivity.
+      * intros E. simpl in E. apply IHn in E. simpl. rewrite <- E. reflexivity.
+Qed.
+
+
+
+   
+
+
+
+
+Lemma identity_of_true_4 : true = true -> true = true -> true = true.
+
+Proof.
+(* The goal is to prove that the identity of true is true.
+This is a trivial proof because true is always equal to true.
+*)
+  intros H1 H2.
+(* We can use the axiom of reflexivity to prove this.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+Proof. intros A B f x y eq. rewrite eq.  reflexivity.  Qed.
+
+Theorem eq_implies_succ_equal : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. apply f_equal. apply H. Qed.
+
+
+
+Theorem eq_implies_succ_equal' : forall (n m : nat),
+  n = m -> S n = S m.
+Proof. intros n m H. f_equal. apply H. Qed.
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+Proof.
+  intros n m b H. simpl in H. apply H.  Qed.
+
+
+
+Theorem silly4 : forall (n m p q : nat),
+  (n = m -> p = q) ->
+  m = n ->
+  q = p.
+Proof.
+  intros n m p q EQ H.
+  symmetry in H. apply EQ in H. symmetry in H.
+  apply H.  Qed.
+
+
+
+
+
+
+
+
+Theorem double_injective_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction n as [| n' IHn'].
+  -  simpl. intros eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct m as [| m'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+
+
+
+Abort.
+
+
+
+
+
+
+
+
+
+Theorem double_injective : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -  simpl. intros m eq. destruct m as [| m'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+
+  - 
+
+
+
+    intros m eq.
+
+
+
+    destruct m as [| m'] eqn:E.
+    + 
+
+
+
+    discriminate eq.
+    + 
+      apply f_equal.
+
+
+
+      apply IHn'. simpl in eq. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+
+Theorem eqb_true : forall n m,
+  n =? m = true -> n = m.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra. discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H. apply IHn' in H.
+      rewrite -> H. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_proof : option (nat*string) := None.
+
+
+
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
+Proof.
+  intros n. induction n as [| n'].
+  - 
+    destruct m.
+    + reflexivity.
+    + intros contra.
+      discriminate contra.
+  - 
+    destruct m.
+    + intros contra. discriminate contra.
+    + intros H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H1.
+      apply IHn' in H1.
+      rewrite <- H1.
+      reflexivity.
+Qed.
+
+
+
+
+Theorem double_injective_take2_FAILED : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m. induction m as [| m' IHm'].
+  -  simpl. intros eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+        
+Abort.
+
+
+
+
+
+
+
+Theorem double_injective_take2 : forall n m,
+  double n = double m ->
+  n = m.
+Proof.
+  intros n m.
+  
+  generalize dependent n.
+  
+  induction m as [| m' IHm'].
+  -  simpl. intros n eq. destruct n as [| n'] eqn:E.
+    +  reflexivity.
+    +  discriminate eq.
+  -  intros n eq. destruct n as [| n'] eqn:E.
+    +  discriminate eq.
+    +  apply f_equal.
+      apply IHm'. injection eq as goal. apply goal. Qed.
+
+
+
+
+
+Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
+  length l = n ->
+  nth_error l n = None.
+Proof.
+  intros n X l.
+  generalize dependent n.
+  induction l as [| x l'].
+  - reflexivity.
+  - destruct n.
+    + intros contra. discriminate contra.
+    + intros H. injection H as H1. simpl. apply IHl' in H1. apply H1.
+Qed.
+
+
+
+
+
+
+
+Definition square n := n * n.
+
+
+
+Lemma square_mult : forall n m, square (n * m) = square n * square m.
+Proof.
+  intros n m.
+  simpl.
+
+
+
+
+
+  unfold square.
+
+
+
+  rewrite mult_assoc.
+  assert (H : n * m * n = n * n * m).
+    { rewrite mul_comm. apply mult_assoc. }
+  rewrite H. rewrite mult_assoc. reflexivity.
+Qed.
+
+
+
+Definition foo (x: nat) := 5.
+
+
+
+Fact silly_fact_1 : forall m, foo m + 1 = foo (m + 1) + 1.
+Proof.
+  intros m.
+  simpl.
+  reflexivity.
+Qed.
+
+
+
+Definition bar x :=
+  match x with
+  | O => 5
+  | S _ => 5
+  end.
+
+
+
+Fact silly_fact_2_FAILED : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  simpl. 
+Abort.
+
+
+
+
+
+Fact silly_fact_2 : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  destruct m eqn:E.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+
+
+
+
+Fact silly_fact_2' : forall m, bar m + 1 = bar (m + 1) + 1.
+Proof.
+  intros m.
+  unfold bar.
+
+
+
+  destruct m eqn:E.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+
+
+
+
+
+Definition sillyfun (n : nat) : bool :=
+  if n =? 3 then false
+  else if n =? 5 then false
+  else false.
+
+Theorem sillyfun_false : forall (n : nat),
+  sillyfun n = false.
+Proof.
+  intros n. unfold sillyfun.
+  destruct (n =? 3) eqn:E1.
+    -  reflexivity.
+    -  destruct (n =? 5) eqn:E2.
+      +  reflexivity.
+      +  reflexivity.  Qed.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y))
+               : (list X) * (list Y) :=
+  match l with
+  | [] => ([], [])
+  | (x, y) :: t =>
+      match split t with
+      | (lx, ly) => (x :: lx, y :: ly)
+      end
+  end.
+
+
+
+Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
+  split l = (l1, l2) ->
+  combine l1 l2 = l.
+Proof.
+  intros X Y l.
+  induction l.
+  - intros l1 l2 H. simpl in H. injection H as H. rewrite <- H. rewrite <- H0. reflexivity.
+  - destruct x as (x, y).
+    destruct l1 as [| x'].
+    + intros l2 H. simpl in H. destruct (split l) in H. discriminate H.
+    + destruct l2 as [| y'].
+      * intros H. simpl in H. destruct (split l) in H. discriminate H.
+      * intros H.
+        simpl.
+        assert (G: split l = (l1, l2)). {
+          simpl in H. destruct (split l).
+          injection H as H. rewrite -> H0. rewrite -> H2. reflexivity.
+        }
+        apply IHl in G.
+        simpl in H. destruct (split l) in H. injection H as H.
+        rewrite -> G. rewrite <- H. rewrite <- H1. reflexivity.
+Qed.
+
+
+
+
+Definition sillyfun1 (n : nat) : bool :=
+  if n =? 3 then true
+  else if n =? 5 then true
+  else false.
+
+
+
+Theorem sillyfun1_odd_FAILED : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3).
+  
+Abort.
+
+
+
+Theorem sillyfun1_odd : forall (n : nat),
+  sillyfun1 n = true ->
+  odd n = true.
+Proof.
+  intros n eq. unfold sillyfun1 in eq.
+  destruct (n =? 3) eqn:Heqe3.
+  
+    -  apply eqb_true in Heqe3.
+      rewrite -> Heqe3. reflexivity.
+    - 
+     
+      destruct (n =? 5) eqn:Heqe5.
+        + 
+          apply eqb_true in Heqe5.
+          rewrite -> Heqe5. reflexivity.
+        +  discriminate eq.  Qed.
+
+
+Theorem bool_fn_applied_thrice :
+  forall (f : bool -> bool) (b : bool),
+  f (f (f b)) = f b.
+Proof.
+  intros f b.
+  destruct b.
+  + destruct (f true) eqn:T.
+    - rewrite -> T. rewrite -> T. reflexivity.
+    - destruct (f false) eqn:F.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+  + destruct (f false) eqn:F.
+    - destruct (f true) eqn:T.
+      * rewrite -> T. reflexivity.
+      * rewrite -> F. reflexivity.
+    - rewrite -> F. rewrite -> F. reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem eqb_sym : forall (n m : nat),
+  (n =? m) = (m =? n).
+Proof.
+  intros n m.
+  destruct (n =? m) eqn:E.
+  + 
+    symmetry. apply eqb_true in E. rewrite -> E. apply eqb_refl.
+  + 
+    generalize dependent m.
+    induction n.
+    - destruct m.
+      * intros E. discriminate E.
+      * reflexivity.
+    - destruct m.
+      * reflexivity.
+      * intros E. simpl in E. apply IHn in E. simpl. rewrite <- E. reflexivity.
+Qed.
+
+
+
+   
+
+
+
+
+Lemma identity_of_true_4 : true = true -> true = true -> true = true.
+
+Proof.
+(* The goal is to prove that the identity of true is true.
+This is a trivial proof because true is always equal to true.
+*)
+  intros H1 H2.
+(* We can use the axiom of reflexivity to prove this.
+*)
+  reflexivity.
+Qed.
+
+Lemma eq_reflexivity_and_transitivity_3 : forall p : nat, forall H1 : (0 =? 0) = true, forall H2 : (0 =? p) = true, (0 =? p) = true.
+
+Proof.
+(* We will prove the lemma by induction on p.
+*)
+  intros p.
+(* Base case: p = 0 *)
+  induction p as [| p' IHp'].
+- (* p = 0 *)
+    simpl.
+(* We know that 0 =? 0 = true by hypothesis H1 *)
+    apply (@identity_of_true_4 ).
+- (* p = S p' *)
+    (* We know that 0 =? p' = true by hypothesis H2 *)
+    simpl.
+rewrite H2.
+(* We want to prove that 0 =? S p' = true *)
+    (* By the induction hypothesis IHp', we know that 0 =? p' = true implies S 0 =? S p' = true *)
+    apply IHp'.
+(* So, we have S 0 =? S p' = true *)
+    (* But, we also know that S 0 = 0 by reflexivity of equality *)
+    simpl.
+(* So, we have 0 =? p' = true *)
+    (* Therefore, by transitivity of equality, 0 =? S p' = true *)
+    apply eqb_trans.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1088)
+Error in step "rewrite H2.".
+Message: The variable H2 was not found in the current
+environment..
+Goal: true = true -> false = true -> false = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma no_zero_divisor_5 : forall p' : nat, forall IHp' : (0 =? 0) = true ->
+(0 =? p') = true -> (0 =? p') = true, true = true -> false = true -> false = true.
+
+
+Error proving eqb_trans
+MAX LEMMA DEPTH REACHED. GIVING UP.

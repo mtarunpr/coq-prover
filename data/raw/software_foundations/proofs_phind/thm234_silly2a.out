@@ -1,0 +1,727 @@
+PROVING silly2a
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+
+Proof.
+(*
+     We will proceed by induction on the equality n = m.
+The base case will be when n = m is true, and the inductive
+     case will be when n = m is false.
+*)
+  intros n m H H2.
+(*
+     Base case: n = m is true.
+We will apply H2 with q := n and r := m to prove [n] = [m].
+*)
+  subst.
+apply H2.
+reflexivity.
+(*
+     Inductive case: n = m is false.
+We will show that this leads to a contradiction.
+We know that n <> m, so we can apply the induction hypothesis
+     on the equality (n, n) = (m, m) to derive a contradiction.
+*)
+  assert (H3 : (n, n) = (m, m) -> False).
+{
+    intros H4.
+induction H4 as [H5 [H6 H7]].
+(*
+       In this subgoal, we have H5 : n = m and H6 : n = m -> False.
+We will apply H6 to H5 to derive a contradiction.
+*)
+    apply H6 in H5.
+contradiction.
+}
+  (*
+     Now we have H3 : (n, n) = (m, m) -> False.
+We will apply the induction hypothesis on the equality (n, n) = (m, m)
+     to derive a contradiction.
+*)
+  apply H3 in H.
+contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #42)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+H : (n, n) = (m, m)
+H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r]
+Unable to unify "(m, m)" with "(n, n)"..
+Goal: (n, n) = (m, m).
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_preserves_pair_0 : forall n m : nat, forall H : (n, n) = (m, m), forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (n, n) = (m, m).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma nat_equality_preserves_pair_0 : forall n m : nat, forall H : (n, n) = (m, m), forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (n, n) = (m, m).
+
+Proof.
+intros n m H H2.
+destruct H as [Hn Hm].
+(* Hn : n = m
+     Hm : n = m *)
+  rewrite Hn in H2.
+(* H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r] *)
+  apply H2 in Hm.
+(* Hm : [n] = [m] *)
+  apply pair_equal in Hm.
+(* Hm : (n, n) = (m, m) *)
+  exact Hm.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #40)
+Error in step "rewrite Hn in H2.".
+Message: The variable Hn was not found in the current
+environment..
+Goal: (n, n) = (n, n).
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_equality_reflexivity_1 : forall n m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (n, n) = (n, n).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma helper_lemma_equality_reflexivity_1 : forall n m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (n, n) = (n, n).
+
+Proof.
+intros n m H2.
+apply H2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #38)
+Error in step "apply H2.".
+Message: In environment
+n, m : nat
+H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r]
+Unable to unify "[?M1090] = [?M1091]" with
+ "(n, n) = (n, n)"..
+Goal: (n, n) = (n, n).
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_equality_reflexivity_2 : forall n m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (n, n) = (n, n).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma helper_lemma_equality_reflexivity_2 : forall n m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (n, n) = (n, n).
+
+Proof.
+(*
+    We will proceed by induction on n.
+Base case: n = 0.
+In this case, we have to prove H2 0 0, which is trivial since (0, 0) = (0, 0).
+*)
+  intros n m H2.
+induction n as [|n' IHn'].
+- (* n = 0 *)
+    simpl.
+apply H2.
+reflexivity.
+- (* n = S n' *)
+    (*
+      We will now use the induction hypothesis IHn' on n'.
+We have to prove H2 (S n') (S m).
+By applying H2 to n' and m, we get H2 n' m.
+By applying IHn' to n' and m, we get (n', n') = (m, m).
+Thus, we have to prove H2 (S n') (S m) from H2 n' m and (n', n') = (m, m).
+We can rewrite (n', n') = (m, m) to H2 n' m.
+Thus, we have to prove H2 (S n') (S m) from H2 (S n') (S m).
+But this is trivial since (S n', S m) = (S n', S m).
+*)
+    simpl.
+apply H2 in H2.
+apply IHn' in H2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #44)
+Error in step "apply H2.".
+Message: In environment
+m : nat
+H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r]
+Unable to unify "[?M1094] = [?M1095]" with
+ "(0, 0) = (0, 0)"..
+Goal: (0, 0) = (0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_3 : forall m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (0, 0) = (0, 0).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma nat_equality_reflexivity_3 : forall m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (0, 0) = (0, 0).
+
+Proof.
+(* We will use the induction principle for nat to prove the lemma.
+*)
+  induction m as [|n rec_m IH_m].
+- (* Base case: m = 0 *)
+    intros H2.
+(* We need to prove [0] = [0].
+This is an easy case because we have a hypothesis that states (0, 0) = (0, 0).
+*)
+    reflexivity.
+- (* Inductive case: m = S n *)
+    (* We have a hypothesis H2 that states (q, q) = (r, r) implies [q] = [r].
+We will use this hypothesis to prove [S n] = [S n].
+*)
+    intros H2.
+(* We apply the induction hypothesis to the case where q = n and r = S n.
+*)
+    specialize (H2 n (S n) (pair_eq_pair_refl n)).
+(* Now we have [n] = [S n] by the induction hypothesis.
+*)
+    (* We will now prove that [S n] = [S n].
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #36)
+Error in step "induction m as [|n rec_m IH_m].".
+Message: The variable m was not found in the current
+environment..
+Goal: nat ->
+(forall q r : nat, (q, q) = (r, r) -> [q] = [r]) ->
+(0, 0) = (0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_4 : nat ->
+(forall q r : nat, (q, q) = (r, r) -> [q] = [r]) ->
+(0, 0) = (0, 0).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma nat_equality_reflexivity_4 : nat ->
+(forall q r : nat, (q, q) = (r, r) -> [q] = [r]) ->
+(0, 0) = (0, 0).
+
+Proof.
+intros n H.
+specialize (H n 0).
+(* We have H : [n] = [0] *)
+  simpl.
+(* We now have H : n = 0 *)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma nat_equality_reflexivity_4 : nat ->
+(forall q r : nat, (q, q) = (r, r) -> [q] = [r]) ->
+(0, 0) = (0, 0).
+
+Proof.
+intros n H.
+specialize (H n 0).
+(* We have H : [n] = [0] *)
+  simpl.
+(* We now have H : n = 0 *)
+  reflexivity.
+Qed.
+
+Lemma nat_equality_reflexivity_3 : forall m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (0, 0) = (0, 0).
+
+Proof.
+(* We will use the induction principle for nat to prove the lemma.
+*)
+  apply (@nat_equality_reflexivity_4 ).
+- (* Base case: m = 0 *)
+    intros H2.
+(* We need to prove [0] = [0].
+This is an easy case because we have a hypothesis that states (0, 0) = (0, 0).
+*)
+    reflexivity.
+- (* Inductive case: m = S n *)
+    (* We have a hypothesis H2 that states (q, q) = (r, r) implies [q] = [r].
+We will use this hypothesis to prove [S n] = [S n].
+*)
+    intros H2.
+(* We apply the induction hypothesis to the case where q = n and r = S n.
+*)
+    specialize (H2 n (S n) (pair_eq_pair_refl n)).
+(* Now we have [n] = [S n] by the induction hypothesis.
+*)
+    (* We will now prove that [S n] = [S n].
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma nat_equality_reflexivity_4 : nat ->
+(forall q r : nat, (q, q) = (r, r) -> [q] = [r]) ->
+(0, 0) = (0, 0).
+
+Proof.
+intros n H.
+specialize (H n 0).
+(* We have H : [n] = [0] *)
+  simpl.
+(* We now have H : n = 0 *)
+  reflexivity.
+Qed.
+
+Lemma nat_equality_reflexivity_3 : forall m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (0, 0) = (0, 0).
+
+
+
+
+Proof.
+(* We will use the induction principle for nat to prove the lemma.
+*)
+  
+apply (@nat_equality_reflexivity_4 ).
+Qed.
+
+Lemma helper_lemma_equality_reflexivity_2 : forall n m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (n, n) = (n, n).
+
+Proof.
+(*
+    We will proceed by induction on n.
+Base case: n = 0.
+In this case, we have to prove H2 0 0, which is trivial since (0, 0) = (0, 0).
+*)
+  intros n m H2.
+induction n as [|n' IHn'].
+- (* n = 0 *)
+    simpl.
+apply (@nat_equality_reflexivity_3 m H2).
+- (* n = S n' *)
+    (*
+      We will now use the induction hypothesis IHn' on n'.
+We have to prove H2 (S n') (S m).
+By applying H2 to n' and m, we get H2 n' m.
+By applying IHn' to n' and m, we get (n', n') = (m, m).
+Thus, we have to prove H2 (S n') (S m) from H2 n' m and (n', n') = (m, m).
+We can rewrite (n', n') = (m, m) to H2 n' m.
+Thus, we have to prove H2 (S n') (S m) from H2 (S n') (S m).
+But this is trivial since (S n', S m) = (S n', S m).
+*)
+    simpl.
+apply H2 in H2.
+apply IHn' in H2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #72)
+Error in step "apply H2 in H2.".
+Message: Unable to apply lemma of type
+ "forall q r : nat, (q, q) = (r, r) -> [q] = [r]"
+on hypothesis of type
+ "forall q r : nat, (q, q) = (r, r) -> [q] = [r]"..
+Goal: (S n', S n') = (S n', S n').
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_equality_preservation_4 : forall n' m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], forall IHn' : (n', n') = (n', n'), (S n', S n') = (S n', S n').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+
+Lemma nat_equality_reflexivity_4 : nat ->
+(forall q r : nat, (q, q) = (r, r) -> [q] = [r]) ->
+(0, 0) = (0, 0).
+
+Proof.
+intros n H.
+specialize (H n 0).
+(* We have H : [n] = [0] *)
+  simpl.
+(* We now have H : n = 0 *)
+  reflexivity.
+Qed.
+
+Lemma nat_equality_reflexivity_3 : forall m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (0, 0) = (0, 0).
+
+
+
+
+Proof.
+(* We will use the induction principle for nat to prove the lemma.
+*)
+  
+apply (@nat_equality_reflexivity_4 ).
+Qed.
+
+Lemma helper_lemma_equality_preservation_4 : forall n' m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], forall IHn' : (n', n') = (n', n'), (S n', S n') = (S n', S n').
+
+Proof.
+(*
+    We will proceed by induction on n'.
+The base case will be when n' = 0.
+The inductive case will be when n' = S n''.
+*)
+  intros n' m H2 IHn'.
+destruct n' as [|n''].
+- (* n' = 0 *)
+    (* We need to prove 0 = 0 *)
+    reflexivity.
+- (* n' = S n'' *)
+    (* We need to prove (S n', S n') = (S n'', S n'') *)
+    (* By the induction hypothesis, we have IHn' : (n'', n'') = (n'', n'') *)
+    (* By the lemma nat_equality_reflexivity_4, we have H2 : (n'', n'') = (n'', n'') -> [n''] = [n''] *)
+    (* We need to prove [S n''; S n''] = [S n''; S n''] *)
+    (* By the lemma silly1, we have n'' = n'' -> n'' = n'' *)
+    (* By the lemma silly2, we have n'' = n'' -> (n'' = n'' -> [n''] = [n'']) -> [n''] = [n''] *)
+    (* By the lemma nat_equality_reflexivity_3, we have H2 : forall m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], (0, 0) = (0, 0) *)
+    (* By the lemma nat_equality_reflexivity_4, we have H2 : nat -> (forall q r : nat, (q, q) = (r, r) -> [q] = [r]) -> (0, 0) = (0, 0) *)
+    (* By the lemma helper_lemma_equality_preservation_4, we have IHn' : forall IHn' : (n', n') = (n', n'), (S n', S n') = (S n', S n') *)
+   
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #68)
+Error in step "Qed.".
+Message:  (in proof helper_lemma_equality_preservation_4): Attempt to save an incomplete proof.
+Goal: (S (S n''), S (S n'')) = (S (S n''), S (S n'')).
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_equality_preservation_5 : forall n'' m : nat, forall H2 : forall q r : nat, (q, q) = (r, r) -> [q] = [r], forall IHn' : (S n'', S n'') = (S n'', S n''), (S (S n''), S (S n'')) = (S (S n''), S (S n'')).
+
+
+Error proving silly2a
+MAX LEMMA DEPTH REACHED. GIVING UP.

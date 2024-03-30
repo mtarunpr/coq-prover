@@ -1,0 +1,3180 @@
+PROVING test_filter2'
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Lists.
+
+
+
+
+
+
+
+
+
+
+
+Inductive boollist : Type :=
+  | bool_nil
+  | bool_cons (b : bool) (l : boollist).
+
+
+
+
+
+Inductive list (X:Type) : Type :=
+  | nil
+  | cons (x : X) (l : list X).
+
+
+
+Check list : Type -> Type.
+
+
+
+Check (nil nat) : list nat.
+
+
+
+Check (cons nat 3 (nil nat)) : list nat.
+
+
+
+Check nil : forall X : Type, list X.
+
+
+
+Check cons : forall X : Type, X -> list X -> list X.
+
+
+
+
+
+Check (cons nat 2 (cons nat 1 (nil nat)))
+      : list nat.
+
+
+
+Fixpoint repeat (X : Type) (x : X) (count : nat) : list X :=
+  match count with
+  | 0 => nil X
+  | S count' => cons X x (repeat X x count')
+  end.
+
+
+
+Example test_repeat1 :
+  repeat nat 4 2 = cons nat 4 (cons nat 4 (nil nat)).
+Proof. reflexivity. Qed.
+
+
+
+Example test_repeat2 :
+  repeat bool false 1 = cons bool false (nil bool).
+Proof. reflexivity. Qed.
+
+
+
+Module MumbleGrumble.
+
+Inductive mumble : Type :=
+  | a
+  | b (x : mumble) (y : nat)
+  | c.
+
+Inductive grumble (X:Type) : Type :=
+  | d (m : mumble)
+  | e (x : X).
+
+
+Eval compute in d mumble (b a 5).
+Eval compute in d bool (b a 5).
+Eval compute in e bool true.
+Eval compute in e mumble (b c 0).
+End MumbleGrumble.
+
+
+
+
+
+
+
+Fixpoint repeat' X x count : list X :=
+  match count with
+  | 0        => nil X
+  | S count' => cons X x (repeat' X x count')
+  end.
+
+
+
+Check repeat'
+  : forall X : Type, X -> nat -> list X.
+Check repeat
+  : forall X : Type, X -> nat -> list X.
+
+
+
+
+
+
+
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0        => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+
+
+
+Definition list123 :=
+  cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+
+
+
+Definition list123' :=
+  cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+
+
+
+
+
+Arguments nil {X}.
+Arguments cons {X}.
+Arguments repeat {X}.
+
+
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
+  match count with
+  | 0        => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+
+
+Inductive list' {X:Type} : Type :=
+  | nil'
+  | cons' (x : X) (l : list').
+
+
+
+
+
+Fixpoint app {X : Type} (l1 l2 : list X) : list X :=
+  match l1 with
+  | nil      => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X:Type} (l:list X) : list X :=
+  match l with
+  | nil      => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fail Definition mynil := nil.
+
+
+
+Definition mynil : list nat := nil.
+
+
+
+Check @nil : forall X : Type, list X.
+
+Definition mynil' := @nil nat.
+
+
+
+Notation "x :: y" := (cons x y)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y)
+                     (at level 60, right associativity).
+
+
+
+Definition list123''' := [1; 2; 3].
+
+
+
+
+
+
+Theorem app_nil_r : forall (X:Type), forall l:list X,
+  l ++ [] = l.
+Proof.
+  intros X.
+  induction l as [| n l'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'.
+    reflexivity.
+Qed.
+
+Theorem app_assoc : forall A (l m n:list A),
+  l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  intros X l1 l2 l3.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros X l1 l2.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+
+
+
+Theorem rev_app_distr: forall X (l1 l2 : list X),
+  rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+  intros X l1 l2.
+  induction l1.
+  - simpl. rewrite -> app_nil_r. reflexivity.
+  - simpl. rewrite -> IHl1. rewrite -> app_assoc. reflexivity.
+Qed.
+
+Theorem rev_involutive : forall X : Type, forall l : list X,
+  rev (rev l) = l.
+Proof.
+  intros X l.
+  induction l.
+  - reflexivity.
+  - simpl.
+    rewrite -> rev_app_distr. rewrite -> IHl. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Inductive prod (X Y : Type) : Type :=
+| pair (x : X) (y : Y).
+
+Arguments pair {X} {Y}.
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Notation "X * Y" := (prod X Y) : type_scope.
+
+
+
+
+
+
+
+Definition fst {X Y : Type} (p : X * Y) : X :=
+  match p with
+  | (x, y) => x
+  end.
+
+Definition snd {X Y : Type} (p : X * Y) : Y :=
+  match p with
+  | (x, y) => y
+  end.
+
+
+
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
+           : list (X*Y) :=
+  match lx, ly with
+  | [], _ => []
+  | _, [] => []
+  | x :: tx, y :: ty => (x, y) :: (combine tx ty)
+  end.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y)) : (list X) * (list Y)
+  := match l with
+     | (m, n) :: l' => (m :: fst (split l'), n :: snd (split l'))
+     | nil          => ([], [])
+     end.
+
+Example test_split:
+  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Proof.
+  reflexivity. Qed.
+
+
+
+
+
+
+
+Module OptionPlayground.
+
+Inductive option (X:Type) : Type :=
+  | Some (x : X)
+  | None.
+
+Arguments Some {X}.
+Arguments None {X}.
+
+End OptionPlayground.
+
+
+
+Fixpoint nth_error {X : Type} (l : list X) (n : nat)
+                   : option X :=
+  match l with
+  | nil => None
+  | a :: l' => match n with
+               | O => Some a
+               | S n' => nth_error l' n'
+               end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof. reflexivity. Qed.
+Example test_nth_error2 : nth_error [[1];[2]] 1 = Some [2].
+Proof. reflexivity. Qed.
+Example test_nth_error3 : nth_error [true] 2 = None.
+Proof. reflexivity. Qed.
+
+
+
+Definition hd_error {X : Type} (l : list X) : option X
+  := match l with
+     | nil    => None
+     | h :: _ => Some h
+     end.
+
+
+
+Check @hd_error : forall X : Type, list X -> option X.
+
+Example test_hd_error1 : hd_error [1;2] = Some 1.
+Proof. reflexivity. Qed.
+Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition doit3times {X : Type} (f : X->X) (n : X) : X :=
+  f (f (f n)).
+
+
+
+Check @doit3times : forall X : Type, (X -> X) -> X -> X.
+
+Example test_doit3times: doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example test_doit3times': doit3times negb true = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint filter {X:Type} (test: X->bool) (l:list X) : list X :=
+  match l with
+  | [] => []
+  | h :: t =>
+    if test h then h :: (filter test t)
+    else filter test t
+  end.
+
+
+
+Example test_filter1: filter even [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X : Type} (l : list X) : bool :=
+  (length l) =? 1.
+
+Example test_filter2:
+    filter length_is_1
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter odd l).
+
+Example test_countoddmembers'1:   countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2:   countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3:   countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Example test_anon_fun':
+  doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Example test_filter2' : filter (fun l => (length l) =? 1)
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+
+Proof.
+(* We will prove the theorem by induction on the input list.
+*)
+  intros X l.
+(* We will need the IHfilter_cons, which states that if the head of the list satisfies the predicate,
+     then the filtered list starting with the head is the head followed by the filtered list of the rest of the list.
+*)
+  induction l as [|x l' IHl'].
+- (* Base case: l = nil.
+*)
+    reflexivity.
+- (* Inductive case: l = x :: l'.
+*)
+    (* We will need the IHl', which states that (filter P l') has already been proven.
+*)
+    (* We will also need the IHfilter_cons, which states that if the head of the list satisfies the predicate,
+       then the filtered list starting with the head is the head followed by the filtered list of the rest of the list.
+*)
+    destruct (length_is_1 x) as [Heq | Hneq].
+- (* Case 1: length x = 1.
+*)
+      (* In this case, we know that x satisfies the predicate, so we can use the IHfilter_cons.
+*)
+      rewrite Heq in H.
+rewrite <- (IHl' (filter (fun l => length l =? 1) l')).
+reflexivity.
+- (* Case 2: length x ≠ 1.
+*)
+      (* In this case, x does not satisfy the predicate, so we can use the IHl'.
+*)
+      rewrite Hneq in H.
+rewrite <- (IHl' (filter (fun l => length l =? 1) l')).
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #408)
+Error in step "intros X l.".
+Message: No product even after head-reduction..
+Goal: filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+TRYING TO PROVE LEMMA
+Lemma filter_singleton_lists_0 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Lists.
+
+
+
+
+
+
+
+
+
+
+
+Inductive boollist : Type :=
+  | bool_nil
+  | bool_cons (b : bool) (l : boollist).
+
+
+
+
+
+Inductive list (X:Type) : Type :=
+  | nil
+  | cons (x : X) (l : list X).
+
+
+
+Check list : Type -> Type.
+
+
+
+Check (nil nat) : list nat.
+
+
+
+Check (cons nat 3 (nil nat)) : list nat.
+
+
+
+Check nil : forall X : Type, list X.
+
+
+
+Check cons : forall X : Type, X -> list X -> list X.
+
+
+
+
+
+Check (cons nat 2 (cons nat 1 (nil nat)))
+      : list nat.
+
+
+
+Fixpoint repeat (X : Type) (x : X) (count : nat) : list X :=
+  match count with
+  | 0 => nil X
+  | S count' => cons X x (repeat X x count')
+  end.
+
+
+
+Example test_repeat1 :
+  repeat nat 4 2 = cons nat 4 (cons nat 4 (nil nat)).
+Proof. reflexivity. Qed.
+
+
+
+Example test_repeat2 :
+  repeat bool false 1 = cons bool false (nil bool).
+Proof. reflexivity. Qed.
+
+
+
+Module MumbleGrumble.
+
+Inductive mumble : Type :=
+  | a
+  | b (x : mumble) (y : nat)
+  | c.
+
+Inductive grumble (X:Type) : Type :=
+  | d (m : mumble)
+  | e (x : X).
+
+
+Eval compute in d mumble (b a 5).
+Eval compute in d bool (b a 5).
+Eval compute in e bool true.
+Eval compute in e mumble (b c 0).
+End MumbleGrumble.
+
+
+
+
+
+
+
+Fixpoint repeat' X x count : list X :=
+  match count with
+  | 0        => nil X
+  | S count' => cons X x (repeat' X x count')
+  end.
+
+
+
+Check repeat'
+  : forall X : Type, X -> nat -> list X.
+Check repeat
+  : forall X : Type, X -> nat -> list X.
+
+
+
+
+
+
+
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0        => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+
+
+
+Definition list123 :=
+  cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+
+
+
+Definition list123' :=
+  cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+
+
+
+
+
+Arguments nil {X}.
+Arguments cons {X}.
+Arguments repeat {X}.
+
+
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
+  match count with
+  | 0        => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+
+
+Inductive list' {X:Type} : Type :=
+  | nil'
+  | cons' (x : X) (l : list').
+
+
+
+
+
+Fixpoint app {X : Type} (l1 l2 : list X) : list X :=
+  match l1 with
+  | nil      => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X:Type} (l:list X) : list X :=
+  match l with
+  | nil      => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fail Definition mynil := nil.
+
+
+
+Definition mynil : list nat := nil.
+
+
+
+Check @nil : forall X : Type, list X.
+
+Definition mynil' := @nil nat.
+
+
+
+Notation "x :: y" := (cons x y)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y)
+                     (at level 60, right associativity).
+
+
+
+Definition list123''' := [1; 2; 3].
+
+
+
+
+
+
+Theorem app_nil_r : forall (X:Type), forall l:list X,
+  l ++ [] = l.
+Proof.
+  intros X.
+  induction l as [| n l'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'.
+    reflexivity.
+Qed.
+
+Theorem app_assoc : forall A (l m n:list A),
+  l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  intros X l1 l2 l3.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros X l1 l2.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+
+
+
+Theorem rev_app_distr: forall X (l1 l2 : list X),
+  rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+  intros X l1 l2.
+  induction l1.
+  - simpl. rewrite -> app_nil_r. reflexivity.
+  - simpl. rewrite -> IHl1. rewrite -> app_assoc. reflexivity.
+Qed.
+
+Theorem rev_involutive : forall X : Type, forall l : list X,
+  rev (rev l) = l.
+Proof.
+  intros X l.
+  induction l.
+  - reflexivity.
+  - simpl.
+    rewrite -> rev_app_distr. rewrite -> IHl. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Inductive prod (X Y : Type) : Type :=
+| pair (x : X) (y : Y).
+
+Arguments pair {X} {Y}.
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Notation "X * Y" := (prod X Y) : type_scope.
+
+
+
+
+
+
+
+Definition fst {X Y : Type} (p : X * Y) : X :=
+  match p with
+  | (x, y) => x
+  end.
+
+Definition snd {X Y : Type} (p : X * Y) : Y :=
+  match p with
+  | (x, y) => y
+  end.
+
+
+
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
+           : list (X*Y) :=
+  match lx, ly with
+  | [], _ => []
+  | _, [] => []
+  | x :: tx, y :: ty => (x, y) :: (combine tx ty)
+  end.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y)) : (list X) * (list Y)
+  := match l with
+     | (m, n) :: l' => (m :: fst (split l'), n :: snd (split l'))
+     | nil          => ([], [])
+     end.
+
+Example test_split:
+  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Proof.
+  reflexivity. Qed.
+
+
+
+
+
+
+
+Module OptionPlayground.
+
+Inductive option (X:Type) : Type :=
+  | Some (x : X)
+  | None.
+
+Arguments Some {X}.
+Arguments None {X}.
+
+End OptionPlayground.
+
+
+
+Fixpoint nth_error {X : Type} (l : list X) (n : nat)
+                   : option X :=
+  match l with
+  | nil => None
+  | a :: l' => match n with
+               | O => Some a
+               | S n' => nth_error l' n'
+               end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof. reflexivity. Qed.
+Example test_nth_error2 : nth_error [[1];[2]] 1 = Some [2].
+Proof. reflexivity. Qed.
+Example test_nth_error3 : nth_error [true] 2 = None.
+Proof. reflexivity. Qed.
+
+
+
+Definition hd_error {X : Type} (l : list X) : option X
+  := match l with
+     | nil    => None
+     | h :: _ => Some h
+     end.
+
+
+
+Check @hd_error : forall X : Type, list X -> option X.
+
+Example test_hd_error1 : hd_error [1;2] = Some 1.
+Proof. reflexivity. Qed.
+Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition doit3times {X : Type} (f : X->X) (n : X) : X :=
+  f (f (f n)).
+
+
+
+Check @doit3times : forall X : Type, (X -> X) -> X -> X.
+
+Example test_doit3times: doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example test_doit3times': doit3times negb true = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint filter {X:Type} (test: X->bool) (l:list X) : list X :=
+  match l with
+  | [] => []
+  | h :: t =>
+    if test h then h :: (filter test t)
+    else filter test t
+  end.
+
+
+
+Example test_filter1: filter even [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X : Type} (l : list X) : bool :=
+  (length l) =? 1.
+
+Example test_filter2:
+    filter length_is_1
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter odd l).
+
+Example test_countoddmembers'1:   countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2:   countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3:   countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Example test_anon_fun':
+  doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma filter_singleton_lists_0 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+Proof.
+(* We will proceed by induction on the input list.
+*)
+  intros l.
+(* We will need to use the IHfilter_singleton_lists_0 lemma, which states that the property holds for the tail of the list.
+*)
+  induction l as [|x l' IH].
+- (* Base case: l = nil.
+*)
+    (* The filter of a nil list is nil.
+*)
+    reflexivity.
+- (* Inductive case: l = x :: l'.
+*)
+    (* We will need to prove that filter (fun l : list nat => length l =? 1) (x :: l') has the same type as [[3]; [4]; [8]].
+*)
+    (* We will use the IHfilter_singleton_lists_0 lemma.
+*)
+    (* The goal is now to prove that filter (fun l : list nat => length l =? 1) (x :: l') = IHfilter_singleton_lists_0.
+*)
+    (* We will use the definition of filter.
+*)
+    simpl.
+(* We will need to prove that if length x = 1 then x :: IHfilter_singleton_lists_0 = IHfilter_singleton_lists_0 else IHfilter_singleton_lists_0 = IHfilter_singleton_lists_0.
+*)
+    (* We will use the definition of length.
+*)
+    simpl.
+(* We will need to prove that if x = [y] then [y] :: IHfilter_singleton_lists_0 = IHfilter_singleton_lists_0 else IHfilter_singleton_lists_0 = IHfilter_singleton_lists_0.
+*)
+    (* We will use the definition of list.
+*)
+    simpl.
+(* We will need to prove that if y = 1 then [1] :: IHfilter_singleton_lists_0 = IHfilter_singleton_lists_0 else IHfilter_singleton_lists_0 = IHfilter_singleton_lists_0.
+*)
+    (* We will use the definition of nat.
+*)
+    simpl.
+(* We will need to prove that if y = 2 then [2] :: I
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #408)
+Error in step "intros l.".
+Message: No product even after head-reduction..
+Goal: filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+TRYING TO PROVE LEMMA
+Lemma filter_singleton_lists_1 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Lists.
+
+
+
+
+
+
+
+
+
+
+
+Inductive boollist : Type :=
+  | bool_nil
+  | bool_cons (b : bool) (l : boollist).
+
+
+
+
+
+Inductive list (X:Type) : Type :=
+  | nil
+  | cons (x : X) (l : list X).
+
+
+
+Check list : Type -> Type.
+
+
+
+Check (nil nat) : list nat.
+
+
+
+Check (cons nat 3 (nil nat)) : list nat.
+
+
+
+Check nil : forall X : Type, list X.
+
+
+
+Check cons : forall X : Type, X -> list X -> list X.
+
+
+
+
+
+Check (cons nat 2 (cons nat 1 (nil nat)))
+      : list nat.
+
+
+
+Fixpoint repeat (X : Type) (x : X) (count : nat) : list X :=
+  match count with
+  | 0 => nil X
+  | S count' => cons X x (repeat X x count')
+  end.
+
+
+
+Example test_repeat1 :
+  repeat nat 4 2 = cons nat 4 (cons nat 4 (nil nat)).
+Proof. reflexivity. Qed.
+
+
+
+Example test_repeat2 :
+  repeat bool false 1 = cons bool false (nil bool).
+Proof. reflexivity. Qed.
+
+
+
+Module MumbleGrumble.
+
+Inductive mumble : Type :=
+  | a
+  | b (x : mumble) (y : nat)
+  | c.
+
+Inductive grumble (X:Type) : Type :=
+  | d (m : mumble)
+  | e (x : X).
+
+
+Eval compute in d mumble (b a 5).
+Eval compute in d bool (b a 5).
+Eval compute in e bool true.
+Eval compute in e mumble (b c 0).
+End MumbleGrumble.
+
+
+
+
+
+
+
+Fixpoint repeat' X x count : list X :=
+  match count with
+  | 0        => nil X
+  | S count' => cons X x (repeat' X x count')
+  end.
+
+
+
+Check repeat'
+  : forall X : Type, X -> nat -> list X.
+Check repeat
+  : forall X : Type, X -> nat -> list X.
+
+
+
+
+
+
+
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0        => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+
+
+
+Definition list123 :=
+  cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+
+
+
+Definition list123' :=
+  cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+
+
+
+
+
+Arguments nil {X}.
+Arguments cons {X}.
+Arguments repeat {X}.
+
+
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
+  match count with
+  | 0        => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+
+
+Inductive list' {X:Type} : Type :=
+  | nil'
+  | cons' (x : X) (l : list').
+
+
+
+
+
+Fixpoint app {X : Type} (l1 l2 : list X) : list X :=
+  match l1 with
+  | nil      => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X:Type} (l:list X) : list X :=
+  match l with
+  | nil      => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fail Definition mynil := nil.
+
+
+
+Definition mynil : list nat := nil.
+
+
+
+Check @nil : forall X : Type, list X.
+
+Definition mynil' := @nil nat.
+
+
+
+Notation "x :: y" := (cons x y)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y)
+                     (at level 60, right associativity).
+
+
+
+Definition list123''' := [1; 2; 3].
+
+
+
+
+
+
+Theorem app_nil_r : forall (X:Type), forall l:list X,
+  l ++ [] = l.
+Proof.
+  intros X.
+  induction l as [| n l'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'.
+    reflexivity.
+Qed.
+
+Theorem app_assoc : forall A (l m n:list A),
+  l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  intros X l1 l2 l3.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros X l1 l2.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+
+
+
+Theorem rev_app_distr: forall X (l1 l2 : list X),
+  rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+  intros X l1 l2.
+  induction l1.
+  - simpl. rewrite -> app_nil_r. reflexivity.
+  - simpl. rewrite -> IHl1. rewrite -> app_assoc. reflexivity.
+Qed.
+
+Theorem rev_involutive : forall X : Type, forall l : list X,
+  rev (rev l) = l.
+Proof.
+  intros X l.
+  induction l.
+  - reflexivity.
+  - simpl.
+    rewrite -> rev_app_distr. rewrite -> IHl. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Inductive prod (X Y : Type) : Type :=
+| pair (x : X) (y : Y).
+
+Arguments pair {X} {Y}.
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Notation "X * Y" := (prod X Y) : type_scope.
+
+
+
+
+
+
+
+Definition fst {X Y : Type} (p : X * Y) : X :=
+  match p with
+  | (x, y) => x
+  end.
+
+Definition snd {X Y : Type} (p : X * Y) : Y :=
+  match p with
+  | (x, y) => y
+  end.
+
+
+
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
+           : list (X*Y) :=
+  match lx, ly with
+  | [], _ => []
+  | _, [] => []
+  | x :: tx, y :: ty => (x, y) :: (combine tx ty)
+  end.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y)) : (list X) * (list Y)
+  := match l with
+     | (m, n) :: l' => (m :: fst (split l'), n :: snd (split l'))
+     | nil          => ([], [])
+     end.
+
+Example test_split:
+  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Proof.
+  reflexivity. Qed.
+
+
+
+
+
+
+
+Module OptionPlayground.
+
+Inductive option (X:Type) : Type :=
+  | Some (x : X)
+  | None.
+
+Arguments Some {X}.
+Arguments None {X}.
+
+End OptionPlayground.
+
+
+
+Fixpoint nth_error {X : Type} (l : list X) (n : nat)
+                   : option X :=
+  match l with
+  | nil => None
+  | a :: l' => match n with
+               | O => Some a
+               | S n' => nth_error l' n'
+               end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof. reflexivity. Qed.
+Example test_nth_error2 : nth_error [[1];[2]] 1 = Some [2].
+Proof. reflexivity. Qed.
+Example test_nth_error3 : nth_error [true] 2 = None.
+Proof. reflexivity. Qed.
+
+
+
+Definition hd_error {X : Type} (l : list X) : option X
+  := match l with
+     | nil    => None
+     | h :: _ => Some h
+     end.
+
+
+
+Check @hd_error : forall X : Type, list X -> option X.
+
+Example test_hd_error1 : hd_error [1;2] = Some 1.
+Proof. reflexivity. Qed.
+Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition doit3times {X : Type} (f : X->X) (n : X) : X :=
+  f (f (f n)).
+
+
+
+Check @doit3times : forall X : Type, (X -> X) -> X -> X.
+
+Example test_doit3times: doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example test_doit3times': doit3times negb true = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint filter {X:Type} (test: X->bool) (l:list X) : list X :=
+  match l with
+  | [] => []
+  | h :: t =>
+    if test h then h :: (filter test t)
+    else filter test t
+  end.
+
+
+
+Example test_filter1: filter even [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X : Type} (l : list X) : bool :=
+  (length l) =? 1.
+
+Example test_filter2:
+    filter length_is_1
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter odd l).
+
+Example test_countoddmembers'1:   countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2:   countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3:   countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Example test_anon_fun':
+  doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma filter_singleton_lists_1 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+Proof.
+(* We will proceed by induction on the input list.
+*)
+  intros l.
+(* We will need to use the IHfilter_singleton_lists_1 lemma, which states that the property holds for the tail of the list.
+*)
+  induction l as [|x l' IH].
+- (* Base case: l = nil.
+*)
+    (* The property holds vacuously for the empty list.
+*)
+    reflexivity.
+- (* Inductive case: l = x :: l'.
+*)
+    (* We will need to reason about the length of the head of the list.
+*)
+    destruct x as [|x' l''].
++ (* Case: x = nil.
+*)
+      (* In this case, the length of x is 0, so it cannot be a singleton list.
+*)
+      (* Therefore, the filter removes x from the list.
+*)
+      simpl.
+(* Our goal is now to prove that filter (fun l : list nat => length l =? 1) (x :: l') = filter (fun l : list nat => length l =? 1) l'.
+*)
+      (* By the IHfilter_singleton_lists_1, this is true.
+*)
+      rewrite IH.
+(* We have now proved the lemma for this case.
+*)
+      reflexivity.
++ (* Case: x = x' :: l''.
+*)
+      (* In this case, the length of x is 1, so it is a singleton list.
+*)
+      (* Therefore, the filter keeps x in the list.
+*)
+      simpl.
+(* Our goal is now to prove that filter (fun l : list nat => length l =? 1) (x :: l') = x :: filter (fun l : list nat => length l =? 1) l'.
+*)
+      (* By the IHfilter_singleton_lists_1, this is true.
+*)
+      rewrite IH.
+(* We have now proved the lemma for this case.
+*)
+      reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #408)
+Error in step "intros l.".
+Message: No product even after head-reduction..
+Goal: filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+TRYING TO PROVE LEMMA
+Lemma filter_singleton_lists_2 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Lists.
+
+
+
+
+
+
+
+
+
+
+
+Inductive boollist : Type :=
+  | bool_nil
+  | bool_cons (b : bool) (l : boollist).
+
+
+
+
+
+Inductive list (X:Type) : Type :=
+  | nil
+  | cons (x : X) (l : list X).
+
+
+
+Check list : Type -> Type.
+
+
+
+Check (nil nat) : list nat.
+
+
+
+Check (cons nat 3 (nil nat)) : list nat.
+
+
+
+Check nil : forall X : Type, list X.
+
+
+
+Check cons : forall X : Type, X -> list X -> list X.
+
+
+
+
+
+Check (cons nat 2 (cons nat 1 (nil nat)))
+      : list nat.
+
+
+
+Fixpoint repeat (X : Type) (x : X) (count : nat) : list X :=
+  match count with
+  | 0 => nil X
+  | S count' => cons X x (repeat X x count')
+  end.
+
+
+
+Example test_repeat1 :
+  repeat nat 4 2 = cons nat 4 (cons nat 4 (nil nat)).
+Proof. reflexivity. Qed.
+
+
+
+Example test_repeat2 :
+  repeat bool false 1 = cons bool false (nil bool).
+Proof. reflexivity. Qed.
+
+
+
+Module MumbleGrumble.
+
+Inductive mumble : Type :=
+  | a
+  | b (x : mumble) (y : nat)
+  | c.
+
+Inductive grumble (X:Type) : Type :=
+  | d (m : mumble)
+  | e (x : X).
+
+
+Eval compute in d mumble (b a 5).
+Eval compute in d bool (b a 5).
+Eval compute in e bool true.
+Eval compute in e mumble (b c 0).
+End MumbleGrumble.
+
+
+
+
+
+
+
+Fixpoint repeat' X x count : list X :=
+  match count with
+  | 0        => nil X
+  | S count' => cons X x (repeat' X x count')
+  end.
+
+
+
+Check repeat'
+  : forall X : Type, X -> nat -> list X.
+Check repeat
+  : forall X : Type, X -> nat -> list X.
+
+
+
+
+
+
+
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0        => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+
+
+
+Definition list123 :=
+  cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+
+
+
+Definition list123' :=
+  cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+
+
+
+
+
+Arguments nil {X}.
+Arguments cons {X}.
+Arguments repeat {X}.
+
+
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
+  match count with
+  | 0        => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+
+
+Inductive list' {X:Type} : Type :=
+  | nil'
+  | cons' (x : X) (l : list').
+
+
+
+
+
+Fixpoint app {X : Type} (l1 l2 : list X) : list X :=
+  match l1 with
+  | nil      => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X:Type} (l:list X) : list X :=
+  match l with
+  | nil      => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fail Definition mynil := nil.
+
+
+
+Definition mynil : list nat := nil.
+
+
+
+Check @nil : forall X : Type, list X.
+
+Definition mynil' := @nil nat.
+
+
+
+Notation "x :: y" := (cons x y)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y)
+                     (at level 60, right associativity).
+
+
+
+Definition list123''' := [1; 2; 3].
+
+
+
+
+
+
+Theorem app_nil_r : forall (X:Type), forall l:list X,
+  l ++ [] = l.
+Proof.
+  intros X.
+  induction l as [| n l'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'.
+    reflexivity.
+Qed.
+
+Theorem app_assoc : forall A (l m n:list A),
+  l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  intros X l1 l2 l3.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros X l1 l2.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+
+
+
+Theorem rev_app_distr: forall X (l1 l2 : list X),
+  rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+  intros X l1 l2.
+  induction l1.
+  - simpl. rewrite -> app_nil_r. reflexivity.
+  - simpl. rewrite -> IHl1. rewrite -> app_assoc. reflexivity.
+Qed.
+
+Theorem rev_involutive : forall X : Type, forall l : list X,
+  rev (rev l) = l.
+Proof.
+  intros X l.
+  induction l.
+  - reflexivity.
+  - simpl.
+    rewrite -> rev_app_distr. rewrite -> IHl. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Inductive prod (X Y : Type) : Type :=
+| pair (x : X) (y : Y).
+
+Arguments pair {X} {Y}.
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Notation "X * Y" := (prod X Y) : type_scope.
+
+
+
+
+
+
+
+Definition fst {X Y : Type} (p : X * Y) : X :=
+  match p with
+  | (x, y) => x
+  end.
+
+Definition snd {X Y : Type} (p : X * Y) : Y :=
+  match p with
+  | (x, y) => y
+  end.
+
+
+
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
+           : list (X*Y) :=
+  match lx, ly with
+  | [], _ => []
+  | _, [] => []
+  | x :: tx, y :: ty => (x, y) :: (combine tx ty)
+  end.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y)) : (list X) * (list Y)
+  := match l with
+     | (m, n) :: l' => (m :: fst (split l'), n :: snd (split l'))
+     | nil          => ([], [])
+     end.
+
+Example test_split:
+  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Proof.
+  reflexivity. Qed.
+
+
+
+
+
+
+
+Module OptionPlayground.
+
+Inductive option (X:Type) : Type :=
+  | Some (x : X)
+  | None.
+
+Arguments Some {X}.
+Arguments None {X}.
+
+End OptionPlayground.
+
+
+
+Fixpoint nth_error {X : Type} (l : list X) (n : nat)
+                   : option X :=
+  match l with
+  | nil => None
+  | a :: l' => match n with
+               | O => Some a
+               | S n' => nth_error l' n'
+               end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof. reflexivity. Qed.
+Example test_nth_error2 : nth_error [[1];[2]] 1 = Some [2].
+Proof. reflexivity. Qed.
+Example test_nth_error3 : nth_error [true] 2 = None.
+Proof. reflexivity. Qed.
+
+
+
+Definition hd_error {X : Type} (l : list X) : option X
+  := match l with
+     | nil    => None
+     | h :: _ => Some h
+     end.
+
+
+
+Check @hd_error : forall X : Type, list X -> option X.
+
+Example test_hd_error1 : hd_error [1;2] = Some 1.
+Proof. reflexivity. Qed.
+Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition doit3times {X : Type} (f : X->X) (n : X) : X :=
+  f (f (f n)).
+
+
+
+Check @doit3times : forall X : Type, (X -> X) -> X -> X.
+
+Example test_doit3times: doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example test_doit3times': doit3times negb true = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint filter {X:Type} (test: X->bool) (l:list X) : list X :=
+  match l with
+  | [] => []
+  | h :: t =>
+    if test h then h :: (filter test t)
+    else filter test t
+  end.
+
+
+
+Example test_filter1: filter even [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X : Type} (l : list X) : bool :=
+  (length l) =? 1.
+
+Example test_filter2:
+    filter length_is_1
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter odd l).
+
+Example test_countoddmembers'1:   countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2:   countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3:   countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Example test_anon_fun':
+  doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma filter_singleton_lists_2 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+Proof.
+(* We will proceed by induction on the input list.
+*)
+  intros l.
+(* We will need to use the IHfilter_singleton_lists_2 lemma, which states that the property holds for the tail of the list.
+*)
+  induction l as [|x l' IHl'].
+(* The base case is when the list is empty.
+In this case, the result is empty.
+*)
+  - reflexivity.
+(* The inductive case is when the list is non-empty.
+We need to consider two sub-cases: when the head of the list is a singleton, and when it is not.
+*)
+  - destruct (length x =? 1) eqn:E.
+(* If the head of the list is a singleton, then it should be in the result.
+*)
+    + rewrite E in IHl'.
+simpl.
+reflexivity.
+(* If the head of the list is not a singleton, then it should not be in the result.
+*)
+    + simpl.
+rewrite IHl'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #408)
+Error in step "intros l.".
+Message: No product even after head-reduction..
+Goal: filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+TRYING TO PROVE LEMMA
+Lemma filter_singleton_lists_3 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Lists.
+
+
+
+
+
+
+
+
+
+
+
+Inductive boollist : Type :=
+  | bool_nil
+  | bool_cons (b : bool) (l : boollist).
+
+
+
+
+
+Inductive list (X:Type) : Type :=
+  | nil
+  | cons (x : X) (l : list X).
+
+
+
+Check list : Type -> Type.
+
+
+
+Check (nil nat) : list nat.
+
+
+
+Check (cons nat 3 (nil nat)) : list nat.
+
+
+
+Check nil : forall X : Type, list X.
+
+
+
+Check cons : forall X : Type, X -> list X -> list X.
+
+
+
+
+
+Check (cons nat 2 (cons nat 1 (nil nat)))
+      : list nat.
+
+
+
+Fixpoint repeat (X : Type) (x : X) (count : nat) : list X :=
+  match count with
+  | 0 => nil X
+  | S count' => cons X x (repeat X x count')
+  end.
+
+
+
+Example test_repeat1 :
+  repeat nat 4 2 = cons nat 4 (cons nat 4 (nil nat)).
+Proof. reflexivity. Qed.
+
+
+
+Example test_repeat2 :
+  repeat bool false 1 = cons bool false (nil bool).
+Proof. reflexivity. Qed.
+
+
+
+Module MumbleGrumble.
+
+Inductive mumble : Type :=
+  | a
+  | b (x : mumble) (y : nat)
+  | c.
+
+Inductive grumble (X:Type) : Type :=
+  | d (m : mumble)
+  | e (x : X).
+
+
+Eval compute in d mumble (b a 5).
+Eval compute in d bool (b a 5).
+Eval compute in e bool true.
+Eval compute in e mumble (b c 0).
+End MumbleGrumble.
+
+
+
+
+
+
+
+Fixpoint repeat' X x count : list X :=
+  match count with
+  | 0        => nil X
+  | S count' => cons X x (repeat' X x count')
+  end.
+
+
+
+Check repeat'
+  : forall X : Type, X -> nat -> list X.
+Check repeat
+  : forall X : Type, X -> nat -> list X.
+
+
+
+
+
+
+
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0        => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+
+
+
+Definition list123 :=
+  cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+
+
+
+Definition list123' :=
+  cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+
+
+
+
+
+Arguments nil {X}.
+Arguments cons {X}.
+Arguments repeat {X}.
+
+
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
+  match count with
+  | 0        => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+
+
+Inductive list' {X:Type} : Type :=
+  | nil'
+  | cons' (x : X) (l : list').
+
+
+
+
+
+Fixpoint app {X : Type} (l1 l2 : list X) : list X :=
+  match l1 with
+  | nil      => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X:Type} (l:list X) : list X :=
+  match l with
+  | nil      => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fail Definition mynil := nil.
+
+
+
+Definition mynil : list nat := nil.
+
+
+
+Check @nil : forall X : Type, list X.
+
+Definition mynil' := @nil nat.
+
+
+
+Notation "x :: y" := (cons x y)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y)
+                     (at level 60, right associativity).
+
+
+
+Definition list123''' := [1; 2; 3].
+
+
+
+
+
+
+Theorem app_nil_r : forall (X:Type), forall l:list X,
+  l ++ [] = l.
+Proof.
+  intros X.
+  induction l as [| n l'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'.
+    reflexivity.
+Qed.
+
+Theorem app_assoc : forall A (l m n:list A),
+  l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  intros X l1 l2 l3.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros X l1 l2.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+
+
+
+Theorem rev_app_distr: forall X (l1 l2 : list X),
+  rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+  intros X l1 l2.
+  induction l1.
+  - simpl. rewrite -> app_nil_r. reflexivity.
+  - simpl. rewrite -> IHl1. rewrite -> app_assoc. reflexivity.
+Qed.
+
+Theorem rev_involutive : forall X : Type, forall l : list X,
+  rev (rev l) = l.
+Proof.
+  intros X l.
+  induction l.
+  - reflexivity.
+  - simpl.
+    rewrite -> rev_app_distr. rewrite -> IHl. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Inductive prod (X Y : Type) : Type :=
+| pair (x : X) (y : Y).
+
+Arguments pair {X} {Y}.
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Notation "X * Y" := (prod X Y) : type_scope.
+
+
+
+
+
+
+
+Definition fst {X Y : Type} (p : X * Y) : X :=
+  match p with
+  | (x, y) => x
+  end.
+
+Definition snd {X Y : Type} (p : X * Y) : Y :=
+  match p with
+  | (x, y) => y
+  end.
+
+
+
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
+           : list (X*Y) :=
+  match lx, ly with
+  | [], _ => []
+  | _, [] => []
+  | x :: tx, y :: ty => (x, y) :: (combine tx ty)
+  end.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y)) : (list X) * (list Y)
+  := match l with
+     | (m, n) :: l' => (m :: fst (split l'), n :: snd (split l'))
+     | nil          => ([], [])
+     end.
+
+Example test_split:
+  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Proof.
+  reflexivity. Qed.
+
+
+
+
+
+
+
+Module OptionPlayground.
+
+Inductive option (X:Type) : Type :=
+  | Some (x : X)
+  | None.
+
+Arguments Some {X}.
+Arguments None {X}.
+
+End OptionPlayground.
+
+
+
+Fixpoint nth_error {X : Type} (l : list X) (n : nat)
+                   : option X :=
+  match l with
+  | nil => None
+  | a :: l' => match n with
+               | O => Some a
+               | S n' => nth_error l' n'
+               end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof. reflexivity. Qed.
+Example test_nth_error2 : nth_error [[1];[2]] 1 = Some [2].
+Proof. reflexivity. Qed.
+Example test_nth_error3 : nth_error [true] 2 = None.
+Proof. reflexivity. Qed.
+
+
+
+Definition hd_error {X : Type} (l : list X) : option X
+  := match l with
+     | nil    => None
+     | h :: _ => Some h
+     end.
+
+
+
+Check @hd_error : forall X : Type, list X -> option X.
+
+Example test_hd_error1 : hd_error [1;2] = Some 1.
+Proof. reflexivity. Qed.
+Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition doit3times {X : Type} (f : X->X) (n : X) : X :=
+  f (f (f n)).
+
+
+
+Check @doit3times : forall X : Type, (X -> X) -> X -> X.
+
+Example test_doit3times: doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example test_doit3times': doit3times negb true = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint filter {X:Type} (test: X->bool) (l:list X) : list X :=
+  match l with
+  | [] => []
+  | h :: t =>
+    if test h then h :: (filter test t)
+    else filter test t
+  end.
+
+
+
+Example test_filter1: filter even [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X : Type} (l : list X) : bool :=
+  (length l) =? 1.
+
+Example test_filter2:
+    filter length_is_1
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter odd l).
+
+Example test_countoddmembers'1:   countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2:   countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3:   countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Example test_anon_fun':
+  doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma filter_singleton_lists_3 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+Proof.
+(* We will proceed by induction on the input list.
+*)
+  intros l.
+(* We will need to use the IHfilter_append lemma, which states that if we have two lists l1 and l2, and we filter a predicate P from l1 and l2, then the concatenation of the filtered lists is equal to filtering P from the concatenation of l1 and l2.
+*)
+  rewrite IHfilter_append.
+(* We will also need to use the IHfilter_nil lemma, which states that filtering a predicate P from the empty list gives the empty list.
+*)
+  rewrite IHfilter_nil.
+(* Now, we will consider two cases: whether the first element of the list satisfies the predicate or not.
+*)
+  destruct l as [| h t].
+(* If the first element satisfies the predicate, then we add it to the result.
+*)
+  - rewrite filter_cons.
+destruct (length_is_1 h) eqn:E.
++ rewrite E.
+reflexivity.
++ rewrite filter_cons.
+reflexivity.
+(* If the first element does not satisfy the predicate, then we simply recurse on the rest of the list.
+*)
+  - rewrite filter_cons.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #408)
+Error in step "intros l.".
+Message: No product even after head-reduction..
+Goal: filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+TRYING TO PROVE LEMMA
+Lemma filter_singleton_lists_4 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Lists.
+
+
+
+
+
+
+
+
+
+
+
+Inductive boollist : Type :=
+  | bool_nil
+  | bool_cons (b : bool) (l : boollist).
+
+
+
+
+
+Inductive list (X:Type) : Type :=
+  | nil
+  | cons (x : X) (l : list X).
+
+
+
+Check list : Type -> Type.
+
+
+
+Check (nil nat) : list nat.
+
+
+
+Check (cons nat 3 (nil nat)) : list nat.
+
+
+
+Check nil : forall X : Type, list X.
+
+
+
+Check cons : forall X : Type, X -> list X -> list X.
+
+
+
+
+
+Check (cons nat 2 (cons nat 1 (nil nat)))
+      : list nat.
+
+
+
+Fixpoint repeat (X : Type) (x : X) (count : nat) : list X :=
+  match count with
+  | 0 => nil X
+  | S count' => cons X x (repeat X x count')
+  end.
+
+
+
+Example test_repeat1 :
+  repeat nat 4 2 = cons nat 4 (cons nat 4 (nil nat)).
+Proof. reflexivity. Qed.
+
+
+
+Example test_repeat2 :
+  repeat bool false 1 = cons bool false (nil bool).
+Proof. reflexivity. Qed.
+
+
+
+Module MumbleGrumble.
+
+Inductive mumble : Type :=
+  | a
+  | b (x : mumble) (y : nat)
+  | c.
+
+Inductive grumble (X:Type) : Type :=
+  | d (m : mumble)
+  | e (x : X).
+
+
+Eval compute in d mumble (b a 5).
+Eval compute in d bool (b a 5).
+Eval compute in e bool true.
+Eval compute in e mumble (b c 0).
+End MumbleGrumble.
+
+
+
+
+
+
+
+Fixpoint repeat' X x count : list X :=
+  match count with
+  | 0        => nil X
+  | S count' => cons X x (repeat' X x count')
+  end.
+
+
+
+Check repeat'
+  : forall X : Type, X -> nat -> list X.
+Check repeat
+  : forall X : Type, X -> nat -> list X.
+
+
+
+
+
+
+
+
+Fixpoint repeat'' X x count : list X :=
+  match count with
+  | 0        => nil _
+  | S count' => cons _ x (repeat'' _ x count')
+  end.
+
+
+
+Definition list123 :=
+  cons nat 1 (cons nat 2 (cons nat 3 (nil nat))).
+
+
+
+Definition list123' :=
+  cons _ 1 (cons _ 2 (cons _ 3 (nil _))).
+
+
+
+
+
+
+Arguments nil {X}.
+Arguments cons {X}.
+Arguments repeat {X}.
+
+
+
+Definition list123'' := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Fixpoint repeat''' {X : Type} (x : X) (count : nat) : list X :=
+  match count with
+  | 0        => nil
+  | S count' => cons x (repeat''' x count')
+  end.
+
+
+
+Inductive list' {X:Type} : Type :=
+  | nil'
+  | cons' (x : X) (l : list').
+
+
+
+
+
+Fixpoint app {X : Type} (l1 l2 : list X) : list X :=
+  match l1 with
+  | nil      => l2
+  | cons h t => cons h (app t l2)
+  end.
+
+Fixpoint rev {X:Type} (l:list X) : list X :=
+  match l with
+  | nil      => nil
+  | cons h t => app (rev t) (cons h nil)
+  end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+  match l with
+  | nil => 0
+  | cons _ l' => S (length l')
+  end.
+
+Example test_rev1 :
+  rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
+Proof. reflexivity. Qed.
+
+Example test_rev2:
+  rev (cons true nil) = cons true nil.
+Proof. reflexivity. Qed.
+
+Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fail Definition mynil := nil.
+
+
+
+Definition mynil : list nat := nil.
+
+
+
+Check @nil : forall X : Type, list X.
+
+Definition mynil' := @nil nat.
+
+
+
+Notation "x :: y" := (cons x y)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y []) ..).
+Notation "x ++ y" := (app x y)
+                     (at level 60, right associativity).
+
+
+
+Definition list123''' := [1; 2; 3].
+
+
+
+
+
+
+Theorem app_nil_r : forall (X:Type), forall l:list X,
+  l ++ [] = l.
+Proof.
+  intros X.
+  induction l as [| n l'].
+  - reflexivity.
+  - simpl. rewrite -> IHl'.
+    reflexivity.
+Qed.
+
+Theorem app_assoc : forall A (l m n:list A),
+  l ++ m ++ n = (l ++ m) ++ n.
+Proof.
+  intros X l1 l2 l3.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+Lemma app_length : forall (X:Type) (l1 l2 : list X),
+  length (l1 ++ l2) = length l1 + length l2.
+Proof.
+  intros X l1 l2.
+  induction l1 as [| n l1' IHl1'].
+  - reflexivity.
+  - simpl. rewrite -> IHl1'. reflexivity.
+Qed.
+
+
+
+
+Theorem rev_app_distr: forall X (l1 l2 : list X),
+  rev (l1 ++ l2) = rev l2 ++ rev l1.
+Proof.
+  intros X l1 l2.
+  induction l1.
+  - simpl. rewrite -> app_nil_r. reflexivity.
+  - simpl. rewrite -> IHl1. rewrite -> app_assoc. reflexivity.
+Qed.
+
+Theorem rev_involutive : forall X : Type, forall l : list X,
+  rev (rev l) = l.
+Proof.
+  intros X l.
+  induction l.
+  - reflexivity.
+  - simpl.
+    rewrite -> rev_app_distr. rewrite -> IHl. reflexivity.
+Qed.
+
+
+
+
+
+
+
+Inductive prod (X Y : Type) : Type :=
+| pair (x : X) (y : Y).
+
+Arguments pair {X} {Y}.
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Notation "X * Y" := (prod X Y) : type_scope.
+
+
+
+
+
+
+
+Definition fst {X Y : Type} (p : X * Y) : X :=
+  match p with
+  | (x, y) => x
+  end.
+
+Definition snd {X Y : Type} (p : X * Y) : Y :=
+  match p with
+  | (x, y) => y
+  end.
+
+
+
+Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
+           : list (X*Y) :=
+  match lx, ly with
+  | [], _ => []
+  | _, [] => []
+  | x :: tx, y :: ty => (x, y) :: (combine tx ty)
+  end.
+
+
+
+
+
+Fixpoint split {X Y : Type} (l : list (X*Y)) : (list X) * (list Y)
+  := match l with
+     | (m, n) :: l' => (m :: fst (split l'), n :: snd (split l'))
+     | nil          => ([], [])
+     end.
+
+Example test_split:
+  split [(1,false);(2,false)] = ([1;2],[false;false]).
+Proof.
+  reflexivity. Qed.
+
+
+
+
+
+
+
+Module OptionPlayground.
+
+Inductive option (X:Type) : Type :=
+  | Some (x : X)
+  | None.
+
+Arguments Some {X}.
+Arguments None {X}.
+
+End OptionPlayground.
+
+
+
+Fixpoint nth_error {X : Type} (l : list X) (n : nat)
+                   : option X :=
+  match l with
+  | nil => None
+  | a :: l' => match n with
+               | O => Some a
+               | S n' => nth_error l' n'
+               end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+Proof. reflexivity. Qed.
+Example test_nth_error2 : nth_error [[1];[2]] 1 = Some [2].
+Proof. reflexivity. Qed.
+Example test_nth_error3 : nth_error [true] 2 = None.
+Proof. reflexivity. Qed.
+
+
+
+Definition hd_error {X : Type} (l : list X) : option X
+  := match l with
+     | nil    => None
+     | h :: _ => Some h
+     end.
+
+
+
+Check @hd_error : forall X : Type, list X -> option X.
+
+Example test_hd_error1 : hd_error [1;2] = Some 1.
+Proof. reflexivity. Qed.
+Example test_hd_error2 : hd_error  [[1];[2]]  = Some [1].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition doit3times {X : Type} (f : X->X) (n : X) : X :=
+  f (f (f n)).
+
+
+
+Check @doit3times : forall X : Type, (X -> X) -> X -> X.
+
+Example test_doit3times: doit3times minustwo 9 = 3.
+Proof. reflexivity. Qed.
+
+Example test_doit3times': doit3times negb true = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint filter {X:Type} (test: X->bool) (l:list X) : list X :=
+  match l with
+  | [] => []
+  | h :: t =>
+    if test h then h :: (filter test t)
+    else filter test t
+  end.
+
+
+
+Example test_filter1: filter even [1;2;3;4] = [2;4].
+Proof. reflexivity. Qed.
+
+Definition length_is_1 {X : Type} (l : list X) : bool :=
+  (length l) =? 1.
+
+Example test_filter2:
+    filter length_is_1
+           [ [1; 2]; [3]; [4]; [5;6;7]; []; [8] ]
+  = [ [3]; [4]; [8] ].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers' (l:list nat) : nat :=
+  length (filter odd l).
+
+Example test_countoddmembers'1:   countoddmembers' [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'2:   countoddmembers' [0;2;4] = 0.
+Proof. reflexivity. Qed.
+Example test_countoddmembers'3:   countoddmembers' nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Example test_anon_fun':
+  doit3times (fun n => n * n) 2 = 256.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma filter_singleton_lists_4 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+Proof.
+(* We will proceed by induction on the input list.
+*)
+  intros l.
+(* We will need to use the IHfilter_singleton_lists_4 lemma, which states that the property holds for the tail of the list.
+*)
+  induction l as [|x l' IHl'].
+(* The base case is when the list is empty.
+In this case, the filter operation returns an empty list.
+*)
+  - simpl.
+reflexivity.
+(* The inductive case is when the list is non-empty.
+We need to consider two sub-cases: when the head of the list is a singleton list and when it is not.
+*)
+  - destruct x as [|x1 x2].
+(* If the head of the list is a singleton list, then it should be included in the result.
+*)
+    + simpl.
+rewrite IHl'.
+reflexivity.
+(* If the head of the list is not a singleton list, then it should not be included in the result.
+*)
+    + simpl.
+rewrite IHl'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #408)
+Error in step "intros l.".
+Message: No product even after head-reduction..
+Goal: filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+TRYING TO PROVE LEMMA
+Lemma filter_singleton_lists_5 : filter (fun l : list nat => length l =? 1)
+  [[1; 2]; [3]; [4]; [5; 6; 7]; [ ]; [8]] =
+[[3]; [4]; [8]].
+
+
+Error proving test_filter2'
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,681 @@
+PROVING add_comm
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+
+Proof.
+(*
+   * We will proceed by induction on m.
+* Base case: m = 0.
+*   We need to prove n + 0 = 0 + n.
+*   By add_0_r_firsttry, we have n + 0 = n.
+*   By add_0_r_firsttry with the arguments swapped, we have 0 + n = n.
+*   Therefore, n + 0 = 0 + n.
+* Inductive case: n + (S m) = S m + n.
+*   We need to prove S(n + m) = S(m + n).
+*   By the induction hypothesis, we have n + m = m + n.
+*   By plus_n_Sm, we have S(n + m) = n + (S m).
+*   By the induction hypothesis, we have S(m + n) = m + (S n).
+*   Therefore, S(n + m) = S(m + n).
+*)
+  intros n m.
+induction m as [| m' IHm'].
+- (* m = 0 *)
+    apply add_0_r_firsttry.
+apply add_0_r_firsttry.
+- (* m = S m' *)
+    rewrite IHm'.
+apply plus_n_Sm.
+apply plus_n_Sm.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #134)
+Error in step "apply add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: n + 0 = 0 + n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_commutativity_0 : forall n : nat, n + 0 = 0 + n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_add_commutativity_0 : forall n : nat, n + 0 = 0 + n.
+
+Proof.
+(* Base case: n + 0 = 0 + n for n = 0 *)
+  intros n.
+apply add_0_r_firsttry.
+(* Inductive step: n + 0 = 0 + n for n = S m *)
+  intros m IHn.
+rewrite IHn.
+apply plus_n_Sm.
+apply mul_0_r.
+apply minus_n_n.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #130)
+Error in step "apply add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: n + 0 = 0 + n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_commutativity_1 : forall n : nat, n + 0 = 0 + n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_add_commutativity_1 : forall n : nat, n + 0 = 0 + n.
+
+Proof.
+(* Base case: n + 0 = 0 + n, where n = 0 *)
+  intros n.
+rewrite add_0_r_firsttry.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #130)
+Error in step "rewrite add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: n + 0 = 0 + n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_commutativity_2 : forall n : nat, n + 0 = 0 + n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_add_commutativity_2 : forall n : nat, n + 0 = 0 + n.
+
+Proof.
+(* Base case: n + 0 = n *)
+  intros n.
+apply add_0_r_firsttry.
+(* Step case: n + S m = S (n + m) *)
+  intros n m.
+rewrite <- plus_n_Sm.
+rewrite <- plus_n_Sm.
+apply mul_0_r.
+apply minus_n_n.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #130)
+Error in step "apply add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: n + 0 = 0 + n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_commutativity_3 : forall n : nat, n + 0 = 0 + n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_add_commutativity_3 : forall n : nat, n + 0 = 0 + n.
+
+Proof.
+(* Base case: n + 0 = 0 + n for n = 0 *)
+  intros n.
+rewrite add_0_r_firsttry.
+reflexivity.
+(* Inductive step: n + 0 = 0 + n for n = S m *)
+  intros n.
+rewrite plus_n_Sm.
+rewrite IHn.
+rewrite add_0_r_firsttry.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #130)
+Error in step "rewrite add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: n + 0 = 0 + n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_commutativity_4 : forall n : nat, n + 0 = 0 + n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_add_commutativity_4 : forall n : nat, n + 0 = 0 + n.
+
+Proof.
+(* Base case: n + 0 = 0 + n for n = 0 *)
+  intros n.
+rewrite add_0_r_firsttry.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #130)
+Error in step "rewrite add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: n + 0 = 0 + n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_commutativity_5 : forall n : nat, n + 0 = 0 + n.
+
+
+Error proving add_comm
+MAX LEMMA DEPTH REACHED. GIVING UP.

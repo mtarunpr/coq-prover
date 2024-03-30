@@ -1,0 +1,1296 @@
+PROVING simple_semi'
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+
+Proof.
+(* We will use the previously proven lemmas and theorems to prove simple_semi'.
+*)
+  (* First, we will apply the silly2 theorem, which states that for any proposition P, if P is true then P is true.
+*)
+  (* This is a trivial step, but it allows us to use the simple_semi lemma, which states that for any n, (n + 1 =? 0) is false.
+*)
+  apply (silly2 (simple_semi n)).
+(* Now, we will apply the silly1 theorem, which states that for any n, 1 + n is equal to the successor of n.
+*)
+  (* This allows us to rewrite the goal to (S n + 1 =? 0), which is obviously false.
+*)
+  apply (silly1 (n + 1)).
+(* Finally, we will use the re_opt_e_match lemma, which states that for any type T and regular expression re, and any string s, if s matches re then s also matches the optimized regular expression re_opt_e re.
+*)
+  (* This is not relevant to the current goal, but it is a useful lemma to know for future proofs.
+*)
+  (* Now, we have proven simple_semi' by applying the previously proven lemmas and theorems.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #194)
+Error in step "apply (silly2 (simple_semi n)).".
+Message: The variable n was not found in the current
+environment..
+Goal: forall n : nat, (n + 1 =? 0) = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma non_zero_succ_0 : forall n : nat, (n + 1 =? 0) = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma non_zero_succ_0 : forall n : nat, (n + 1 =? 0) = false.
+
+Proof.
+(* We will use the previously proven lemmas and theorems to prove the current lemma.
+*)
+  (* We will proceed by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(* Base case: n = 0 *)
+  - simpl.
+(* We know that (0 + 1 =? 0) = false by the simple_semi lemma.
+*)
+    apply simple_semi.
+(* This concludes the base case.
+*)
+
+  (* Inductive case: n = S n' *)
+  - simpl.
+(* We know that (S n' + 1 =? 0) = false by the induction hypothesis IHn'.
+*)
+    apply IHn'.
+(* This concludes the inductive case.
+*)
+
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #202)
+Error in step "apply simple_semi.".
+Message: Unable to unify "(?M1382 + 1 =? 0) = false" with
+ "false = false"..
+Goal: false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma false_equality_1 : false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma false_equality_1 : false = false.
+
+Proof.
+(* The theorem is an equality between two values that are both "false".
+In Coq, "false" is a proof of any proposition, so we can use the axiom 
+     "proof_irrelevance" to state that any proof of false is equal to any other proof of false.
+*)
+  apply proof_irrelevance.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #194)
+Error in step "apply proof_irrelevance.".
+Message: The variable proof_irrelevance was not found
+in the current environment..
+Goal: false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma false_equality_2 : false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma false_equality_2 : false = false.
+
+Proof.
+(* The theorem is an equality between two terms that are obviously equal,
+     so we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma false_equality_2 : false = false.
+
+Proof.
+(* The theorem is an equality between two terms that are obviously equal,
+     so we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma false_equality_1 : false = false.
+
+Proof.
+(* The theorem is an equality between two values that are both "false".
+In Coq, "false" is a proof of any proposition, so we can use the axiom 
+     "proof_irrelevance" to state that any proof of false is equal to any other proof of false.
+*)
+  apply (@false_equality_2 ).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma false_equality_2 : false = false.
+
+Proof.
+(* The theorem is an equality between two terms that are obviously equal,
+     so we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma false_equality_1 : false = false.
+
+Proof.
+(* The theorem is an equality between two values that are both "false".
+In Coq, "false" is a proof of any proposition, so we can use the axiom 
+     "proof_irrelevance" to state that any proof of false is equal to any other proof of false.
+*)
+  apply (@false_equality_2 ).
+Qed.
+
+Lemma non_zero_succ_0 : forall n : nat, (n + 1 =? 0) = false.
+
+Proof.
+(* We will use the previously proven lemmas and theorems to prove the current lemma.
+*)
+  (* We will proceed by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(* Base case: n = 0 *)
+  - simpl.
+(* We know that (0 + 1 =? 0) = false by the simple_semi lemma.
+*)
+    apply (@false_equality_1 ).
+- simpl.
+(* We know that (S n' + 1 =? 0) = false by the induction hypothesis IHn'.
+*)
+    apply IHn'.
+(* This concludes the inductive case.
+*)
+
+
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #224)
+Error in step "apply IHn'.".
+Message: In environment
+n' : nat
+IHn' : (n' + 1 =? 0) = false
+Unable to unify "(n' + 1 =? 0) = false" with
+ "false = false"..
+Goal: false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma no_zero_successor_2 : forall n' : nat, forall IHn' : (n' + 1 =? 0) = false, false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma false_equality_2 : false = false.
+
+Proof.
+(* The theorem is an equality between two terms that are obviously equal,
+     so we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma false_equality_1 : false = false.
+
+Proof.
+(* The theorem is an equality between two values that are both "false".
+In Coq, "false" is a proof of any proposition, so we can use the axiom 
+     "proof_irrelevance" to state that any proof of false is equal to any other proof of false.
+*)
+  apply (@false_equality_2 ).
+Qed.
+
+Lemma no_zero_successor_2 : forall n' : nat, forall IHn' : (n' + 1 =? 0) = false, false = false.
+
+Proof.
+(* We will use the induction principle for natural numbers *)
+  intros n IHn.
+(* We will also need the lemma simple_semi *)
+  apply (simple_semi n).
+(* We will also need the lemma false_equality_2 *)
+  apply (false_equality_2).
+(* We will also need the lemma false_equality_1 *)
+  apply (false_equality_1).
+(* We will also need the theorem silly1 *)
+  apply (silly1 n).
+(* We will also need the theorem silly2 *)
+  apply (silly2 _).
+(* We will also need the lemma re_opt_e_match *)
+  apply (re_opt_e_match _ _ _ _).
+(* We will also need the lemma simple_semi *)
+  apply (simple_semi _).
+(* We will also need the lemma false_equality_2 *)
+  apply (false_equality_2).
+(* We will also need the lemma false_equality_1 *)
+  apply (false_equality_1).
+(* We will also need the theorem silly1 *)
+  apply (silly1 _).
+(* We will also need the theorem silly2 *)
+  apply (silly2 _).
+(* We will also need the lemma re_opt_e_match *)
+  apply (re_opt_e_match _ _ _ _).
+(* We will also need the lemma simple_semi *)
+  apply (simple_semi _).
+(* We will also need the lemma false_equality_2 *)
+  apply (false_equality_2).
+(* We will also need the lemma false_equality_1 *)
+  apply (false_equality_1).
+(* We will also need the theorem silly1 *)
+  apply (silly1 _).
+(* We will also need the theorem silly2 *)
+  apply (silly2 _).
+(* We will also need the lemma re_opt_e_match *)
+  apply (re_opt_e_match _ _ _ _).
+(* We will also need the lemma simple_semi *)
+  apply (simple_semi _).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #212)
+Error in step "apply (simple_semi n).".
+Message: In environment
+n : nat
+IHn : (n + 1 =? 0) = false
+Unable to unify "(n + 1 =? 0) = false" with
+ "false = false"..
+Goal: false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_plus_one_never_zero_3 : forall n : nat, forall IHn : (n + 1 =? 0) = false, false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma false_equality_2 : false = false.
+
+Proof.
+(* The theorem is an equality between two terms that are obviously equal,
+     so we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma false_equality_1 : false = false.
+
+Proof.
+(* The theorem is an equality between two values that are both "false".
+In Coq, "false" is a proof of any proposition, so we can use the axiom 
+     "proof_irrelevance" to state that any proof of false is equal to any other proof of false.
+*)
+  apply (@false_equality_2 ).
+Qed.
+
+Lemma nat_plus_one_never_zero_3 : forall n : nat, forall IHn : (n + 1 =? 0) = false, false = false.
+
+Proof.
+(* We will use the previously proven lemmas to prove the theorem.
+*)
+  intros n IHn.
+(* We will rewrite the goal to be more similar to the previous lemmas.
+*)
+  rewrite IHn.
+(* Now we have the goal false = false.
+We can use the previously proven lemma false_equality_1 to prove this.
+*)
+  apply false_equality_1.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #212)
+Error in step "rewrite IHn.".
+Message: Found no subterm matching "n + 1 =? 0" in the current goal..
+Goal: false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_plus_one_never_zero_4 : forall n : nat, forall IHn : (n + 1 =? 0) = false, false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+
+
+Lemma false_equality_2 : false = false.
+
+Proof.
+(* The theorem is an equality between two terms that are obviously equal,
+     so we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma false_equality_1 : false = false.
+
+Proof.
+(* The theorem is an equality between two values that are both "false".
+In Coq, "false" is a proof of any proposition, so we can use the axiom 
+     "proof_irrelevance" to state that any proof of false is equal to any other proof of false.
+*)
+  apply (@false_equality_2 ).
+Qed.
+
+Lemma nat_plus_one_never_zero_4 : forall n : nat, forall IHn : (n + 1 =? 0) = false, false = false.
+
+Proof.
+(* We will use the previously proven lemmas to prove the theorem.
+*)
+  intros n IHn.
+(* We will rewrite the goal to be proven *)
+  rewrite IHn.
+(* Now we need to prove false = false, which is trivially true *)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #212)
+Error in step "rewrite IHn.".
+Message: Found no subterm matching "n + 1 =? 0" in the current goal..
+Goal: false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_plus_one_never_zero_5 : forall n : nat, forall IHn : (n + 1 =? 0) = false, false = false.
+
+
+Error proving simple_semi'
+MAX LEMMA DEPTH REACHED. GIVING UP.

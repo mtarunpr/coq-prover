@@ -1,0 +1,1156 @@
+PROVING and_example3
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+
+
+Lemma and_example3 : forall n m : nat, n + m = 0 -> n * m = 0.
+
+Proof.
+(* We will prove this by induction on m.
+*)
+  intros m.
+(* We first handle the base case when m = 0.
+*)
+  induction m as [|m' IHm'].
+- (* m = 0 *)
+    intros H.
+(* We need to prove n * 0 = 0.
+By definition of multiplication, this is true.
+*)
+    reflexivity.
+- (* m = S m' *)
+    (* We will now use the induction hypothesis.
+*)
+    intros H.
+(* We have H : n + S m' = 0.
+We want to prove n * S m' = 0.
+*)
+    (* We can rewrite H using the definition of addition.
+*)
+    rewrite <- plus_n_Sm.
+(* Now H is n + m' = 0.
+*)
+    (* We can now apply the induction hypothesis to this.
+*)
+    apply IHm'.
+(* This gives us n * m' = 0.
+*)
+    (* We now need to prove n * S m' = n * m'.
+*)
+    (* By definition of multiplication, this is true.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #214)
+Error in step "rewrite <- plus_n_Sm.".
+Message: Found no subterm matching 
+"?M1096 + S ?M1097" in the current goal..
+Goal: S m' + H = 0 -> S m' * H = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_plus_mult_zero_0 : forall m' : nat, forall IHm' : forall m : nat, m' + m = 0 -> m' * m = 0, forall H : nat, S m' + H = 0 -> S m' * H = 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+
+
+Lemma succ_plus_mult_zero_0 : forall m' : nat, forall IHm' : forall m : nat, m' + m = 0 -> m' * m = 0, forall H : nat, S m' + H = 0 -> S m' * H = 0.
+
+Proof.
+(* We will proceed by induction on H.
+*)
+  intros m' IHm' H.
+(* We will need to use the IHm' lemma in the induction step.
+*)
+  induction H as [|Hrec H'].
+- (* Base case: H = 0 *)
+    (* In this case, S m' + 0 = 0, so S m' * 0 = 0 by definition of multiplication.
+*)
+    reflexivity.
+- (* Inductive case: H = S Hrec *)
+    (* We will need to prove S m' + S Hrec = 0 and S m' * S Hrec = 0.
+*)
+    (* By the induction hypothesis, we know that m' + Hrec = 0 and m' * Hrec = 0.
+*)
+    (* We will use the IHm' lemma to prove that m' + S Hrec = 0 and m' * S Hrec = 0.
+*)
+    (* We have m' + S Hrec = S m' + Hrec by definition of addition.
+*)
+    (* By the IHm' lemma, we have m' * S Hrec = S m' * Hrec.
+*)
+    (* Therefore, S m' + S Hrec = 0 and S m' * S Hrec = 0.
+*)
+    apply IHm' in Hrec.
+(* Now we need to prove S m' + S Hrec = 0.
+*)
+    (* We know that S m' + Hrec = 0.
+*)
+    (* By the injectivity of addition, we have S m' + S Hrec = S (m' + Hrec).
+*)
+    (* By our previous work, S (m' + Hrec) = S 0 = 0.
+*)
+    (* Therefore, S m' + S Hrec = 0.
+*)
+    (* We have already proven S m' * S Hrec = 0.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #206)
+Error in step "reflexivity.".
+Message: In environment
+m' : nat
+IHm' : forall m : nat, m' + m = 0 -> m' * m = 0
+H : S m' + 0 = 0
+Unable to unify "0" with 
+"S m' * 0"..
+Goal: S m' + 0 = 0 -> S m' * 0 = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_S_m_plus_zero_equals_zero_1 : forall m' : nat, forall IHm' : forall m : nat, m' + m = 0 -> m' * m = 0, S m' + 0 = 0 -> S m' * 0 = 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+
+
+Lemma lemma_S_m_plus_zero_equals_zero_1 : forall m' : nat, forall IHm' : forall m : nat, m' + m = 0 -> m' * m = 0, S m' + 0 = 0 -> S m' * 0 = 0.
+
+Proof.
+(* We will proceed by induction on m'.
+*)
+  intros m' IHm'.
+(* We will also need to use the induction hypothesis for S m'.
+*)
+  induction m' as [| m' IHm''].
+- (* Base case: m' = 0 *)
+    (* In this case, S m' + 0 = 0 -> S m' * 0 = 0 is trivially true, because S 0 = 1 and 1 * 0 = 0.
+*)
+    reflexivity.
+- (* Inductive case: m' = S m'' *)
+    (* We will need to use the induction hypothesis for m''.
+*)
+    intros H.
+(* We will also need to use the induction hypothesis for S m'.
+*)
+    apply IHm' in H.
+(* Now we have S m'' + 0 = 0 and S m'' * 0 = 0.
+*)
+    (* We want to prove S (S m'') + 0 = 0 -> S (S m'') * 0 = 0.
+*)
+    (* This is equivalent to S m'' + 0 = 0 -> S m'' * 0 = 0.
+*)
+    (* We have this from the induction hypothesis for S m''.
+*)
+    apply H.
+(* This completes the proof.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #212)
+Error in step "apply IHm' in H.".
+Message: Unable to apply lemma of type
+ "forall m : nat, S m' + m = 0 -> S m' * m = 0"
+on hypothesis of type "S (S m') + 0 = 0"..
+Goal: S (S m') * 0 = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_induction_step_for_multiplication_equals_zero_2 : forall m' : nat, forall IHm' : forall m : nat, S m' + m = 0 -> S m' * m = 0, forall IHm'' : (forall m : nat, m' + m = 0 -> m' * m = 0) ->
+S m' + 0 = 0 -> S m' * 0 = 0, forall H : S (S m') + 0 = 0, S (S m') * 0 = 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+
+
+Lemma lemma_induction_step_for_multiplication_equals_zero_2 : forall m' : nat, forall IHm' : forall m : nat, S m' + m = 0 -> S m' * m = 0, forall IHm'' : (forall m : nat, m' + m = 0 -> m' * m = 0) ->
+S m' + 0 = 0 -> S m' * 0 = 0, forall H : S (S m') + 0 = 0, S (S m') * 0 = 0.
+
+Proof.
+(* We will proceed by induction on m'.
+*)
+  intros m' IHm' IHm'' H.
+(* We will also need to use the induction hypothesis for m' + 0 = 0.
+*)
+  apply IHm' in H.
+(* Now we can rewrite H using the induction hypothesis for m' + 0 = 0.
+*)
+  rewrite H in IHm''.
+(* Finally, we can apply the induction hypothesis for m' + 0 = 0 to prove the goal.
+*)
+  apply IHm''.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #202)
+Error in step "apply IHm' in H.".
+Message: Unable to apply lemma of type
+ "forall m : nat, S m' + m = 0 -> S m' * m = 0"
+on hypothesis of type "S (S m') + 0 = 0"..
+Goal: S (S m') * 0 = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_induction_step_for_multiplication_equals_zero_3 : forall m' : nat, forall IHm' : forall m : nat, S m' + m = 0 -> S m' * m = 0, forall IHm'' : (forall m : nat, m' + m = 0 -> m' * m = 0) ->
+S m' + 0 = 0 -> S m' * 0 = 0, forall H : S (S m') + 0 = 0, S (S m') * 0 = 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+
+
+Lemma lemma_induction_step_for_multiplication_equals_zero_3 : forall m' : nat, forall IHm' : forall m : nat, S m' + m = 0 -> S m' * m = 0, forall IHm'' : (forall m : nat, m' + m = 0 -> m' * m = 0) ->
+S m' + 0 = 0 -> S m' * 0 = 0, forall H : S (S m') + 0 = 0, S (S m') * 0 = 0.
+
+Proof.
+(* We will proceed by induction on m'.
+*)
+  intros m' IHm' IHm'' H.
+(* We will also need to use the induction hypothesis for m' + 0 = 0.
+*)
+  apply IHm' in H.
+(* Now we can rewrite H using the induction hypothesis for m' + 0 = 0.
+*)
+  rewrite H in IHm''.
+(* Finally, we can apply the induction hypothesis for m' + 0 = 0 to prove the goal.
+*)
+  apply IHm''.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #202)
+Error in step "apply IHm' in H.".
+Message: Unable to apply lemma of type
+ "forall m : nat, S m' + m = 0 -> S m' * m = 0"
+on hypothesis of type "S (S m') + 0 = 0"..
+Goal: S (S m') * 0 = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_induction_step_for_multiplication_equals_zero_4 : forall m' : nat, forall IHm' : forall m : nat, S m' + m = 0 -> S m' * m = 0, forall IHm'' : (forall m : nat, m' + m = 0 -> m' * m = 0) ->
+S m' + 0 = 0 -> S m' * 0 = 0, forall H : S (S m') + 0 = 0, S (S m') * 0 = 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+
+
+Lemma lemma_induction_step_for_multiplication_equals_zero_4 : forall m' : nat, forall IHm' : forall m : nat, S m' + m = 0 -> S m' * m = 0, forall IHm'' : (forall m : nat, m' + m = 0 -> m' * m = 0) ->
+S m' + 0 = 0 -> S m' * 0 = 0, forall H : S (S m') + 0 = 0, S (S m') * 0 = 0.
+
+Proof.
+(* We will proceed by induction on m'.
+*)
+  intros m' IHm' IHm'' H.
+(* We will also need to use the induction hypothesis for m' + 0 = 0.
+*)
+  apply IHm' in H.
+(* Now we can rewrite H using the induction hypothesis for m' + 0 = 0.
+*)
+  rewrite H in IHm''.
+(* Finally, we can apply the induction hypothesis for m' + 0 = 0 to prove the goal.
+*)
+  apply IHm''.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #202)
+Error in step "apply IHm' in H.".
+Message: Unable to apply lemma of type
+ "forall m : nat, S m' + m = 0 -> S m' * m = 0"
+on hypothesis of type "S (S m') + 0 = 0"..
+Goal: S (S m') * 0 = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_induction_step_for_multiplication_equals_zero_5 : forall m' : nat, forall IHm' : forall m : nat, S m' + m = 0 -> S m' * m = 0, forall IHm'' : (forall m : nat, m' + m = 0 -> m' * m = 0) ->
+S m' + 0 = 0 -> S m' * 0 = 0, forall H : S (S m') + 0 = 0, S (S m') * 0 = 0.
+
+
+Error proving and_example3
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,253 @@
+PROVING silly1
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+
+Proof.
+(* The theorem is an identity, so we can use the "reflexivity" tactic, which
+     completes the proof by applying the equality axiom (n = n) to the goal.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #14)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+H : n = m
+Unable to unify "m" with "n"..
+Goal: forall n m : nat, n = m -> n = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_0 : forall n m : nat, n = m -> n = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_0 : forall n m : nat, n = m -> n = m.
+
+Proof.
+(* The "intros" tactic is used to introduce all the variables in the
+     statement.
+In this case, it will introduce n, m, and the equality proof H.
+*)
+  intros n m H.
+(* Now we simply apply the axiom of reflexivity to the equality proof H.
+This will produce a proof that n is equal to n, which is exactly what we
+     need to prove our lemma.
+*)
+  apply eq_refl.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #16)
+Error in step "apply eq_refl.".
+Message: In environment
+n, m : nat
+H : n = m
+Unable to unify "m" with "n"..
+Goal: n = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_1 : forall n m : nat, forall H : n = m, n = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_1 : forall n m : nat, forall H : n = m, n = m.
+
+Proof.
+(* The goal is to prove the statement for any natural numbers n and m, 
+     and the equality H that n = m.
+Since equality is reflexive in Coq, 
+     we can simply apply the equality type constructor to H to obtain n = m.
+*)
+  intros n m H.
+reflexivity.
+(* This tactic applies the equality type constructor to H, 
+     which is the equality proof we have.
+This completes the proof.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #16)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+H : n = m
+Unable to unify "m" with "n"..
+Goal: n = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_2 : forall n m : nat, forall H : n = m, n = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_2 : forall n m : nat, forall H : n = m, n = m.
+
+Proof.
+(* The goal is to prove the statement for any natural numbers n and m, 
+     and the equality H that n = m.
+Since equality is reflexive in Coq, 
+     we can simply apply the equality type constructor to H to obtain n = m.
+*)
+  intros n m H.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #16)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+H : n = m
+Unable to unify "m" with "n"..
+Goal: n = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_3 : forall n m : nat, forall H : n = m, n = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_3 : forall n m : nat, forall H : n = m, n = m.
+
+Proof.
+(* The proof of this lemma is very simple.
+We just need to apply the axiom of reflexivity
+     for equality.
+This axiom states that for any type T and any element x of T, x is equal
+     to x.
+In our case, T is the type of natural numbers, and x is n.
+The axiom can be
+     applied to our goal by instantiating T with nat and x with n.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #14)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+H : n = m
+Unable to unify "m" with "n"..
+Goal: forall n m : nat, n = m -> n = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_4 : forall n m : nat, n = m -> n = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_4 : forall n m : nat, n = m -> n = m.
+
+Proof.
+(* The goal of the proof is to show that n = m, given that n = m.
+We can do this by simply applying the axiom of reflexivity for equality.
+*)
+  apply eq_refl.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #14)
+Error in step "apply eq_refl.".
+Message: Applied theorem does not have enough premises..
+Goal: forall n m : nat, n = m -> n = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_5 : forall n m : nat, n = m -> n = m.
+
+
+Error proving silly1
+MAX LEMMA DEPTH REACHED. GIVING UP.

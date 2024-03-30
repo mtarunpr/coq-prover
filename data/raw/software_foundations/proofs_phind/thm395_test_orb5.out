@@ -1,0 +1,948 @@
+PROVING test_orb5
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+
+
+Example test_orb5 : false || false || true = true.
+
+Proof.
+(* We will use induction on the number of arguments to prove this theorem.
+*)
+  intros.
+(* Base case: If there is only one argument, it is either true or false.
+*)
+  - destruct H as [H1 H2].
++ reflexivity.
++ simpl.
+rewrite H2.
+reflexivity.
+(* Inductive case: If there are more arguments, we can remove the first one and apply the induction hypothesis.
+*)
+  - simpl.
+rewrite H.
+apply orb_true_true.
+apply orb_true_false.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #86)
+Error in step "destruct H as [H1 H2].".
+Message: The variable H was not found in the current
+environment..
+Goal: false || false || true = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma disjunction_of_false_and_true_0 : false || false || true = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+
+
+Lemma disjunction_of_false_and_true_0 : false || false || true = true.
+
+Proof.
+(* We will use the definition of the disjunction (||) to prove the lemma.
+*)
+  (* The definition of || is a recursive function that pattern matches on its first argument.
+*)
+  (* In this case, the first argument is false, so we will pattern match on the second argument.
+*)
+  (* The second argument is false, so we will pattern match on the third argument.
+*)
+  (* The third argument is true, so we will return true.
+*)
+  apply orb.
+apply orb.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #82)
+Error in step "apply orb.".
+Message: Unable to unify "bool" with
+ "false || false || true = true"..
+Goal: false || false || true = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma disjunction_of_false_and_true_1 : false || false || true = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+
+
+Lemma disjunction_of_false_and_true_1 : false || false || true = true.
+
+Proof.
+(* We will use the definition of the disjunction (||) to prove the lemma.
+*)
+  (* The definition of || is a recursive function that pattern matches on its first argument.
+*)
+  (* In this case, the first argument is false, so we will pattern match on the second argument.
+*)
+  apply orb_false_right.
+(* Now we have to prove that false || true = true.
+We can do this using the definition of ||.
+*)
+  apply orb_false_right.
+(* Now we have to prove that false || false = false.
+This is the base case of the induction.
+*)
+  apply orb_false_left.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #82)
+Error in step "apply orb_false_right.".
+Message: The variable orb_false_right was not found
+in the current environment..
+Goal: false || false || true = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma disjunction_of_false_and_true_2 : false || false || true = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+
+
+Lemma disjunction_of_false_and_true_2 : false || false || true = true.
+
+Proof.
+(* We will use the definition of the disjunction (||) to prove the lemma.
+*)
+  (* The definition of || is a recursive function that pattern matches on its first argument.
+*)
+  (* In this case, the first argument is false, so we will pattern match on the second argument.
+*)
+  apply orb_false_right.
+(* The second argument is false || true, so we will use the definition of || again.
+*)
+  apply orb_false_right.
+(* Now we have proven that false || false || true = true.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #82)
+Error in step "apply orb_false_right.".
+Message: The variable orb_false_right was not found
+in the current environment..
+Goal: false || false || true = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma disjunction_of_false_and_true_3 : false || false || true = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+
+
+Lemma disjunction_of_false_and_true_3 : false || false || true = true.
+
+Proof.
+(* We will use the definition of the disjunction (||) to prove the lemma.
+*)
+  (* The definition of || is a recursive function that pattern matches on its first argument.
+*)
+  (* In this case, the first argument is false, so we will pattern match on the second argument.
+*)
+  apply orb_false_right.
+(* Now we have to prove false || true = true.
+Again, we use the definition of ||.
+*)
+  (* This time, the first argument is false and the second argument is true.
+*)
+  (* So, we apply the definition of || with false as the first argument and true as the second argument.
+*)
+  apply orb_false_left.
+(* This concludes the proof.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #82)
+Error in step "apply orb_false_right.".
+Message: The variable orb_false_right was not found
+in the current environment..
+Goal: false || false || true = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma disjunction_of_false_and_true_4 : false || false || true = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+
+
+Lemma disjunction_of_false_and_true_4 : false || false || true = true.
+
+Proof.
+(* We will use the definition of the disjunction (||) to prove the lemma.
+*)
+  (* The definition of || is a recursive function that pattern matches on its first argument.
+*)
+  (* In this case, the first argument is false, so we will pattern match on the second argument.
+*)
+  apply orb_false_right.
+(* Now we have to prove (false || true) = true.
+We can do this by applying the definition of || again.
+*)
+  apply orb_false_right.
+(* Now we have to prove (false || false) = true.
+But this is a contradiction, because we know that false || false = false by definition.
+*)
+  (* Therefore, we have a contradiction, and we can't prove the lemma.
+*)
+Abort.
+```
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #82)
+Error in step "apply orb_false_right.".
+Message: The variable orb_false_right was not found
+in the current environment..
+Goal: false || false || true = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma disjunction_of_false_and_true_5 : false || false || true = true.
+
+
+Error proving test_orb5
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,560 @@
+PROVING silly_ex
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+
+Proof.
+(*
+     We will proceed by induction on p.
+The base case will show that if even 0 = true, then odd (S 0) = true.
+The inductive step will show that if even p = true and odd (S p) = true, then even (S (S p)) = false.
+*)
+  intros.
+generalize dependent p.
+induction p as [|p' IHp'].
+- (* Base case: p = 0 *)
+    intros H0 H1 H2.
+(* We need to show that odd (S 0) = true.
+By definition, odd 0 = false and even 0 = true.
+Therefore, we need to show that odd 1 = true.
+By the first hypothesis, H0, we have even 1 = false.
+Therefore, by the second hypothesis, H1, we have odd 1 = true.
+*)
+    apply H1.
+apply H0.
+- (* Inductive step: IHp' : even p' = true -> odd (S p') = true *)
+    intros H0 H1 H2.
+(* We need to show that odd (S (S p')) = true.
+By the inductive hypothesis, IHp', we have even p' = true.
+Therefore, by the first hypothesis, H0, we have even (S p') = false.
+Therefore, by the second hypothesis, H1, we have odd (S (S p')) = true.
+*)
+    apply IHp'.
+apply H0.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #56)
+Error in step "intros H0 H1 H2.".
+Message: H0 is already used..
+Goal: even 0 = true -> odd 1 = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_and_odd_properties_0 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, even 0 = true -> odd 1 = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+Lemma even_and_odd_properties_0 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, even 0 = true -> odd 1 = true.
+
+Proof.
+(* We will proceed by applying the given hypotheses H and H0 to the specific cases of n = 0 and n = 1.
+*)
+  intros H H0.
+(* Case n = 0 *)
+  apply H.
+reflexivity.
+(* Case n = 1 *)
+  apply H0.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #50)
+Error in step "apply H.".
+Message: In environment
+H : forall n : nat,
+    even n = true -> even (S n) = false
+H0 : forall n : nat, even n = false -> odd n = true
+e : even ?M1090 = true
+Unable to unify "even (S ?M1090) = false" with
+ "odd 1 = true"..
+Goal: even 0 = true -> odd 1 = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_and_odd_properties_1 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, even 0 = true -> odd 1 = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+Lemma even_and_odd_properties_1 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, even 0 = true -> odd 1 = true.
+
+Proof.
+(* We will proceed by applying the given hypotheses H and H0 to the specific cases of n = 0 and n = 1.
+*)
+  intros H H0.
+(* Case n = 0 *)
+  apply H.
+reflexivity.
+(* Case n = 1 *)
+  apply H0.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #50)
+Error in step "apply H.".
+Message: In environment
+H : forall n : nat,
+    even n = true -> even (S n) = false
+H0 : forall n : nat, even n = false -> odd n = true
+e : even ?M1090 = true
+Unable to unify "even (S ?M1090) = false" with
+ "odd 1 = true"..
+Goal: even 0 = true -> odd 1 = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_and_odd_properties_2 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, even 0 = true -> odd 1 = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+Lemma even_and_odd_properties_2 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, even 0 = true -> odd 1 = true.
+
+Proof.
+(* We will proceed by induction on the first argument of even_and_odd_properties_2.
+*)
+  intros H.
+intros H0.
+intros H1.
+intros H2.
+(* We will need to use the definition of even and odd.
+*)
+  Definition even := fun n => n mod 2 = 0.
+Definition odd := fun n => n mod 2 = 1.
+(* We will need to use the definition of addition.
+*)
+  Definition add := fun n m => n + m.
+(* We will need to use the definition of successor.
+*)
+  Definition S := fun n => n + 1.
+(* We will need to use the definition of list equality.
+*)
+  Definition eq_list := fun A B => forall x, (A x = B x).
+(* We will need to use the definition of list membership.
+*)
+  Definition mem := fun x A => exists B, eq_list A (x :: B).
+(* We will need to use the definition of list cons.
+*)
+  Definition cons := fun x A => x :: A.
+(* We will need to use the definition of list nil.
+*)
+  Definition nil := fun A => A = [].
+(* We will need to use the definition of list appending.
+*)
+  Definition app := fun A B => A ++ B.
+(* We will need to use the definition of list length.
+*)
+  Definition len := fun A => length A.
+(* We will need to use the definition of list head.
+*)
+  Definition head := fun A => hd A.
+(* We will need to use the definition of list tail.
+*)
+  Definition tail := fun A => tl A.
+(* We will need to use the definition of list last.
+*)
+  Definition last := fun A => last A.
+(* We will need to use the definition of list init.
+*)
+  Definition init := fun A => init A.
+(* We will need to use the definition of list reverse.
+*)
+  Definition reverse := fun A => rev A.
+(* We will need to use the definition of list map.
+*)
+  Definition map := fun f A => map f A.
+(* We will need to
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #54)
+Error in step "intros H2.".
+Message: No product even after head-reduction..
+Goal: odd 1 = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_and_odd_properties_3 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, forall H1 : even 0 = true, odd 1 = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+Lemma even_and_odd_properties_3 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, forall H1 : even 0 = true, odd 1 = true.
+
+Proof.
+(* We will prove the lemma by induction on n.
+*)
+  intros H H0 H1.
+induction n as [|n' IHn'].
+(* Base case: n = 0 *)
+  - simpl.
+(* We know that even 0 = true and odd 1 = true.
+*)
+    rewrite H1.
+(* We also know that even (S 0) = false.
+*)
+    apply H.
+reflexivity.
+(* Inductive case: n = S n' *)
+  - simpl.
+(* We know that even (S n') = false.
+*)
+    apply H.
+(* We also know that even n' = true.
+*)
+    apply IHn'.
+(* We know that even n' = true -> even (S n') = false.
+*)
+    apply H.
+reflexivity.
+(* We have proven the lemma.
+*)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #50)
+Error in step "induction n as [|n' IHn'].".
+Message: The variable n was not found in the current
+environment..
+Goal: odd 1 = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_and_odd_properties_4 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, forall H1 : even 0 = true, odd 1 = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+
+Lemma even_and_odd_properties_4 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, forall H1 : even 0 = true, odd 1 = true.
+
+Proof.
+(* We will prove the lemma by induction on n.
+*)
+  intros H H0 H1.
+induction n as [|n' IHn'].
+(* Base case: n = 0 *)
+  - (* We know that even 0 = true by hypothesis H1.
+*)
+    simpl.
+(* We need to prove that even 0 = true -> even (S 0) = false.
+*)
+    intros H2.
+(* We know that even (S 0) = false by hypothesis H2.
+*)
+    simpl.
+(* We have proven the base case.
+*)
+    exact H2.
+(* Inductive case: n = S n' *)
+  - (* We know that even (S n') = false by the induction hypothesis IHn'.
+*)
+    simpl.
+(* We need to prove that even (S n') = false -> even (S (S n')) = true.
+*)
+    intros H2.
+(* We know that even (S (S n')) = true by the induction hypothesis IHn'.
+*)
+    simpl.
+(* We have proven the inductive case.
+*)
+    exact IHn'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #50)
+Error in step "induction n as [|n' IHn'].".
+Message: The variable n was not found in the current
+environment..
+Goal: odd 1 = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_and_odd_properties_5 : forall H : forall n : nat,
+even n = true -> even (S n) = false, forall H0 : forall n : nat, even n = false -> odd n = true, forall H1 : even 0 = true, odd 1 = true.
+
+
+Error proving silly_ex
+MAX LEMMA DEPTH REACHED. GIVING UP.

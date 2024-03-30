@@ -1,0 +1,439 @@
+PROVING re_opt_e_match
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+
+Proof.
+(* We will proceed by induction on the structure of the regular expression re.
+*)
+  intros T re s H.
+induction re as [|re1 re2 Hre1 Hre2].
+(* Case re = Empty: *)
+  - (* In this case, we have s =~ Empty, which is false by definition of =~.
+*)
+    intros H.
+exfalso.
+now apply H.
+(* Case re = Epsilon: *)
+  - (* In this case, we have s =~ Epsilon, which is true by definition of =~.
+*)
+    intros H.
+reflexivity.
+(* Case re = Symbol a: *)
+  - (* In this case, we have s =~ Symbol a, which is true if and only if s = a.
+*)
+    intros H.
+now apply H.
+(* Case re = Star re1: *)
+  - (* We know that s =~ Star re1.
+We need to prove that s =~ re_opt_e (Star re1).
+*)
+    (* By definition of =~, this is equivalent to proving that for all s', s' =~ re1 -> s' =~ re_opt_e re1.
+*)
+    intros H.
+induction H as [s' Hs'].
+(* In this case, we have s' =~ re1.
+We need to prove that s' =~ re_opt_e re1.
+*)
+    (* By definition of =~, this is equivalent to proving that for all s'', s'' =~ re1 -> s'' =~ re_opt_e re1.
+*)
+    intros Hs'.
+induction Hs' as [s'' Hs''].
+(* In this case, we have s'' =~ re1.
+We need to prove that s'' =~ re_opt_e re1.
+*)
+    (* By definition of =~, this is equivalent to proving that for all s''', s''' =~ re1 -> s''' =~ re_opt_e re1.
+*)
+    intros Hs''.
+induction Hs'' as [s''' Hs'''].
+(* In this case
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction re as [|re1 re2 Hre1 Hre2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt_e re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_match_optional_empty_0 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+
+
+Lemma reg_exp_match_optional_empty_0 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+Proof.
+(* The goal is to prove that s =~ re_opt_e re, given that s =~ re.
+We will proceed by induction on the structure of re.
+*)
+  intros T re s H.
+induction re as [|a re1 re2].
+(* Case re = Empty: This case is impossible since we have s =~ re, and re = Empty would mean s = [], which contradicts the fact that s =~ re.
+*)
+  (* Case re = Symbol a: In this case, re_opt_e re = re, so we need to prove that s =~ re.
+But this is given by hypothesis H.
+*)
+  constructor.
+exact H.
+(* Case re = Star re1: In this case, re_opt_e re = re_opt_e (Star re1) = Star (re_opt_e re1).
+We need to prove that s =~ Star (re_opt_e re1).
+*)
+  (* We know that s =~ re, so we need to prove that s =~ Star (re_opt_e re1).
+By definition of =~, this is equivalent to proving that s =~ re1* or s =~ [].
+*)
+  (* We can do this by induction on the structure of s.
+*)
+  induction s as [|x s'].
+(* Case s = []: In this case, we need to prove that [] =~ re1*.
+By definition of =~, this is equivalent to proving that [] =~ [] or there exists a list s' such that [] =~ re1* and s' =~ re1*.
+*)
+  (* But [] =~ [] is true by definition of =~.
+*)
+  constructor.
+reflexivity.
+(* Case s = x :: s': In this case, we need to prove that x :: s' =~ re1*.
+By definition of =~, this is equivalent to proving that x :: s' =~ re1* or there exists a list s'' such that x :: s' =~ re1 and s'' =~ re1*.
+*)
+  (* We know that s
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction re as [|a re1 re2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt_e re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_match_optional_empty_1 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+
+
+Lemma reg_exp_match_optional_empty_1 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+Proof.
+(* The goal is to prove that s =~ re_opt_e re, given that s =~ re.
+We will proceed by induction on the structure of re.
+*)
+  intros T re s H.
+induction re as [|a re1 re2].
+(* Case re = Empty *)
+  - (* s =~ Empty is impossible by definition of =~ *)
+    contradiction.
+(* Case re = Symbol a *)
+  - (* re_opt_e (Symbol a) = Symbol a *)
+    simpl.
+rewrite H.
+reflexivity.
+(* Case re = Concat re1 re2 *)
+  - (* s =~ Concat re1 re2 is equivalent to the existence of a list s1 and a list s2 such that s = s1 ++ s2 and s1 =~ re1 and s2 =~ re2 *)
+    simpl.
+destruct H as [s1 s2 H1 H2].
+(* By IHre1, we have s1 =~ re_opt_e re1 *)
+    apply IHre1 in H1.
+(* By IHre2, we have s2 =~ re_opt_e re2 *)
+    apply IHre2 in H2.
+(* We now need to prove that s =~ re_opt_e (Concat re1 re2) *)
+    simpl.
+rewrite H1, H2.
+reflexivity.
+(* Case re = Star re1 *)
+  - (* s =~ Star re1 is equivalent to the existence of a list s' such that s = s' ++ s' and s' =~ re1 *)
+    simpl.
+destruct H as [s' H'].
+(* By IHre1, we have s' =~ re_opt_e re1 *)
+    apply IHre1 in H'.
+(* We now need to prove that s =~ re_opt_e (Star re1) *)
+    simpl.
+rewrite H'.
+reflexivity.
+(* Case re = re_opt_e re *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction re as [|a re1 re2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt_e re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_match_optional_empty_2 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+
+
+Lemma reg_exp_match_optional_empty_2 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+Proof.
+(* The goal is to prove that s =~ re_opt_e re, given that s =~ re.
+We will proceed by induction on the structure of re.
+*)
+  intros T re s H.
+induction re as [|a re1 re2].
+(* Case re = Empty: This case is impossible since we have s =~ re, and re = Empty would mean s = [], which contradicts the fact that s =~ re.
+*)
+  (* Case re = Symbol a: In this case, re_opt_e re = re, so we need to prove that s =~ re.
+But this is given by hypothesis H.
+*)
+  constructor.
+exact H.
+(* Case re = Star re1: In this case, re_opt_e re = re_opt_e (Star re1) = Star (re_opt_e re1).
+We need to prove that s =~ Star (re_opt_e re1).
+*)
+  (* We know that s =~ re, so we need to prove that s =~ Star (re_opt_e re1).
+By definition of =~, this is equivalent to proving that s =~ re1* or s =~ [].
+*)
+  (* We can do this by induction on the structure of s.
+*)
+  induction s as [|x s'].
+(* Case s = []: In this case, we need to prove that [] =~ re1*.
+By definition of =~, this is equivalent to proving that [] =~ [] or there exists a list s' such that [] =~ re1* and s' =~ re1*.
+*)
+  (* But [] =~ [] is true by definition of =~.
+*)
+  constructor.
+reflexivity.
+(* Case s = x :: s': In this case, we need to prove that x :: s' =~ re1*.
+By definition of =~, this is equivalent to proving that x :: s' =~ re1* or there exists a list s'' such that x :: s' =~ re1 and s'' =~ re1*.
+*)
+  (* We know that s
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction re as [|a re1 re2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt_e re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_match_optional_empty_3 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+
+
+Lemma reg_exp_match_optional_empty_3 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+Proof.
+(* The goal is to prove that s =~ re_opt_e re, given that s =~ re.
+We will proceed by induction on the structure of re.
+*)
+  intros T re s H.
+induction re as [|a re1 re2].
+(* Case re = Empty: This case is impossible since we have s =~ re, and re = Empty would mean s = [], which contradicts the fact that s =~ re.
+*)
+  (* Case re = Symbol a: In this case, re_opt_e re = re, so we need to prove that s =~ re.
+But this is given by hypothesis H.
+*)
+  constructor.
+exact H.
+(* Case re = Star re1: In this case, re_opt_e re = re_opt_e (Star re1) = Star (re_opt_e re1).
+We need to prove that s =~ Star (re_opt_e re1).
+*)
+  (* We know that s =~ re, so we need to prove that s =~ Star (re_opt_e re1).
+By definition of =~, this is equivalent to proving that s =~ re1* or s =~ [].
+*)
+  (* We can do this by induction on the structure of s.
+*)
+  induction s as [|x s'].
+(* Case s = []: In this case, we need to prove that [] =~ re1*.
+By definition of =~, this is equivalent to proving that [] =~ [] or there exists a list s' such that [] =~ re1* and s' =~ re1*.
+*)
+  (* But [] =~ [] is true by definition of =~.
+*)
+  constructor.
+reflexivity.
+(* Case s = x :: s': In this case, we need to prove that x :: s' =~ re1*.
+By definition of =~, this is equivalent to proving that x :: s' =~ re1* or there exists a list s'' such that x :: s' =~ re1 and s'' =~ re1*.
+*)
+  (* We know that s
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction re as [|a re1 re2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt_e re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_match_optional_empty_4 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+
+
+Lemma reg_exp_match_optional_empty_4 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+Proof.
+(* The goal is to prove that s =~ re_opt_e re, given that s =~ re.
+We will proceed by induction on the structure of re.
+*)
+  intros T re s H.
+induction re as [|a re1 re2].
+(* Case re = Empty: This case is impossible since we have s =~ re, and re = Empty would mean s = [] which contradicts the fact that s is not empty.
+*)
+  (* Case re = Symbol a: In this case, re_opt_e re = re, so we need to prove that s =~ re.
+But this is given by hypothesis H.
+*)
+  constructor.
+exact H.
+(* Case re = Star re1: In this case, re_opt_e re = re_opt_e (Star re1) = Star (re_opt_e re1).
+We need to prove that s =~ Star (re_opt_e re1).
+By the IH, we know that s =~ re1*.
+Now, we need to prove that s =~ Star (re_opt_e re1).
+This is true because s =~ re1* and re1* = (re_opt_e re1)*, so s =~ (re_opt_e re1)* = Star (re_opt_e re1).
+*)
+  apply eq_refl.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction re as [|a re1 re2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt_e re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_match_optional_empty_5 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt_e re.
+
+
+Error proving re_opt_e_match
+MAX LEMMA DEPTH REACHED. GIVING UP.

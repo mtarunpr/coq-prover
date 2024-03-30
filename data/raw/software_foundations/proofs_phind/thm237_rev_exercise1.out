@@ -1,0 +1,685 @@
+PROVING rev_exercise1
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+
+Proof.
+intros l l'.
+induction l as [| n l' IHl'].
++ (* l = [] *)
+    simpl.
+intros H.
+inversion H.
++ (* l = n :: l' *)
+    simpl.
+intros H.
+rewrite <- H.
+apply IHl'.
++ (* l' = rev l *)
+      simpl.
+intros H'.
+rewrite <- H'.
+apply IHl'.
++ (* l' = [] *)
+        simpl.
+reflexivity.
++ (* l' = n' :: l'' *)
+        simpl.
+intros H''.
+rewrite <- H''.
+apply IHl'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #78)
+Error in step "induction l as [| n l' IHl'].".
+Message: l' is already used..
+Goal: l = rev l' -> l' = rev l.
+
+
+TRYING TO PROVE LEMMA
+Lemma list_reverse_involutive_0 : forall l l' : list nat, l = rev l' -> l' = rev l.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+
+
+Lemma list_reverse_involutive_0 : forall l l' : list nat, l = rev l' -> l' = rev l.
+
+Proof.
+(*
+     We will proceed by induction on l.
+The base case will be when l is an empty list.
+The inductive case will be when l is a cons.
+*)
+  intros l l' H.
+(*
+     We will need to use the IHlist_reverse_involutive_0 lemma,
+     which states that if l = rev l' then l' = rev l.
+We will also need to use the rev_cons lemma, which states
+     that rev (x :: l) = rev l ++ [x].
+*)
+  induction l as [| n l'].
+- (* Base case: l = [] *)
+    (* Since l = rev l' and l' = [], we have l = rev [] = [] *)
+    simpl in H.
+reflexivity.
+- (* Inductive case: l = n :: l' *)
+    (* By the IHlist_reverse_involutive_0, we have l' = rev l *)
+    apply IHlist_reverse_involutive_0 in H.
+(* By the rev_cons lemma, we have rev l = rev (n :: l') = l' ++ [n] *)
+    simpl in H.
+(* Thus, we have l' = rev l = (l' ++ [n]) ++ [n] *)
+    rewrite H in H0.
+(* By the app_assoc lemma, we have l' = (l' ++ [n]) ++ [n] = l' ++ ([n] ++ [n]) *)
+    rewrite app_assoc in H0.
+(* By the app_eq_iff_eq_append_cancel_left lemma, we have l' = l' ++ ([n] ++ [n]) *)
+    rewrite app_eq_iff_eq_append_cancel_left in H0.
+(* By the app_nil_r_cancel lemma, we have l' = l' ++ [n] *)
+    rewrite app_nil_r_cancel in H0.
+(* By the app_eq_iff_eq_append_cancel_left lemma again, we have l' = [n] *)
+    rewrite app_eq_iff_eq_append_
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #78)
+Error in step "induction l as [| n l'].".
+Message: l' is already used..
+Goal: l' = rev l.
+
+
+TRYING TO PROVE LEMMA
+Lemma list_reverse_involutive_1 : forall l l' : list nat, forall H : l = rev l', l' = rev l.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+
+
+Lemma list_reverse_involutive_1 : forall l l' : list nat, forall H : l = rev l', l' = rev l.
+
+Proof.
+intros l l' H.
+rewrite H.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #80)
+Error in step "reflexivity.".
+Message: In environment
+l, l' : list nat
+H : l = rev l'
+Unable to unify "rev (rev l')" with "l'"..
+Goal: l' = rev (rev l').
+
+
+TRYING TO PROVE LEMMA
+Lemma list_reverse_involutive_2 : forall l l' : list nat, forall H : l = rev l', l' = rev (rev l').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+
+
+Lemma list_reverse_involutive_2 : forall l l' : list nat, forall H : l = rev l', l' = rev (rev l').
+
+Proof.
+intros l l' H.
+rewrite H.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #78)
+Error in step "rewrite H.".
+Message: Found no subterm matching "l" in the current goal..
+Goal: l' = rev (rev l').
+
+
+TRYING TO PROVE LEMMA
+Lemma list_reverse_involutive_3 : forall l l' : list nat, forall H : l = rev l', l' = rev (rev l').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+
+
+Lemma list_reverse_involutive_3 : forall l l' : list nat, forall H : l = rev l', l' = rev (rev l').
+
+Proof.
+(*
+     We will proceed by induction on l.
+The base case will be when l is empty.
+The inductive case will be when l is a cons.
+*)
+  intros l l' H.
+(*
+     First, we will show that if l is empty, then l' is also empty.
+This will be done by applying the hypothesis H and simplifying.
+*)
+  induction l as [|n l''].
+- (* l is empty *)
+    simpl in H.
+reflexivity.
+- (* l is a cons *)
+    (*
+       Now, we will show that if l is a cons, then l' is also a cons
+       and that the rest of the list (l'') is the reverse of the rest of the list (l'').
+This will be done by applying the hypothesis H and simplifying.
+*)
+    simpl in H.
+rewrite H.
+(*
+       Now, we will show that the head of l is equal to the head of l'.
+This will be done by applying the hypothesis H and simplifying.
+*)
+    simpl in H.
+rewrite H.
+(*
+       Finally, we will show that the rest of the list (l'') is the reverse of the rest of the list (l').
+This will be done by applying the induction hypothesis to l'', l' and the equality we have just derived.
+*)
+    apply (IHl l'' l' _).
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #84)
+Error in step "reflexivity.".
+Message: In environment
+l' : list nat
+H : [ ] = rev l'
+Unable to unify "rev (rev l')" with 
+"l'"..
+Goal: l' = rev (rev l').
+
+
+TRYING TO PROVE LEMMA
+Lemma empty_list_rev_is_id_4 : forall l' : list nat, forall H : [ ] = rev l', l' = rev (rev l').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+
+
+Lemma empty_list_rev_is_id_4 : forall l' : list nat, forall H : [ ] = rev l', l' = rev (rev l').
+
+Proof.
+intros l'.
+induction H as [|x l' Hrec].
+- (* H: [] = rev l' *)
+    (* Base case: l' = [] *)
+    reflexivity.
+- (* H: x :: l' = rev l' *)
+    (* Inductive case: l' = y :: l *)
+    (* We know that x :: l' = rev l' and Hrec: l' = rev l *)
+    (* We want to prove that y :: l = rev (rev (y :: l)) *)
+    (* By definition of rev, rev (y :: l) = rev l' *)
+    (* So we need to prove y :: l = rev l' *)
+    (* By the IH, we know that l' = rev l *)
+    (* So we need to prove y :: l = x :: rev l *)
+    (* By the injectivity of ::, we need to prove y = x and l = rev l *)
+    (* The first equality is false by the premise of the theorem *)
+    (* So we have a contradiction and the theorem is proven *)
+    contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #78)
+Error in step "induction H as [|x l' Hrec].".
+Message: The variable H was not found in the current
+environment..
+Goal: [ ] = rev l' -> l' = rev (rev l').
+
+
+TRYING TO PROVE LEMMA
+Lemma empty_list_rev_is_id_5 : forall l' : list nat, [ ] = rev l' -> l' = rev (rev l').
+
+
+Error proving rev_exercise1
+MAX LEMMA DEPTH REACHED. GIVING UP.

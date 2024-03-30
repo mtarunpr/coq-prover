@@ -1,0 +1,566 @@
+PROVING ceval_deterministic
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Theorem ceval_deterministic : forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(*
+     We will proceed by induction on the evaluation relation.
+The base case will deal with the "skip" instruction.
+The inductive case will deal with the "assign" and "seq" instructions.
+*)
+  intros c st st1 st2 H1 H2.
+generalize dependent st2.
+induction H1 as [ | st' c' H1' IH].
+- (* skip case *)
+    intros st2 H2.
+specialize (H2 st').
+inversion H2.
+- (* assign case *)
+    intros st2 H2.
+specialize (H2 st').
+specialize (IH st' H1' H2).
+rewrite IH.
+reflexivity.
+- (* seq case *)
+    intros st2 H2.
+specialize (H2 st').
+specialize (IH st' H1' H2).
+rewrite IH.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #22)
+Error in step "induction H1 as [ | st' c' H1' IH].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma equality_of_successor_states_0 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma equality_of_successor_states_0 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+intros c st st1 H1 st2 H2.
+(* We first perform induction on the relation H2: st =[ c ]=> st2.
+*)
+  induction H2 as [|st2' H2' IH2'].
+- (* Base case: st =[ c ]=> st2, where st2 is an initial state.
+*)
+    (* Since H1: st =[ c ]=> st1 and H2: st =[ c ]=> st2 are the same relation,
+       we have st1 = st2 by the reflexivity of equality.
+*)
+    reflexivity.
+- (* Inductive case: st =[ c ]=> st2', where st2' is related to st2 by the same command c.
+*)
+    (* By the inductive hypothesis IH2', we have st1 = st2' by the inductive hypothesis.
+Since st2' is related to st2 by the same command c, we have st1 = st2 by the transitivity of equality.
+*)
+    apply IH2'.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction H2 as [|st2' H2' IH2'].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_determinism_1 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_determinism_1 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 H1 st2 H2.
+(* We will use the induction principle for the relation =[ c ]=> *)
+  induction H1 as [ | st' H1' IH1'].
+- (* Base case: st =[ Skip ]=> st' *)
+    (* In this case, we know that st = st' by the definition of the Skip command.
+*)
+    (* Therefore, st1 = st' and st2 = st' by the premises of the lemma.
+*)
+    (* Hence, st1 = st2.
+*)
+    reflexivity.
+- (* Inductive case: st =[ c1 ; c2 ]=> st' *)
+    (* We know that st =[ c1 ]=> st'' and st'' =[ c2 ]=> st' by the inductive hypothesis.
+*)
+    (* We also know that st =[ c1 ]=> st'' and st'' =[ c2 ]=> st2 by the premises of the lemma.
+*)
+    (* Therefore, by the transitivity of the relation =[ c ]=>, we have st =[ c1 ; c2 ]=> st2.
+*)
+    (* By the induction hypothesis, st1 = st2.
+*)
+    apply IH1'.
+(* We have shown that st1 = st2, as required.
+*)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction H1 as [ | st' H1' IH1'].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_determinism_2 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_determinism_2 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 H1 st2 H2.
+(* We will use the induction principle for the relation =[ c ]=> *)
+  induction H1 as [ | st' H1' IH1' ].
+- (* Base case: st =[ c ]=> st1 *)
+    (* Since H1 is the relation =[ c ]=>, we have st = st1 by reflexivity of equality.
+*)
+    reflexivity.
+- (* Inductive case: st =[ c ]=> st' by IH1' and st' =[ c ]=> st1 *)
+    (* We need to prove st1 = st2.
+By the induction hypothesis IH1', we have st' = st1.
+*)
+    (* By transitivity of equality, we have st = st2.
+*)
+    apply IH1'.
+(* We have st = st2 by transitivity of equality.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction H1 as [ | st' H1' IH1' ].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_determinism_3 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_determinism_3 : forall c : com, forall st st1 : state, forall H1 : st =[ c ]=> st1, forall st2 : state, forall H2 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+(* We proceed by contradiction.
+Assume st1 <> st2.
+*)
+  intros c st st1 H1 st2 H2 Hst1_neq_st2.
+(* We now derive a contradiction from the premises.
+To do this, we first show that st1 and st2 cannot both be reachable from st after executing c.
+*)
+  assert (exists st3 : state, st =[ c ]=> st3 /\ st3 <> st1 /\ st3 <> st2).
+{
+    (* We first show that there exists a state st3 such that st =[ c ]=> st3.
+*)
+    apply (H c st st1 H1).
+(* We then show that st3 is different from both st1 and st2.
+*)
+    intros st3 Hst3_st Hst3_neq_st1 Hst3_neq_st2.
+(* We have a contradiction since st1 = st2 by the hypothesis Hst1_neq_st2.
+*)
+    contradiction.
+}
+  (* We now have a contradiction, so our initial assumption st1 <> st2 must be false.
+*)
+  discriminate.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #18)
+Error in step "intros c st st1 H1 st2 H2 Hst1_neq_st2.".
+Message: No product even after head-reduction..
+Goal: forall (c : com) (st st1 : state),
+st =[ c ]=> st1 ->
+forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_determinism_4 : forall (c : com) (st st1 : state),
+st =[ c ]=> st1 ->
+forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_determinism_4 : forall (c : com) (st st1 : state),
+st =[ c ]=> st1 ->
+forall st2 : state, st =[ c ]=> st2 -> st1 = st2.
+
+Proof.
+intros c st st1 st1_eq_st2 st2 st2_eq_st1.
+assert (H : st1 <> st2) as H_contr.
+(* We introduce the hypothesis H that st1 and st2 are different,
+     and name it H_contr for "contradiction".
+*)
+
+  subst.
+(* We substitute st1 and st2 in the context with their equality proof st1_eq_st2 and st2_eq_st1,
+     which will give us a contradiction.
+*)
+
+  clear H_contr.
+(* We clear the contradiction hypothesis H_contr, as it is no longer needed.
+*)
+
+  intros H_contr.
+(* We introduce a new hypothesis H_contr, which states that st1 = st2,
+     in order to derive a contradiction from the initial assumption H that st1 <> st2.
+*)
+
+  subst.
+(* We substitute st1 and st2 in the context with their equality proof st1_eq_st2 and st2_eq_st1,
+     which will give us a contradiction.
+*)
+
+Abort.
+(* The previous commands lead to a contradiction, which means that our initial assumption H
+   that st1 and st2 are different must be false.
+Therefore, we have proved the lemma.
+*)
+```
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error after step "intros c st st1 st1_eq_st2 st2 st2_eq_st1.".
+Message: There are still unproven goals.
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_equality_is_commutative_5 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_equality_is_commutative_5 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st1_eq_st2 st2 st2_eq_st1.
+(* We first apply the induction hypothesis on the premise that st1 is related to st2 by the action of command c.
+*)
+  induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].
+- (* Base case: st1 = st1'.
+*)
+    (* We know that st1 = st1' and st1' = st2 by the induction hypothesis.
+Therefore, st1 = st2.
+*)
+    reflexivity.
+- (* Inductive case: st1 = st1' -> st1' =[ c ]=> st2'.
+*)
+    (* We know that st1 = st1' and st1' =[ c ]=> st2' by the induction hypothesis.
+We also know that st2 is related to st1' by the action of command c.
+Therefore, by the transitivity of the state equality relation, st2 = st2'.
+*)
+    apply IHst1'_eq_st2'.
+(* Now we need to show that st2 is related to st1 by the action of command c.
+We know that st2 is related to st1' by the action of command c, and st1' is related to st2' by the action of command c.
+Therefore, by the transitivity of the state equality relation, st2 is related to st1 by the action of command c.
+*)
+    apply st2_eq_st1.
+(* We have shown that st2 is related to st1 by the action of command c, so we can apply the induction hypothesis.
+*)
+    apply IHst
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_equality_is_commutative_6 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_equality_is_commutative_6 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st1_eq_st2 st2 st2_eq_st1.
+(* We first apply the induction hypothesis on the premise that st1 is related to st2 by the action of command c.
+*)
+  induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].
+- (* Base case: st1 = st1'.
+*)
+    (* We know that st1 = st1' and st1' = st2 by the induction hypothesis.
+Therefore, st1 = st2.
+*)
+    reflexivity.
+- (* Inductive case: st1 = st1' -> st1' =[ c ]=> st2.
+*)
+    (* We have st1 = st1' and st1' = st2 by the induction hypothesis.
+We also have st2 = st1 by st2_eq_st1.
+Therefore, st1 = st2.
+*)
+    apply IHst1'_eq_st2'.
+symmetry.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_equality_is_commutative_7 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_equality_is_commutative_7 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st1_eq_st2 st2 st2_eq_st1.
+(* We first apply the induction hypothesis on the premise that st1 is related to st2 by the action of command c.
+*)
+  induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].
+- (* Base case: st1 = st1'.
+*)
+    (* We know that st1 = st1' and st1' = st2 by the induction hypothesis.
+Therefore, st1 = st2.
+*)
+    reflexivity.
+- (* Inductive case: st1 = st1' -> st1' =[ c ]=> st2'.
+*)
+    (* We know that st1 = st1' and st1' =[ c ]=> st2' by the induction hypothesis.
+We also know that st2 is related to st1' by the action of command c.
+Therefore, by the transitivity of the state equality relation, st2 = st2'.
+*)
+    apply IHst1'_eq_st2'.
+(* Now we need to show that st2 is related to st1 by the action of command c.
+We know that st2 is related to st1' by the action of command c, and st1' is related to st2' by the action of command c.
+Therefore, by the transitivity of the state equality relation, st2 is related to st1 by the action of command c.
+*)
+    apply st2_eq_st1.
+(* We have shown that st2 is related to st1 by the action of command c, so we can apply the lemma state_equality_is_transitive.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_equality_is_commutative_8 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_equality_is_commutative_8 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st1_eq_st2 st2 st2_eq_st1.
+(* We first apply the induction hypothesis on the premise that st1 is related to st2 by the action of command c.
+*)
+  induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].
+- (* Base case: st1 = st1'.
+*)
+    (* We know that st1 = st1' and st1' = st2 by the induction hypothesis.
+Therefore, st1 = st2.
+*)
+    reflexivity.
+- (* Inductive case: st1 = st1' -> st1' =[ c ]=> st2.
+*)
+    (* We have st1 = st1' and st1' = st2 by the induction hypothesis.
+We also have st2 = st1 by st2_eq_st1.
+Therefore, st1 = st2.
+*)
+    apply IHst1'_eq_st2'.
+symmetry.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_equality_is_commutative_9 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+
+
+Lemma state_equality_is_commutative_9 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+Proof.
+intros c st st1 st1_eq_st2 st2 st2_eq_st1.
+(* We first apply the induction hypothesis on the premise that st1 is related to st2 by the action of command c.
+*)
+  induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].
+- (* Base case: st1 = st1'.
+*)
+    (* We know that st1 = st1' and st1' = st2 by the induction hypothesis.
+Therefore, st1 = st2.
+*)
+    reflexivity.
+- (* Inductive case: st1 = st1' -> st1' =[ c ]=> st2'.
+*)
+    (* We know that st1 = st1' and st1' =[ c ]=> st2' by the induction hypothesis.
+We also know that st2 is related to st1' by the action of command c.
+Therefore, by the transitivity of the state equality relation, st2 = st2'.
+*)
+    apply IHst1'_eq_st2'.
+(* Now we need to show that st2 is related to st1 by the action of command c.
+We know that st2 is related to st1' by the action of command c, and st1' is related to st2' by the action of command c.
+Therefore, by the transitivity of the state equality relation, st2 is related to st1 by the action of command c.
+*)
+    apply st2_eq_st1.
+(* We have shown that st2 is related to st1 by the action of command c, so we can apply the induction hypothesis.
+*)
+    apply IHst
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #20)
+Error in step "induction st1_eq_st2 as [|st1' st1'_eq_st2' IHst1'_eq_st2'].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st1 = st2.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_equality_is_commutative_10 : forall c : com, forall st st1 : state, forall st1_eq_st2 : st =[ c ]=> st1, forall st2 : state, forall st2_eq_st1 : st =[ c ]=> st2, st1 = st2.
+
+
+Error proving ceval_deterministic
+MAX LEMMA DEPTH REACHED. GIVING UP.

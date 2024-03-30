@@ -1,0 +1,3115 @@
+PROVING ceval'_example1
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+Theorem ceval_deterministic'': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H2.
+  
+  - 
+    rwd H H4.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto. Qed.
+
+
+
+Ltac find_rwd :=
+  match goal with
+    H1: ?E = true,
+    H2: ?E = false
+    |- _ => rwd H1 H2
+  end.
+
+
+
+Theorem ceval_deterministic''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite (IHE1_1 st'0 H3) in *.
+      auto. Qed.
+
+
+
+Ltac find_eqn :=
+  match goal with
+    H1: forall x, ?P x -> ?L = ?R,
+    H2: ?P ?X
+    |- _ => rewrite (H1 X H2) in *
+  end.
+
+
+
+
+
+Theorem ceval_deterministic'''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd;
+    try find_eqn; auto.
+Qed.
+
+
+
+Module Repeat.
+
+Inductive com : Type :=
+  | CSkip
+  | CAsgn (x : string) (a : aexp)
+  | CSeq (c1 c2 : com)
+  | CIf (b : bexp) (c1 c2 : com)
+  | CWhile (b : bexp) (c : com)
+  | CRepeat (c : com) (b : bexp).
+
+
+
+Notation "'repeat' x 'until' y 'end'" :=
+         (CRepeat x y)
+            (in custom com at level 0,
+             x at level 99, y at level 99).
+Notation "'skip'"  :=
+         CSkip (in custom com at level 0).
+Notation "x := y"  :=
+         (CAsgn x y)
+            (in custom com at level 0, x constr at level 0,
+             y at level 85, no associativity).
+Notation "x ; y" :=
+         (CSeq x y)
+           (in custom com at level 90, right associativity).
+Notation "'if' x 'then' y 'else' z 'end'" :=
+         (CIf x y z)
+           (in custom com at level 89, x at level 99,
+            y at level 99, z at level 99).
+Notation "'while' x 'do' y 'end'" :=
+         (CWhile x y)
+            (in custom com at level 89, x at level 99, y at level 99).
+
+Reserved Notation "st '=[' c ']=>' st'"
+         (at level 40, c custom com at level 99, st' constr at next level).
+
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st,
+      st =[ skip ]=> st
+  | E_Asgn  : forall st a1 n x,
+      aeval st a1 = n ->
+      st =[ x := a1 ]=> (x !-> n ; st)
+  | E_Seq : forall c1 c2 st st' st'',
+      st  =[ c1 ]=> st'  ->
+      st' =[ c2 ]=> st'' ->
+      st  =[ c1 ; c2 ]=> st''
+  | E_IfTrue : forall st st' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_IfFalse : forall st st' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_WhileFalse : forall b st c,
+      beval st b = false ->
+      st =[ while b do c end ]=> st
+  | E_WhileTrue : forall st st' st'' b c,
+      beval st b = true ->
+      st  =[ c ]=> st' ->
+      st' =[ while b do c end ]=> st'' ->
+      st  =[ while b do c end ]=> st''
+  | E_RepeatEnd : forall st st' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = true ->
+      st  =[ repeat c until b end ]=> st'
+  | E_RepeatLoop : forall st st' st'' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = false ->
+      st' =[ repeat c until b end ]=> st'' ->
+      st  =[ repeat c until b end ]=> st''
+
+  where "st =[ c ]=> st'" := (ceval c st st').
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_rwd; try find_eqn; auto.
+  - 
+    + 
+       find_rwd.
+       
+  - 
+     + 
+        find_rwd.
+Qed.
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_eqn; try find_rwd; auto.
+Qed.
+
+End Repeat.
+
+
+
+
+
+
+
+
+Example ceval_example1:
+  empty_st =[
+    X := 2;
+    if (X <= 1)
+      then Y := 3
+      else Z := 4
+    end
+  ]=> (Z !-> 4 ; X !-> 2).
+Proof.
+  
+  apply E_Seq with (X !-> 2).
+  - apply E_Asgn. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Asgn. reflexivity.
+Qed.
+
+
+
+
+
+
+Example ceval'_example1 : empty_st =[
+    X := 2;
+    if (X <= 1)
+      then Y := 3
+      else Z := 4
+    end
+  ]=> (Z !-> 4 ; X !-> 2).
+
+Proof.
+(* We will proceed by induction on the evaluation of the commands.
+*)
+  induction ceval_ind; intros st st1 st2 H1 H2.
+(* Case E_Skip: *)
+  - apply H2.
+(* Case E_Asgn: *)
+  - apply H2.
+(* Case E_Seq: *)
+  - (* We will use the induction hypothesis on the first command.
+*)
+    apply IHceval in H1.
+(* We will use the induction hypothesis on the second command.
+*)
+    apply IHceval in H2.
+(* We will use the transitivity of the state relation.
+*)
+    apply transitive_ceval with st' := st'.
+(* Case E_IfTrue: *)
+  - apply H2.
+(* Case E_IfFalse: *)
+  - apply H2.
+(* Case E_WhileFalse: *)
+  - apply H2.
+(* Case E_WhileTrue: *)
+  - (* We will use the induction hypothesis on the loop command.
+*)
+    apply IHceval in H2.
+(* We will use the transitivity of the state relation.
+*)
+    apply transitive_ceval with st' := st'.
+(* Case E_RepeatEnd: *)
+  - apply H2.
+(* Case E_RepeatLoop: *)
+  - (* We will use the induction hypothesis on the loop command.
+*)
+    apply IHceval in H2.
+(* We will use the transitivity of the state relation.
+*)
+    apply transitive_ceval with st' := st'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #462)
+Error in step "induction ceval_ind; intros st st1 st2 H1 H2.".
+Message: Unable to find an instance for the variables P, c, s,
+s0..
+Goal: empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+TRYING TO PROVE LEMMA
+Lemma assign_and_branch_lemma_0 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+Theorem ceval_deterministic'': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H2.
+  
+  - 
+    rwd H H4.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto. Qed.
+
+
+
+Ltac find_rwd :=
+  match goal with
+    H1: ?E = true,
+    H2: ?E = false
+    |- _ => rwd H1 H2
+  end.
+
+
+
+Theorem ceval_deterministic''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite (IHE1_1 st'0 H3) in *.
+      auto. Qed.
+
+
+
+Ltac find_eqn :=
+  match goal with
+    H1: forall x, ?P x -> ?L = ?R,
+    H2: ?P ?X
+    |- _ => rewrite (H1 X H2) in *
+  end.
+
+
+
+
+
+Theorem ceval_deterministic'''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd;
+    try find_eqn; auto.
+Qed.
+
+
+
+Module Repeat.
+
+Inductive com : Type :=
+  | CSkip
+  | CAsgn (x : string) (a : aexp)
+  | CSeq (c1 c2 : com)
+  | CIf (b : bexp) (c1 c2 : com)
+  | CWhile (b : bexp) (c : com)
+  | CRepeat (c : com) (b : bexp).
+
+
+
+Notation "'repeat' x 'until' y 'end'" :=
+         (CRepeat x y)
+            (in custom com at level 0,
+             x at level 99, y at level 99).
+Notation "'skip'"  :=
+         CSkip (in custom com at level 0).
+Notation "x := y"  :=
+         (CAsgn x y)
+            (in custom com at level 0, x constr at level 0,
+             y at level 85, no associativity).
+Notation "x ; y" :=
+         (CSeq x y)
+           (in custom com at level 90, right associativity).
+Notation "'if' x 'then' y 'else' z 'end'" :=
+         (CIf x y z)
+           (in custom com at level 89, x at level 99,
+            y at level 99, z at level 99).
+Notation "'while' x 'do' y 'end'" :=
+         (CWhile x y)
+            (in custom com at level 89, x at level 99, y at level 99).
+
+Reserved Notation "st '=[' c ']=>' st'"
+         (at level 40, c custom com at level 99, st' constr at next level).
+
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st,
+      st =[ skip ]=> st
+  | E_Asgn  : forall st a1 n x,
+      aeval st a1 = n ->
+      st =[ x := a1 ]=> (x !-> n ; st)
+  | E_Seq : forall c1 c2 st st' st'',
+      st  =[ c1 ]=> st'  ->
+      st' =[ c2 ]=> st'' ->
+      st  =[ c1 ; c2 ]=> st''
+  | E_IfTrue : forall st st' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_IfFalse : forall st st' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_WhileFalse : forall b st c,
+      beval st b = false ->
+      st =[ while b do c end ]=> st
+  | E_WhileTrue : forall st st' st'' b c,
+      beval st b = true ->
+      st  =[ c ]=> st' ->
+      st' =[ while b do c end ]=> st'' ->
+      st  =[ while b do c end ]=> st''
+  | E_RepeatEnd : forall st st' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = true ->
+      st  =[ repeat c until b end ]=> st'
+  | E_RepeatLoop : forall st st' st'' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = false ->
+      st' =[ repeat c until b end ]=> st'' ->
+      st  =[ repeat c until b end ]=> st''
+
+  where "st =[ c ]=> st'" := (ceval c st st').
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_rwd; try find_eqn; auto.
+  - 
+    + 
+       find_rwd.
+       
+  - 
+     + 
+        find_rwd.
+Qed.
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_eqn; try find_rwd; auto.
+Qed.
+
+End Repeat.
+
+
+
+
+
+
+
+
+Example ceval_example1:
+  empty_st =[
+    X := 2;
+    if (X <= 1)
+      then Y := 3
+      else Z := 4
+    end
+  ]=> (Z !-> 4 ; X !-> 2).
+Proof.
+  
+  apply E_Seq with (X !-> 2).
+  - apply E_Asgn. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Asgn. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma assign_and_branch_lemma_0 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+Proof.
+(* We will prove this lemma by induction on the ceval relation.
+*)
+(* The base case will be the E_Asgn constructor.
+*)
+(* The inductive case will be the E_IfTrue constructor.
+*)
+(* We will also use the lemmas E_Seq and E_IfFalse.
+*)
+
+(* Base case: E_Asgn *)
+intros empty_st c a1 n x H.
+(* H: aeval empty_st a1 = n *)
+(* We want to prove: empty_st =[ x := a1 ]=> (x !-> n ; empty_st) *)
+apply E_Asgn.
+(* Now we need to prove: aeval empty_st a1 = n *)
+(* This is given by H *)
+
+(* Inductive case: E_IfTrue *)
+intros st st' b c1 c2 H1 H2.
+(* H1: st =[ if b then c1 else c2 end ]=> st' *)
+(* H2: beval st b = true *)
+(* We want to prove: st =[ c1 ]=> st' *)
+apply E_IfTrue.
+(* Now we need to prove: beval st b = true *)
+(* This is given by H2 *)
+
+(* We will now use the lemmas E_Seq and E_IfFalse to complete the proof.
+*)
+(* E_Seq: st  =[ c1 ]=> st'  -> st' =[ c2 ]=> st'' -> st  =[ c1 ; c2 ]=> st'' *)
+(* E_IfFalse: beval st b = false -> st  =[ c2 ]=> st' -> st =[ if b then c1 else c2 end ]=> st' *)
+
+(* Case 1: beval st b = false *)
+apply E_IfFalse.
+(* Now we need to prove: beval st b = false *)
+(* This is given by the negation of H2 *)
+
+(* Case 2: beval st b = true *)
+apply E_Seq.
+(* Now we need to prove: st  =[ c1 ]=> st'  and st' =[ c2 ]=> st'' *)
+(* This is given by the induction hypothesis *)
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #462)
+Error in step "intros empty_st c a1 n x H.".
+Message: No product even after head-reduction..
+Goal: empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+TRYING TO PROVE LEMMA
+Lemma assign_and_branch_lemma_1 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+Theorem ceval_deterministic'': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H2.
+  
+  - 
+    rwd H H4.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto. Qed.
+
+
+
+Ltac find_rwd :=
+  match goal with
+    H1: ?E = true,
+    H2: ?E = false
+    |- _ => rwd H1 H2
+  end.
+
+
+
+Theorem ceval_deterministic''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite (IHE1_1 st'0 H3) in *.
+      auto. Qed.
+
+
+
+Ltac find_eqn :=
+  match goal with
+    H1: forall x, ?P x -> ?L = ?R,
+    H2: ?P ?X
+    |- _ => rewrite (H1 X H2) in *
+  end.
+
+
+
+
+
+Theorem ceval_deterministic'''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd;
+    try find_eqn; auto.
+Qed.
+
+
+
+Module Repeat.
+
+Inductive com : Type :=
+  | CSkip
+  | CAsgn (x : string) (a : aexp)
+  | CSeq (c1 c2 : com)
+  | CIf (b : bexp) (c1 c2 : com)
+  | CWhile (b : bexp) (c : com)
+  | CRepeat (c : com) (b : bexp).
+
+
+
+Notation "'repeat' x 'until' y 'end'" :=
+         (CRepeat x y)
+            (in custom com at level 0,
+             x at level 99, y at level 99).
+Notation "'skip'"  :=
+         CSkip (in custom com at level 0).
+Notation "x := y"  :=
+         (CAsgn x y)
+            (in custom com at level 0, x constr at level 0,
+             y at level 85, no associativity).
+Notation "x ; y" :=
+         (CSeq x y)
+           (in custom com at level 90, right associativity).
+Notation "'if' x 'then' y 'else' z 'end'" :=
+         (CIf x y z)
+           (in custom com at level 89, x at level 99,
+            y at level 99, z at level 99).
+Notation "'while' x 'do' y 'end'" :=
+         (CWhile x y)
+            (in custom com at level 89, x at level 99, y at level 99).
+
+Reserved Notation "st '=[' c ']=>' st'"
+         (at level 40, c custom com at level 99, st' constr at next level).
+
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st,
+      st =[ skip ]=> st
+  | E_Asgn  : forall st a1 n x,
+      aeval st a1 = n ->
+      st =[ x := a1 ]=> (x !-> n ; st)
+  | E_Seq : forall c1 c2 st st' st'',
+      st  =[ c1 ]=> st'  ->
+      st' =[ c2 ]=> st'' ->
+      st  =[ c1 ; c2 ]=> st''
+  | E_IfTrue : forall st st' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_IfFalse : forall st st' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_WhileFalse : forall b st c,
+      beval st b = false ->
+      st =[ while b do c end ]=> st
+  | E_WhileTrue : forall st st' st'' b c,
+      beval st b = true ->
+      st  =[ c ]=> st' ->
+      st' =[ while b do c end ]=> st'' ->
+      st  =[ while b do c end ]=> st''
+  | E_RepeatEnd : forall st st' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = true ->
+      st  =[ repeat c until b end ]=> st'
+  | E_RepeatLoop : forall st st' st'' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = false ->
+      st' =[ repeat c until b end ]=> st'' ->
+      st  =[ repeat c until b end ]=> st''
+
+  where "st =[ c ]=> st'" := (ceval c st st').
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_rwd; try find_eqn; auto.
+  - 
+    + 
+       find_rwd.
+       
+  - 
+     + 
+        find_rwd.
+Qed.
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_eqn; try find_rwd; auto.
+Qed.
+
+End Repeat.
+
+
+
+
+
+
+
+
+Example ceval_example1:
+  empty_st =[
+    X := 2;
+    if (X <= 1)
+      then Y := 3
+      else Z := 4
+    end
+  ]=> (Z !-> 4 ; X !-> 2).
+Proof.
+  
+  apply E_Seq with (X !-> 2).
+  - apply E_Asgn. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Asgn. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma assign_and_branch_lemma_1 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+Proof.
+(* We will prove this lemma by induction on the ceval relation.
+*)
+(* First, we will consider the base case where the command is CSkip.
+*)
+(* In this case, the state remains unchanged.
+*)
+intros st st1 st2.
+(* We will now consider the inductive case.
+*)
+(* We will consider the different constructors for the com type.
+*)
+(* Case 1: CAsgn *)
+(* In this case, the command is an assignment.
+*)
+(* We will first show that the assignment does not affect the value of X.
+*)
+(* We will then show that the assignment does not affect the value of Y or Z.
+*)
+(* Case 2: CSeq *)
+(* In this case, the command is a sequence of commands.
+*)
+(* We will show that the state after executing the sequence of commands is the same for both st1 and st2.
+*)
+(* Case 3: CIf *)
+(* In this case, the command is an if statement.
+*)
+(* We will show that if the condition is true, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Similarly, we will show that if the condition is false, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Case 4: CWhile *)
+(* In this case, the command is a while loop.
+*)
+(* We will show that if the condition is false, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Case 5: CRepeat *)
+(* In this case, the command is a repeat loop.
+*)
+(* We will show that if the condition is true, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Similarly, we will show that if the condition is false, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Now, we will prove the lemma by induction on the ceval relation.
+*)
+induction c; intros st st1 st2 H.
+(* Case 1: CAsgn *)
+(* We will first show that the assignment does not affect the value of X.
+*)
+(* We will then show that the assignment does not affect the value
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #462)
+Error in step "intros st st1 st2.".
+Message: No product even after head-reduction..
+Goal: empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+TRYING TO PROVE LEMMA
+Lemma assign_and_branch_lemma_2 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+Theorem ceval_deterministic'': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H2.
+  
+  - 
+    rwd H H4.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto. Qed.
+
+
+
+Ltac find_rwd :=
+  match goal with
+    H1: ?E = true,
+    H2: ?E = false
+    |- _ => rwd H1 H2
+  end.
+
+
+
+Theorem ceval_deterministic''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite (IHE1_1 st'0 H3) in *.
+      auto. Qed.
+
+
+
+Ltac find_eqn :=
+  match goal with
+    H1: forall x, ?P x -> ?L = ?R,
+    H2: ?P ?X
+    |- _ => rewrite (H1 X H2) in *
+  end.
+
+
+
+
+
+Theorem ceval_deterministic'''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd;
+    try find_eqn; auto.
+Qed.
+
+
+
+Module Repeat.
+
+Inductive com : Type :=
+  | CSkip
+  | CAsgn (x : string) (a : aexp)
+  | CSeq (c1 c2 : com)
+  | CIf (b : bexp) (c1 c2 : com)
+  | CWhile (b : bexp) (c : com)
+  | CRepeat (c : com) (b : bexp).
+
+
+
+Notation "'repeat' x 'until' y 'end'" :=
+         (CRepeat x y)
+            (in custom com at level 0,
+             x at level 99, y at level 99).
+Notation "'skip'"  :=
+         CSkip (in custom com at level 0).
+Notation "x := y"  :=
+         (CAsgn x y)
+            (in custom com at level 0, x constr at level 0,
+             y at level 85, no associativity).
+Notation "x ; y" :=
+         (CSeq x y)
+           (in custom com at level 90, right associativity).
+Notation "'if' x 'then' y 'else' z 'end'" :=
+         (CIf x y z)
+           (in custom com at level 89, x at level 99,
+            y at level 99, z at level 99).
+Notation "'while' x 'do' y 'end'" :=
+         (CWhile x y)
+            (in custom com at level 89, x at level 99, y at level 99).
+
+Reserved Notation "st '=[' c ']=>' st'"
+         (at level 40, c custom com at level 99, st' constr at next level).
+
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st,
+      st =[ skip ]=> st
+  | E_Asgn  : forall st a1 n x,
+      aeval st a1 = n ->
+      st =[ x := a1 ]=> (x !-> n ; st)
+  | E_Seq : forall c1 c2 st st' st'',
+      st  =[ c1 ]=> st'  ->
+      st' =[ c2 ]=> st'' ->
+      st  =[ c1 ; c2 ]=> st''
+  | E_IfTrue : forall st st' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_IfFalse : forall st st' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_WhileFalse : forall b st c,
+      beval st b = false ->
+      st =[ while b do c end ]=> st
+  | E_WhileTrue : forall st st' st'' b c,
+      beval st b = true ->
+      st  =[ c ]=> st' ->
+      st' =[ while b do c end ]=> st'' ->
+      st  =[ while b do c end ]=> st''
+  | E_RepeatEnd : forall st st' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = true ->
+      st  =[ repeat c until b end ]=> st'
+  | E_RepeatLoop : forall st st' st'' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = false ->
+      st' =[ repeat c until b end ]=> st'' ->
+      st  =[ repeat c until b end ]=> st''
+
+  where "st =[ c ]=> st'" := (ceval c st st').
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_rwd; try find_eqn; auto.
+  - 
+    + 
+       find_rwd.
+       
+  - 
+     + 
+        find_rwd.
+Qed.
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_eqn; try find_rwd; auto.
+Qed.
+
+End Repeat.
+
+
+
+
+
+
+
+
+Example ceval_example1:
+  empty_st =[
+    X := 2;
+    if (X <= 1)
+      then Y := 3
+      else Z := 4
+    end
+  ]=> (Z !-> 4 ; X !-> 2).
+Proof.
+  
+  apply E_Seq with (X !-> 2).
+  - apply E_Asgn. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Asgn. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma assign_and_branch_lemma_2 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+Proof.
+(* We will prove the lemma by induction on the ceval relation.
+*)
+intros empty_st.
+(* We first apply the E_Seq constructor to decompose the command.
+*)
+apply (E_Seq (X := 2) (if X <= 1 then Y := 3 else Z := 4 end)).
+(* We now have to prove that empty_st =[ X := 2 ]=> (X !-> 2) and
+   empty_st =[ if X <= 1 then Y := 3 else Z := 4 end ]=> (Z !-> 4; X !-> 2).
+*)
+(* For the first part, we use E_Asgn.
+*)
+- apply (E_Asgn 2).
+(* We need to prove that aeval empty_st 2 = 2.
+*)
+  reflexivity.
+(* For the second part, we use E_IfFalse.
+*)
+- apply (E_IfFalse false).
+(* We need to prove that beval empty_st (X <= 1) = false and
+     empty_st =[ Y := 3 ]=> (Z !-> 4; X !-> 2).
+*)
+  - reflexivity.
+(* We now have to prove that empty_st =[ Y := 3 ]=> (Z !-> 4; X !-> 2).
+*)
+    apply (E_Asgn 3).
+(* We need to prove that aeval empty_st 3 = 4 and
+       empty_st =[ X := 2 ]=> (X !-> 2).
+*)
+    - reflexivity.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #462)
+Error in step "intros empty_st.".
+Message: No product even after head-reduction..
+Goal: empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+TRYING TO PROVE LEMMA
+Lemma assign_and_branch_lemma_3 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+Theorem ceval_deterministic'': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H2.
+  
+  - 
+    rwd H H4.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto. Qed.
+
+
+
+Ltac find_rwd :=
+  match goal with
+    H1: ?E = true,
+    H2: ?E = false
+    |- _ => rwd H1 H2
+  end.
+
+
+
+Theorem ceval_deterministic''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite (IHE1_1 st'0 H3) in *.
+      auto. Qed.
+
+
+
+Ltac find_eqn :=
+  match goal with
+    H1: forall x, ?P x -> ?L = ?R,
+    H2: ?P ?X
+    |- _ => rewrite (H1 X H2) in *
+  end.
+
+
+
+
+
+Theorem ceval_deterministic'''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd;
+    try find_eqn; auto.
+Qed.
+
+
+
+Module Repeat.
+
+Inductive com : Type :=
+  | CSkip
+  | CAsgn (x : string) (a : aexp)
+  | CSeq (c1 c2 : com)
+  | CIf (b : bexp) (c1 c2 : com)
+  | CWhile (b : bexp) (c : com)
+  | CRepeat (c : com) (b : bexp).
+
+
+
+Notation "'repeat' x 'until' y 'end'" :=
+         (CRepeat x y)
+            (in custom com at level 0,
+             x at level 99, y at level 99).
+Notation "'skip'"  :=
+         CSkip (in custom com at level 0).
+Notation "x := y"  :=
+         (CAsgn x y)
+            (in custom com at level 0, x constr at level 0,
+             y at level 85, no associativity).
+Notation "x ; y" :=
+         (CSeq x y)
+           (in custom com at level 90, right associativity).
+Notation "'if' x 'then' y 'else' z 'end'" :=
+         (CIf x y z)
+           (in custom com at level 89, x at level 99,
+            y at level 99, z at level 99).
+Notation "'while' x 'do' y 'end'" :=
+         (CWhile x y)
+            (in custom com at level 89, x at level 99, y at level 99).
+
+Reserved Notation "st '=[' c ']=>' st'"
+         (at level 40, c custom com at level 99, st' constr at next level).
+
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st,
+      st =[ skip ]=> st
+  | E_Asgn  : forall st a1 n x,
+      aeval st a1 = n ->
+      st =[ x := a1 ]=> (x !-> n ; st)
+  | E_Seq : forall c1 c2 st st' st'',
+      st  =[ c1 ]=> st'  ->
+      st' =[ c2 ]=> st'' ->
+      st  =[ c1 ; c2 ]=> st''
+  | E_IfTrue : forall st st' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_IfFalse : forall st st' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_WhileFalse : forall b st c,
+      beval st b = false ->
+      st =[ while b do c end ]=> st
+  | E_WhileTrue : forall st st' st'' b c,
+      beval st b = true ->
+      st  =[ c ]=> st' ->
+      st' =[ while b do c end ]=> st'' ->
+      st  =[ while b do c end ]=> st''
+  | E_RepeatEnd : forall st st' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = true ->
+      st  =[ repeat c until b end ]=> st'
+  | E_RepeatLoop : forall st st' st'' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = false ->
+      st' =[ repeat c until b end ]=> st'' ->
+      st  =[ repeat c until b end ]=> st''
+
+  where "st =[ c ]=> st'" := (ceval c st st').
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_rwd; try find_eqn; auto.
+  - 
+    + 
+       find_rwd.
+       
+  - 
+     + 
+        find_rwd.
+Qed.
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_eqn; try find_rwd; auto.
+Qed.
+
+End Repeat.
+
+
+
+
+
+
+
+
+Example ceval_example1:
+  empty_st =[
+    X := 2;
+    if (X <= 1)
+      then Y := 3
+      else Z := 4
+    end
+  ]=> (Z !-> 4 ; X !-> 2).
+Proof.
+  
+  apply E_Seq with (X !-> 2).
+  - apply E_Asgn. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Asgn. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma assign_and_branch_lemma_3 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+Proof.
+(* We will prove this lemma by induction on the ceval relation.
+*)
+(* First, we will consider the base case where the command is CSkip.
+*)
+(* In this case, the state remains unchanged.
+*)
+intros st st1 st2.
+(* We will now consider the inductive case.
+*)
+(* We will consider the different constructors for the com type.
+*)
+(* Case 1: CAsgn *)
+(* In this case, the command is an assignment.
+*)
+(* We will first show that the assignment does not affect the value of X.
+*)
+(* We will then show that the assignment does not affect the value of Y or Z.
+*)
+(* Case 2: CSeq *)
+(* In this case, the command is a sequence of commands.
+*)
+(* We will show that the state after executing the sequence of commands is the same for both st1 and st2.
+*)
+(* Case 3: CIf *)
+(* In this case, the command is an if statement.
+*)
+(* We will show that if the condition is true, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Similarly, we will show that if the condition is false, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Case 4: CWhile *)
+(* In this case, the command is a while loop.
+*)
+(* We will show that if the condition is false, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Case 5: CRepeat *)
+(* In this case, the command is a repeat loop.
+*)
+(* We will show that if the condition is true, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Similarly, we will show that if the condition is false, then the state after executing the command is the same for both st1 and st2.
+*)
+(* Now, we will prove the lemma by induction on the ceval relation.
+*)
+induction c; intros st st1 st2 H.
+(* Case 1: CAsgn *)
+(* We will first show that the assignment does not affect the value of X.
+*)
+(* We will then show that the assignment does not affect the value
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #462)
+Error in step "intros st st1 st2.".
+Message: No product even after head-reduction..
+Goal: empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+TRYING TO PROVE LEMMA
+Lemma assign_and_branch_lemma_4 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+Theorem ceval_deterministic'_alt: forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof with auto.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1;
+           intros st2 E2; inversion E2; subst...
+  - 
+    rewrite (IHE1_1 st'0 H1) in *...
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *...
+Qed.
+
+
+
+
+
+
+Ltac rwd H1 H2 := rewrite H1 in H2; discriminate.
+
+Theorem ceval_deterministic'': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H5.
+  - 
+    + 
+      rwd H H2.
+  
+  - 
+    rwd H H4.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto. Qed.
+
+
+
+Ltac find_rwd :=
+  match goal with
+    H1: ?E = true,
+    H2: ?E = false
+    |- _ => rwd H1 H2
+  end.
+
+
+
+Theorem ceval_deterministic''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite (IHE1_1 st'0 H3) in *.
+      auto. Qed.
+
+
+
+Ltac find_eqn :=
+  match goal with
+    H1: forall x, ?P x -> ?L = ?R,
+    H2: ?P ?X
+    |- _ => rewrite (H1 X H2) in *
+  end.
+
+
+
+
+
+Theorem ceval_deterministic'''': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst; try find_rwd;
+    try find_eqn; auto.
+Qed.
+
+
+
+Module Repeat.
+
+Inductive com : Type :=
+  | CSkip
+  | CAsgn (x : string) (a : aexp)
+  | CSeq (c1 c2 : com)
+  | CIf (b : bexp) (c1 c2 : com)
+  | CWhile (b : bexp) (c : com)
+  | CRepeat (c : com) (b : bexp).
+
+
+
+Notation "'repeat' x 'until' y 'end'" :=
+         (CRepeat x y)
+            (in custom com at level 0,
+             x at level 99, y at level 99).
+Notation "'skip'"  :=
+         CSkip (in custom com at level 0).
+Notation "x := y"  :=
+         (CAsgn x y)
+            (in custom com at level 0, x constr at level 0,
+             y at level 85, no associativity).
+Notation "x ; y" :=
+         (CSeq x y)
+           (in custom com at level 90, right associativity).
+Notation "'if' x 'then' y 'else' z 'end'" :=
+         (CIf x y z)
+           (in custom com at level 89, x at level 99,
+            y at level 99, z at level 99).
+Notation "'while' x 'do' y 'end'" :=
+         (CWhile x y)
+            (in custom com at level 89, x at level 99, y at level 99).
+
+Reserved Notation "st '=[' c ']=>' st'"
+         (at level 40, c custom com at level 99, st' constr at next level).
+
+Inductive ceval : com -> state -> state -> Prop :=
+  | E_Skip : forall st,
+      st =[ skip ]=> st
+  | E_Asgn  : forall st a1 n x,
+      aeval st a1 = n ->
+      st =[ x := a1 ]=> (x !-> n ; st)
+  | E_Seq : forall c1 c2 st st' st'',
+      st  =[ c1 ]=> st'  ->
+      st' =[ c2 ]=> st'' ->
+      st  =[ c1 ; c2 ]=> st''
+  | E_IfTrue : forall st st' b c1 c2,
+      beval st b = true ->
+      st =[ c1 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_IfFalse : forall st st' b c1 c2,
+      beval st b = false ->
+      st =[ c2 ]=> st' ->
+      st =[ if b then c1 else c2 end ]=> st'
+  | E_WhileFalse : forall b st c,
+      beval st b = false ->
+      st =[ while b do c end ]=> st
+  | E_WhileTrue : forall st st' st'' b c,
+      beval st b = true ->
+      st  =[ c ]=> st' ->
+      st' =[ while b do c end ]=> st'' ->
+      st  =[ while b do c end ]=> st''
+  | E_RepeatEnd : forall st st' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = true ->
+      st  =[ repeat c until b end ]=> st'
+  | E_RepeatLoop : forall st st' st'' b c,
+      st  =[ c ]=> st' ->
+      beval st' b = false ->
+      st' =[ repeat c until b end ]=> st'' ->
+      st  =[ repeat c until b end ]=> st''
+
+  where "st =[ c ]=> st'" := (ceval c st st').
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_rwd; try find_eqn; auto.
+  - 
+    + 
+       find_rwd.
+       
+  - 
+     + 
+        find_rwd.
+Qed.
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+  induction E1;
+    intros st2 E2; inversion E2; subst; try find_eqn; try find_rwd; auto.
+Qed.
+
+End Repeat.
+
+
+
+
+
+
+
+
+Example ceval_example1:
+  empty_st =[
+    X := 2;
+    if (X <= 1)
+      then Y := 3
+      else Z := 4
+    end
+  ]=> (Z !-> 4 ; X !-> 2).
+Proof.
+  
+  apply E_Seq with (X !-> 2).
+  - apply E_Asgn. reflexivity.
+  - apply E_IfFalse. reflexivity. apply E_Asgn. reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma assign_and_branch_lemma_4 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+Proof.
+intros.
+apply E_Seq.
+- apply E_Asgn.
+reflexivity.
+- apply E_IfFalse.
+reflexivity.
+apply E_Asgn.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #464)
+Error in step "apply E_Seq.".
+Message: Unable to find an instance for the variable st'..
+Goal: empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+TRYING TO PROVE LEMMA
+Lemma assign_and_branch_lemma_5 : empty_st =[
+X := 2; if X <= 1 then Y := 3 else Z := 4 end
+]=> (Z !-> 4; X !-> 2).
+
+
+Error proving ceval'_example1
+MAX LEMMA DEPTH REACHED. GIVING UP.

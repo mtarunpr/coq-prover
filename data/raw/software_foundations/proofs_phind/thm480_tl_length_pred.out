@@ -1,0 +1,2621 @@
+PROVING tl_length_pred
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+From LF Require Export Induction.
+Module NatList.
+
+
+
+
+
+
+Inductive natprod : Type :=
+  | pair (n1 n2 : nat).
+
+
+
+Check (pair 3 5) : natprod.
+
+
+
+Definition fst (p : natprod) : nat :=
+  match p with
+  | pair x y => x
+  end.
+
+Definition snd (p : natprod) : nat :=
+  match p with
+  | pair x y => y
+  end.
+
+Compute (fst (pair 3 5)).
+
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Compute (fst (3,5)).
+
+Definition fst' (p : natprod) : nat :=
+  match p with
+  | (x,y) => x
+  end.
+
+Definition snd' (p : natprod) : nat :=
+  match p with
+  | (x,y) => y
+  end.
+
+Definition swap_pair (p : natprod) : natprod :=
+  match p with
+  | (x,y) => (y,x)
+  end.
+
+
+
+
+
+Theorem surjective_pairing' : forall (n m : nat),
+  (n,m) = (fst (n,m), snd (n,m)).
+Proof.
+  reflexivity. Qed.
+
+
+
+Theorem surjective_pairing_stuck : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  simpl. 
+Abort.
+
+
+
+Theorem surjective_pairing : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  intros p. destruct p as [n m]. simpl. reflexivity. Qed.
+
+
+
+
+Theorem snd_fst_is_swap : forall (p : natprod),
+  (snd p, fst p) = swap_pair p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+Theorem fst_swap_is_snd : forall (p : natprod),
+  fst (swap_pair p) = snd p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+
+
+
+
+Inductive natlist : Type :=
+  | nil
+  | cons (n : nat) (l : natlist).
+
+
+
+Definition mylist := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Notation "x :: l" := (cons x l)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
+
+
+
+Definition mylist1 := 1 :: (2 :: (3 :: nil)).
+Definition mylist2 := 1 :: 2 :: 3 :: nil.
+Definition mylist3 := [1;2;3].
+
+
+
+
+
+
+
+
+Fixpoint repeat (n count : nat) : natlist :=
+  match count with
+  | O => nil
+  | S count' => n :: (repeat n count')
+  end.
+
+
+
+
+
+
+Fixpoint length (l:natlist) : nat :=
+  match l with
+  | nil => O
+  | h :: t => S (length t)
+  end.
+
+
+
+
+
+
+Fixpoint app (l1 l2 : natlist) : natlist :=
+  match l1 with
+  | nil    => l2
+  | h :: t => h :: (app t l2)
+  end.
+
+
+
+Notation "x ++ y" := (app x y)
+                     (right associativity, at level 60).
+
+Example test_app1:             [1;2;3] ++ [4;5] = [1;2;3;4;5].
+Proof. reflexivity. Qed.
+Example test_app2:             nil ++ [4;5] = [4;5].
+Proof. reflexivity. Qed.
+Example test_app3:             [1;2;3] ++ nil = [1;2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition hd (default : nat) (l : natlist) : nat :=
+  match l with
+  | nil => default
+  | h :: t => h
+  end.
+
+Definition tl (l : natlist) : natlist :=
+  match l with
+  | nil => nil
+  | h :: t => t
+  end.
+
+Example test_hd1:             hd 0 [1;2;3] = 1.
+Proof. reflexivity. Qed.
+Example test_hd2:             hd 0 [] = 0.
+Proof. reflexivity. Qed.
+Example test_tl:              tl [1;2;3] = [2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint nonzeros (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | O :: t => nonzeros t
+     | n :: t => n :: nonzeros t
+     end.
+
+Example test_nonzeros:
+  nonzeros [0;1;0;2;3;0;0] = [1;2;3].
+Proof. reflexivity. Qed.
+
+Fixpoint oddmembers (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | n :: t => match odd n with
+                | false => oddmembers t
+                | true  => n :: oddmembers t
+                end
+     end.
+
+Example test_oddmembers:
+  oddmembers [0;1;0;2;3;0;0] = [1;3].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers (l:natlist) : nat
+  := length (oddmembers l).
+
+Example test_countoddmembers1:
+  countoddmembers [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers2:
+  countoddmembers [0;2;4] = 0.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers3:
+  countoddmembers nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+Fixpoint alternate (l1 l2 : natlist) : natlist
+  := match l1, l2 with
+     | x1 :: l1', x2 :: l2' => x1 :: x2 :: alternate l1' l2'
+     | l1, nil              => l1
+     | nil, l2              => l2
+     end.
+
+Example test_alternate1:
+  alternate [1;2;3] [4;5;6] = [1;4;2;5;3;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate2:
+  alternate [1] [4;5;6] = [1;4;5;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate3:
+  alternate [1;2;3] [4] = [1;4;2;3].
+Proof. reflexivity. Qed.
+
+Example test_alternate4:
+  alternate [] [20;30] = [20;30].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Definition bag := natlist.
+
+
+
+Fixpoint count (v : nat) (s : bag) : nat
+  := match s with
+     | n :: s' => if v =? n then S (count v s') else count v s'
+     | nil     => O
+     end.
+
+
+
+Example test_count1:              count 1 [1;2;3;1;4;1] = 3.
+Proof. reflexivity. Qed.
+Example test_count2:              count 6 [1;2;3;1;4;1] = 0.
+Proof. reflexivity. Qed.
+
+
+
+Definition sum : bag -> bag -> bag
+  := app.
+
+Example test_sum1:              count 1 (sum [1;2;3] [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+
+Definition add (v : nat) (s : bag) : bag
+  := cons v s.
+
+Example test_add1:                count 1 (add 1 [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+Example test_add2:                count 5 (add 1 [1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint member (v : nat) (s : bag) : bool
+  := match s with
+     | n :: s' => if n =? v then true else member v s'
+     | nil    => false
+     end.
+
+Example test_member1:             member 1 [1;4;1] = true.
+Proof. reflexivity. Qed.
+
+Example test_member2:             member 2 [1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint remove_one (v : nat) (s : bag) : bag
+  := match s with
+     | n :: s' => if n =? v then s' else n :: remove_one v s'
+     | nil     => nil
+     end.
+
+Example test_remove_one1:
+  count 5 (remove_one 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one2:
+  count 5 (remove_one 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one3:
+  count 4 (remove_one 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+
+Example test_remove_one4:
+  count 5 (remove_one 5 [2;1;5;4;5;1;4]) = 1.
+Proof. reflexivity. Qed.
+
+Fixpoint remove_all (v:nat) (s:bag) : bag
+  := match s with
+     | n :: s' => if n =? v then remove_all v s' else n :: remove_all v s'
+     | nil     => nil
+     end.
+
+Example test_remove_all1:  count 5 (remove_all 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all2:  count 5 (remove_all 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all3:  count 4 (remove_all 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+Example test_remove_all4:  count 5 (remove_all 5 [2;1;5;4;5;1;4;5;1;4]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint included (s1 : bag) (s2 : bag) : bool
+  := match s1 with
+     | n :: s1' => if member n s2 then included s1' (remove_one n s2) else false
+     | nil      => true
+     end.
+
+Example test_included1:              included [1;2] [2;1;4;1] = true.
+Proof. reflexivity. Qed.
+Example test_included2:              included [1;2;2] [2;1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_add_inc_count : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem nil_app : forall l : natlist,
+  [] ++ l = l.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Theorem tl_length_pred : forall l:natlist,
+  pred (length l) = length (tl l).
+
+Proof.
+(* We will proceed by induction on the length of the list l.
+*)
+  intros l.
+induction l as [| n l'].
+(* Base case: l = nil *)
+  - simpl.
+reflexivity.
+(* Inductive case: l = n :: l' *)
+  - simpl.
+rewrite IHl'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #416)
+Error in step "rewrite IHl'.".
+Message: Found no subterm matching 
+"Nat.pred (length l')" in the current goal..
+Goal: length l' = length l'.
+
+
+TRYING TO PROVE LEMMA
+Lemma length_of_natlist_after_removing_one_element_0 : forall n : nat, forall l' : natlist, forall IHl' : Nat.pred (length l') = length (tl l'), length l' = length l'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+From LF Require Export Induction.
+Module NatList.
+
+
+
+
+
+
+Inductive natprod : Type :=
+  | pair (n1 n2 : nat).
+
+
+
+Check (pair 3 5) : natprod.
+
+
+
+Definition fst (p : natprod) : nat :=
+  match p with
+  | pair x y => x
+  end.
+
+Definition snd (p : natprod) : nat :=
+  match p with
+  | pair x y => y
+  end.
+
+Compute (fst (pair 3 5)).
+
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Compute (fst (3,5)).
+
+Definition fst' (p : natprod) : nat :=
+  match p with
+  | (x,y) => x
+  end.
+
+Definition snd' (p : natprod) : nat :=
+  match p with
+  | (x,y) => y
+  end.
+
+Definition swap_pair (p : natprod) : natprod :=
+  match p with
+  | (x,y) => (y,x)
+  end.
+
+
+
+
+
+Theorem surjective_pairing' : forall (n m : nat),
+  (n,m) = (fst (n,m), snd (n,m)).
+Proof.
+  reflexivity. Qed.
+
+
+
+Theorem surjective_pairing_stuck : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  simpl. 
+Abort.
+
+
+
+Theorem surjective_pairing : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  intros p. destruct p as [n m]. simpl. reflexivity. Qed.
+
+
+
+
+Theorem snd_fst_is_swap : forall (p : natprod),
+  (snd p, fst p) = swap_pair p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+Theorem fst_swap_is_snd : forall (p : natprod),
+  fst (swap_pair p) = snd p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+
+
+
+
+Inductive natlist : Type :=
+  | nil
+  | cons (n : nat) (l : natlist).
+
+
+
+Definition mylist := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Notation "x :: l" := (cons x l)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
+
+
+
+Definition mylist1 := 1 :: (2 :: (3 :: nil)).
+Definition mylist2 := 1 :: 2 :: 3 :: nil.
+Definition mylist3 := [1;2;3].
+
+
+
+
+
+
+
+
+Fixpoint repeat (n count : nat) : natlist :=
+  match count with
+  | O => nil
+  | S count' => n :: (repeat n count')
+  end.
+
+
+
+
+
+
+Fixpoint length (l:natlist) : nat :=
+  match l with
+  | nil => O
+  | h :: t => S (length t)
+  end.
+
+
+
+
+
+
+Fixpoint app (l1 l2 : natlist) : natlist :=
+  match l1 with
+  | nil    => l2
+  | h :: t => h :: (app t l2)
+  end.
+
+
+
+Notation "x ++ y" := (app x y)
+                     (right associativity, at level 60).
+
+Example test_app1:             [1;2;3] ++ [4;5] = [1;2;3;4;5].
+Proof. reflexivity. Qed.
+Example test_app2:             nil ++ [4;5] = [4;5].
+Proof. reflexivity. Qed.
+Example test_app3:             [1;2;3] ++ nil = [1;2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition hd (default : nat) (l : natlist) : nat :=
+  match l with
+  | nil => default
+  | h :: t => h
+  end.
+
+Definition tl (l : natlist) : natlist :=
+  match l with
+  | nil => nil
+  | h :: t => t
+  end.
+
+Example test_hd1:             hd 0 [1;2;3] = 1.
+Proof. reflexivity. Qed.
+Example test_hd2:             hd 0 [] = 0.
+Proof. reflexivity. Qed.
+Example test_tl:              tl [1;2;3] = [2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint nonzeros (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | O :: t => nonzeros t
+     | n :: t => n :: nonzeros t
+     end.
+
+Example test_nonzeros:
+  nonzeros [0;1;0;2;3;0;0] = [1;2;3].
+Proof. reflexivity. Qed.
+
+Fixpoint oddmembers (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | n :: t => match odd n with
+                | false => oddmembers t
+                | true  => n :: oddmembers t
+                end
+     end.
+
+Example test_oddmembers:
+  oddmembers [0;1;0;2;3;0;0] = [1;3].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers (l:natlist) : nat
+  := length (oddmembers l).
+
+Example test_countoddmembers1:
+  countoddmembers [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers2:
+  countoddmembers [0;2;4] = 0.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers3:
+  countoddmembers nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+Fixpoint alternate (l1 l2 : natlist) : natlist
+  := match l1, l2 with
+     | x1 :: l1', x2 :: l2' => x1 :: x2 :: alternate l1' l2'
+     | l1, nil              => l1
+     | nil, l2              => l2
+     end.
+
+Example test_alternate1:
+  alternate [1;2;3] [4;5;6] = [1;4;2;5;3;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate2:
+  alternate [1] [4;5;6] = [1;4;5;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate3:
+  alternate [1;2;3] [4] = [1;4;2;3].
+Proof. reflexivity. Qed.
+
+Example test_alternate4:
+  alternate [] [20;30] = [20;30].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Definition bag := natlist.
+
+
+
+Fixpoint count (v : nat) (s : bag) : nat
+  := match s with
+     | n :: s' => if v =? n then S (count v s') else count v s'
+     | nil     => O
+     end.
+
+
+
+Example test_count1:              count 1 [1;2;3;1;4;1] = 3.
+Proof. reflexivity. Qed.
+Example test_count2:              count 6 [1;2;3;1;4;1] = 0.
+Proof. reflexivity. Qed.
+
+
+
+Definition sum : bag -> bag -> bag
+  := app.
+
+Example test_sum1:              count 1 (sum [1;2;3] [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+
+Definition add (v : nat) (s : bag) : bag
+  := cons v s.
+
+Example test_add1:                count 1 (add 1 [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+Example test_add2:                count 5 (add 1 [1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint member (v : nat) (s : bag) : bool
+  := match s with
+     | n :: s' => if n =? v then true else member v s'
+     | nil    => false
+     end.
+
+Example test_member1:             member 1 [1;4;1] = true.
+Proof. reflexivity. Qed.
+
+Example test_member2:             member 2 [1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint remove_one (v : nat) (s : bag) : bag
+  := match s with
+     | n :: s' => if n =? v then s' else n :: remove_one v s'
+     | nil     => nil
+     end.
+
+Example test_remove_one1:
+  count 5 (remove_one 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one2:
+  count 5 (remove_one 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one3:
+  count 4 (remove_one 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+
+Example test_remove_one4:
+  count 5 (remove_one 5 [2;1;5;4;5;1;4]) = 1.
+Proof. reflexivity. Qed.
+
+Fixpoint remove_all (v:nat) (s:bag) : bag
+  := match s with
+     | n :: s' => if n =? v then remove_all v s' else n :: remove_all v s'
+     | nil     => nil
+     end.
+
+Example test_remove_all1:  count 5 (remove_all 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all2:  count 5 (remove_all 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all3:  count 4 (remove_all 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+Example test_remove_all4:  count 5 (remove_all 5 [2;1;5;4;5;1;4;5;1;4]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint included (s1 : bag) (s2 : bag) : bool
+  := match s1 with
+     | n :: s1' => if member n s2 then included s1' (remove_one n s2) else false
+     | nil      => true
+     end.
+
+Example test_included1:              included [1;2] [2;1;4;1] = true.
+Proof. reflexivity. Qed.
+Example test_included2:              included [1;2;2] [2;1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_add_inc_count : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem nil_app : forall l : natlist,
+  [] ++ l = l.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma length_of_natlist_after_removing_one_element_0 : forall n : nat, forall l' : natlist, forall IHl' : Nat.pred (length l') = length (tl l'), length l' = length l'.
+
+Proof.
+intros n l' IHl'.
+assert (Hl' : l' = n :: tl l') by now_using_assumption.
+clear IHl'.
+rewrite Hl'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #404)
+Error in step "assert (Hl' : l' = n :: tl l') by now_using_assumption.".
+Message: The reference now_using_assumption was not found
+in the current environment..
+Goal: length l' = length l'.
+
+
+TRYING TO PROVE LEMMA
+Lemma length_of_natlist_after_removing_one_element_1 : forall n : nat, forall l' : natlist, forall IHl' : Nat.pred (length l') = length (tl l'), length l' = length l'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+From LF Require Export Induction.
+Module NatList.
+
+
+
+
+
+
+Inductive natprod : Type :=
+  | pair (n1 n2 : nat).
+
+
+
+Check (pair 3 5) : natprod.
+
+
+
+Definition fst (p : natprod) : nat :=
+  match p with
+  | pair x y => x
+  end.
+
+Definition snd (p : natprod) : nat :=
+  match p with
+  | pair x y => y
+  end.
+
+Compute (fst (pair 3 5)).
+
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Compute (fst (3,5)).
+
+Definition fst' (p : natprod) : nat :=
+  match p with
+  | (x,y) => x
+  end.
+
+Definition snd' (p : natprod) : nat :=
+  match p with
+  | (x,y) => y
+  end.
+
+Definition swap_pair (p : natprod) : natprod :=
+  match p with
+  | (x,y) => (y,x)
+  end.
+
+
+
+
+
+Theorem surjective_pairing' : forall (n m : nat),
+  (n,m) = (fst (n,m), snd (n,m)).
+Proof.
+  reflexivity. Qed.
+
+
+
+Theorem surjective_pairing_stuck : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  simpl. 
+Abort.
+
+
+
+Theorem surjective_pairing : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  intros p. destruct p as [n m]. simpl. reflexivity. Qed.
+
+
+
+
+Theorem snd_fst_is_swap : forall (p : natprod),
+  (snd p, fst p) = swap_pair p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+Theorem fst_swap_is_snd : forall (p : natprod),
+  fst (swap_pair p) = snd p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+
+
+
+
+Inductive natlist : Type :=
+  | nil
+  | cons (n : nat) (l : natlist).
+
+
+
+Definition mylist := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Notation "x :: l" := (cons x l)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
+
+
+
+Definition mylist1 := 1 :: (2 :: (3 :: nil)).
+Definition mylist2 := 1 :: 2 :: 3 :: nil.
+Definition mylist3 := [1;2;3].
+
+
+
+
+
+
+
+
+Fixpoint repeat (n count : nat) : natlist :=
+  match count with
+  | O => nil
+  | S count' => n :: (repeat n count')
+  end.
+
+
+
+
+
+
+Fixpoint length (l:natlist) : nat :=
+  match l with
+  | nil => O
+  | h :: t => S (length t)
+  end.
+
+
+
+
+
+
+Fixpoint app (l1 l2 : natlist) : natlist :=
+  match l1 with
+  | nil    => l2
+  | h :: t => h :: (app t l2)
+  end.
+
+
+
+Notation "x ++ y" := (app x y)
+                     (right associativity, at level 60).
+
+Example test_app1:             [1;2;3] ++ [4;5] = [1;2;3;4;5].
+Proof. reflexivity. Qed.
+Example test_app2:             nil ++ [4;5] = [4;5].
+Proof. reflexivity. Qed.
+Example test_app3:             [1;2;3] ++ nil = [1;2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition hd (default : nat) (l : natlist) : nat :=
+  match l with
+  | nil => default
+  | h :: t => h
+  end.
+
+Definition tl (l : natlist) : natlist :=
+  match l with
+  | nil => nil
+  | h :: t => t
+  end.
+
+Example test_hd1:             hd 0 [1;2;3] = 1.
+Proof. reflexivity. Qed.
+Example test_hd2:             hd 0 [] = 0.
+Proof. reflexivity. Qed.
+Example test_tl:              tl [1;2;3] = [2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint nonzeros (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | O :: t => nonzeros t
+     | n :: t => n :: nonzeros t
+     end.
+
+Example test_nonzeros:
+  nonzeros [0;1;0;2;3;0;0] = [1;2;3].
+Proof. reflexivity. Qed.
+
+Fixpoint oddmembers (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | n :: t => match odd n with
+                | false => oddmembers t
+                | true  => n :: oddmembers t
+                end
+     end.
+
+Example test_oddmembers:
+  oddmembers [0;1;0;2;3;0;0] = [1;3].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers (l:natlist) : nat
+  := length (oddmembers l).
+
+Example test_countoddmembers1:
+  countoddmembers [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers2:
+  countoddmembers [0;2;4] = 0.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers3:
+  countoddmembers nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+Fixpoint alternate (l1 l2 : natlist) : natlist
+  := match l1, l2 with
+     | x1 :: l1', x2 :: l2' => x1 :: x2 :: alternate l1' l2'
+     | l1, nil              => l1
+     | nil, l2              => l2
+     end.
+
+Example test_alternate1:
+  alternate [1;2;3] [4;5;6] = [1;4;2;5;3;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate2:
+  alternate [1] [4;5;6] = [1;4;5;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate3:
+  alternate [1;2;3] [4] = [1;4;2;3].
+Proof. reflexivity. Qed.
+
+Example test_alternate4:
+  alternate [] [20;30] = [20;30].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Definition bag := natlist.
+
+
+
+Fixpoint count (v : nat) (s : bag) : nat
+  := match s with
+     | n :: s' => if v =? n then S (count v s') else count v s'
+     | nil     => O
+     end.
+
+
+
+Example test_count1:              count 1 [1;2;3;1;4;1] = 3.
+Proof. reflexivity. Qed.
+Example test_count2:              count 6 [1;2;3;1;4;1] = 0.
+Proof. reflexivity. Qed.
+
+
+
+Definition sum : bag -> bag -> bag
+  := app.
+
+Example test_sum1:              count 1 (sum [1;2;3] [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+
+Definition add (v : nat) (s : bag) : bag
+  := cons v s.
+
+Example test_add1:                count 1 (add 1 [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+Example test_add2:                count 5 (add 1 [1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint member (v : nat) (s : bag) : bool
+  := match s with
+     | n :: s' => if n =? v then true else member v s'
+     | nil    => false
+     end.
+
+Example test_member1:             member 1 [1;4;1] = true.
+Proof. reflexivity. Qed.
+
+Example test_member2:             member 2 [1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint remove_one (v : nat) (s : bag) : bag
+  := match s with
+     | n :: s' => if n =? v then s' else n :: remove_one v s'
+     | nil     => nil
+     end.
+
+Example test_remove_one1:
+  count 5 (remove_one 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one2:
+  count 5 (remove_one 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one3:
+  count 4 (remove_one 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+
+Example test_remove_one4:
+  count 5 (remove_one 5 [2;1;5;4;5;1;4]) = 1.
+Proof. reflexivity. Qed.
+
+Fixpoint remove_all (v:nat) (s:bag) : bag
+  := match s with
+     | n :: s' => if n =? v then remove_all v s' else n :: remove_all v s'
+     | nil     => nil
+     end.
+
+Example test_remove_all1:  count 5 (remove_all 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all2:  count 5 (remove_all 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all3:  count 4 (remove_all 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+Example test_remove_all4:  count 5 (remove_all 5 [2;1;5;4;5;1;4;5;1;4]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint included (s1 : bag) (s2 : bag) : bool
+  := match s1 with
+     | n :: s1' => if member n s2 then included s1' (remove_one n s2) else false
+     | nil      => true
+     end.
+
+Example test_included1:              included [1;2] [2;1;4;1] = true.
+Proof. reflexivity. Qed.
+Example test_included2:              included [1;2;2] [2;1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_add_inc_count : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem nil_app : forall l : natlist,
+  [] ++ l = l.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma length_of_natlist_after_removing_one_element_1 : forall n : nat, forall l' : natlist, forall IHl' : Nat.pred (length l') = length (tl l'), length l' = length l'.
+
+Proof.
+intros n l' IHl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+assert (Hl' : l' = tl l').
+{ reflexivity.
+}
+  rewrite Hl'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #408)
+Error in step "reflexivity.".
+Message: In environment
+n : nat
+l' : natlist
+IHl' : Nat.pred (length l') = length (tl l')
+Unable to unify "tl l'" with 
+"l'"..
+Goal: l' = tl l'.
+
+
+TRYING TO PROVE LEMMA
+Lemma length_of_tail_is_less_by_one_2 : forall n : nat, forall l' : natlist, forall IHl' : Nat.pred (length l') = length (tl l'), l' = tl l'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+From LF Require Export Induction.
+Module NatList.
+
+
+
+
+
+
+Inductive natprod : Type :=
+  | pair (n1 n2 : nat).
+
+
+
+Check (pair 3 5) : natprod.
+
+
+
+Definition fst (p : natprod) : nat :=
+  match p with
+  | pair x y => x
+  end.
+
+Definition snd (p : natprod) : nat :=
+  match p with
+  | pair x y => y
+  end.
+
+Compute (fst (pair 3 5)).
+
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Compute (fst (3,5)).
+
+Definition fst' (p : natprod) : nat :=
+  match p with
+  | (x,y) => x
+  end.
+
+Definition snd' (p : natprod) : nat :=
+  match p with
+  | (x,y) => y
+  end.
+
+Definition swap_pair (p : natprod) : natprod :=
+  match p with
+  | (x,y) => (y,x)
+  end.
+
+
+
+
+
+Theorem surjective_pairing' : forall (n m : nat),
+  (n,m) = (fst (n,m), snd (n,m)).
+Proof.
+  reflexivity. Qed.
+
+
+
+Theorem surjective_pairing_stuck : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  simpl. 
+Abort.
+
+
+
+Theorem surjective_pairing : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  intros p. destruct p as [n m]. simpl. reflexivity. Qed.
+
+
+
+
+Theorem snd_fst_is_swap : forall (p : natprod),
+  (snd p, fst p) = swap_pair p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+Theorem fst_swap_is_snd : forall (p : natprod),
+  fst (swap_pair p) = snd p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+
+
+
+
+Inductive natlist : Type :=
+  | nil
+  | cons (n : nat) (l : natlist).
+
+
+
+Definition mylist := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Notation "x :: l" := (cons x l)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
+
+
+
+Definition mylist1 := 1 :: (2 :: (3 :: nil)).
+Definition mylist2 := 1 :: 2 :: 3 :: nil.
+Definition mylist3 := [1;2;3].
+
+
+
+
+
+
+
+
+Fixpoint repeat (n count : nat) : natlist :=
+  match count with
+  | O => nil
+  | S count' => n :: (repeat n count')
+  end.
+
+
+
+
+
+
+Fixpoint length (l:natlist) : nat :=
+  match l with
+  | nil => O
+  | h :: t => S (length t)
+  end.
+
+
+
+
+
+
+Fixpoint app (l1 l2 : natlist) : natlist :=
+  match l1 with
+  | nil    => l2
+  | h :: t => h :: (app t l2)
+  end.
+
+
+
+Notation "x ++ y" := (app x y)
+                     (right associativity, at level 60).
+
+Example test_app1:             [1;2;3] ++ [4;5] = [1;2;3;4;5].
+Proof. reflexivity. Qed.
+Example test_app2:             nil ++ [4;5] = [4;5].
+Proof. reflexivity. Qed.
+Example test_app3:             [1;2;3] ++ nil = [1;2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition hd (default : nat) (l : natlist) : nat :=
+  match l with
+  | nil => default
+  | h :: t => h
+  end.
+
+Definition tl (l : natlist) : natlist :=
+  match l with
+  | nil => nil
+  | h :: t => t
+  end.
+
+Example test_hd1:             hd 0 [1;2;3] = 1.
+Proof. reflexivity. Qed.
+Example test_hd2:             hd 0 [] = 0.
+Proof. reflexivity. Qed.
+Example test_tl:              tl [1;2;3] = [2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint nonzeros (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | O :: t => nonzeros t
+     | n :: t => n :: nonzeros t
+     end.
+
+Example test_nonzeros:
+  nonzeros [0;1;0;2;3;0;0] = [1;2;3].
+Proof. reflexivity. Qed.
+
+Fixpoint oddmembers (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | n :: t => match odd n with
+                | false => oddmembers t
+                | true  => n :: oddmembers t
+                end
+     end.
+
+Example test_oddmembers:
+  oddmembers [0;1;0;2;3;0;0] = [1;3].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers (l:natlist) : nat
+  := length (oddmembers l).
+
+Example test_countoddmembers1:
+  countoddmembers [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers2:
+  countoddmembers [0;2;4] = 0.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers3:
+  countoddmembers nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+Fixpoint alternate (l1 l2 : natlist) : natlist
+  := match l1, l2 with
+     | x1 :: l1', x2 :: l2' => x1 :: x2 :: alternate l1' l2'
+     | l1, nil              => l1
+     | nil, l2              => l2
+     end.
+
+Example test_alternate1:
+  alternate [1;2;3] [4;5;6] = [1;4;2;5;3;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate2:
+  alternate [1] [4;5;6] = [1;4;5;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate3:
+  alternate [1;2;3] [4] = [1;4;2;3].
+Proof. reflexivity. Qed.
+
+Example test_alternate4:
+  alternate [] [20;30] = [20;30].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Definition bag := natlist.
+
+
+
+Fixpoint count (v : nat) (s : bag) : nat
+  := match s with
+     | n :: s' => if v =? n then S (count v s') else count v s'
+     | nil     => O
+     end.
+
+
+
+Example test_count1:              count 1 [1;2;3;1;4;1] = 3.
+Proof. reflexivity. Qed.
+Example test_count2:              count 6 [1;2;3;1;4;1] = 0.
+Proof. reflexivity. Qed.
+
+
+
+Definition sum : bag -> bag -> bag
+  := app.
+
+Example test_sum1:              count 1 (sum [1;2;3] [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+
+Definition add (v : nat) (s : bag) : bag
+  := cons v s.
+
+Example test_add1:                count 1 (add 1 [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+Example test_add2:                count 5 (add 1 [1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint member (v : nat) (s : bag) : bool
+  := match s with
+     | n :: s' => if n =? v then true else member v s'
+     | nil    => false
+     end.
+
+Example test_member1:             member 1 [1;4;1] = true.
+Proof. reflexivity. Qed.
+
+Example test_member2:             member 2 [1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint remove_one (v : nat) (s : bag) : bag
+  := match s with
+     | n :: s' => if n =? v then s' else n :: remove_one v s'
+     | nil     => nil
+     end.
+
+Example test_remove_one1:
+  count 5 (remove_one 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one2:
+  count 5 (remove_one 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one3:
+  count 4 (remove_one 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+
+Example test_remove_one4:
+  count 5 (remove_one 5 [2;1;5;4;5;1;4]) = 1.
+Proof. reflexivity. Qed.
+
+Fixpoint remove_all (v:nat) (s:bag) : bag
+  := match s with
+     | n :: s' => if n =? v then remove_all v s' else n :: remove_all v s'
+     | nil     => nil
+     end.
+
+Example test_remove_all1:  count 5 (remove_all 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all2:  count 5 (remove_all 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all3:  count 4 (remove_all 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+Example test_remove_all4:  count 5 (remove_all 5 [2;1;5;4;5;1;4;5;1;4]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint included (s1 : bag) (s2 : bag) : bool
+  := match s1 with
+     | n :: s1' => if member n s2 then included s1' (remove_one n s2) else false
+     | nil      => true
+     end.
+
+Example test_included1:              included [1;2] [2;1;4;1] = true.
+Proof. reflexivity. Qed.
+Example test_included2:              included [1;2;2] [2;1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_add_inc_count : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem nil_app : forall l : natlist,
+  [] ++ l = l.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma length_of_tail_is_less_by_one_2 : forall n : nat, forall l' : natlist, forall IHl' : Nat.pred (length l') = length (tl l'), l' = tl l'.
+
+Proof.
+intros n l' IHl'.
+induction l' as [| h l''].
+- (* l' = nil *)
+    simpl.
+reflexivity.
+- (* l' = h :: l'' *)
+    simpl.
+rewrite IHl'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #416)
+Error in step "rewrite IHl'.".
+Message: Found no subterm matching 
+"Nat.pred (length (h :: l''))" in the current goal..
+Goal: h :: l'' = l''.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_append_tail_same_length_3 : forall n h : nat, forall l'' : natlist, forall IHl' : Nat.pred (length (h :: l'')) =
+length (tl (h :: l'')), forall IHl'' : Nat.pred (length l'') = length (tl l'') ->
+l'' = tl l'', h :: l'' = l''.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+From LF Require Export Induction.
+Module NatList.
+
+
+
+
+
+
+Inductive natprod : Type :=
+  | pair (n1 n2 : nat).
+
+
+
+Check (pair 3 5) : natprod.
+
+
+
+Definition fst (p : natprod) : nat :=
+  match p with
+  | pair x y => x
+  end.
+
+Definition snd (p : natprod) : nat :=
+  match p with
+  | pair x y => y
+  end.
+
+Compute (fst (pair 3 5)).
+
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Compute (fst (3,5)).
+
+Definition fst' (p : natprod) : nat :=
+  match p with
+  | (x,y) => x
+  end.
+
+Definition snd' (p : natprod) : nat :=
+  match p with
+  | (x,y) => y
+  end.
+
+Definition swap_pair (p : natprod) : natprod :=
+  match p with
+  | (x,y) => (y,x)
+  end.
+
+
+
+
+
+Theorem surjective_pairing' : forall (n m : nat),
+  (n,m) = (fst (n,m), snd (n,m)).
+Proof.
+  reflexivity. Qed.
+
+
+
+Theorem surjective_pairing_stuck : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  simpl. 
+Abort.
+
+
+
+Theorem surjective_pairing : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  intros p. destruct p as [n m]. simpl. reflexivity. Qed.
+
+
+
+
+Theorem snd_fst_is_swap : forall (p : natprod),
+  (snd p, fst p) = swap_pair p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+Theorem fst_swap_is_snd : forall (p : natprod),
+  fst (swap_pair p) = snd p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+
+
+
+
+Inductive natlist : Type :=
+  | nil
+  | cons (n : nat) (l : natlist).
+
+
+
+Definition mylist := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Notation "x :: l" := (cons x l)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
+
+
+
+Definition mylist1 := 1 :: (2 :: (3 :: nil)).
+Definition mylist2 := 1 :: 2 :: 3 :: nil.
+Definition mylist3 := [1;2;3].
+
+
+
+
+
+
+
+
+Fixpoint repeat (n count : nat) : natlist :=
+  match count with
+  | O => nil
+  | S count' => n :: (repeat n count')
+  end.
+
+
+
+
+
+
+Fixpoint length (l:natlist) : nat :=
+  match l with
+  | nil => O
+  | h :: t => S (length t)
+  end.
+
+
+
+
+
+
+Fixpoint app (l1 l2 : natlist) : natlist :=
+  match l1 with
+  | nil    => l2
+  | h :: t => h :: (app t l2)
+  end.
+
+
+
+Notation "x ++ y" := (app x y)
+                     (right associativity, at level 60).
+
+Example test_app1:             [1;2;3] ++ [4;5] = [1;2;3;4;5].
+Proof. reflexivity. Qed.
+Example test_app2:             nil ++ [4;5] = [4;5].
+Proof. reflexivity. Qed.
+Example test_app3:             [1;2;3] ++ nil = [1;2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition hd (default : nat) (l : natlist) : nat :=
+  match l with
+  | nil => default
+  | h :: t => h
+  end.
+
+Definition tl (l : natlist) : natlist :=
+  match l with
+  | nil => nil
+  | h :: t => t
+  end.
+
+Example test_hd1:             hd 0 [1;2;3] = 1.
+Proof. reflexivity. Qed.
+Example test_hd2:             hd 0 [] = 0.
+Proof. reflexivity. Qed.
+Example test_tl:              tl [1;2;3] = [2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint nonzeros (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | O :: t => nonzeros t
+     | n :: t => n :: nonzeros t
+     end.
+
+Example test_nonzeros:
+  nonzeros [0;1;0;2;3;0;0] = [1;2;3].
+Proof. reflexivity. Qed.
+
+Fixpoint oddmembers (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | n :: t => match odd n with
+                | false => oddmembers t
+                | true  => n :: oddmembers t
+                end
+     end.
+
+Example test_oddmembers:
+  oddmembers [0;1;0;2;3;0;0] = [1;3].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers (l:natlist) : nat
+  := length (oddmembers l).
+
+Example test_countoddmembers1:
+  countoddmembers [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers2:
+  countoddmembers [0;2;4] = 0.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers3:
+  countoddmembers nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+Fixpoint alternate (l1 l2 : natlist) : natlist
+  := match l1, l2 with
+     | x1 :: l1', x2 :: l2' => x1 :: x2 :: alternate l1' l2'
+     | l1, nil              => l1
+     | nil, l2              => l2
+     end.
+
+Example test_alternate1:
+  alternate [1;2;3] [4;5;6] = [1;4;2;5;3;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate2:
+  alternate [1] [4;5;6] = [1;4;5;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate3:
+  alternate [1;2;3] [4] = [1;4;2;3].
+Proof. reflexivity. Qed.
+
+Example test_alternate4:
+  alternate [] [20;30] = [20;30].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Definition bag := natlist.
+
+
+
+Fixpoint count (v : nat) (s : bag) : nat
+  := match s with
+     | n :: s' => if v =? n then S (count v s') else count v s'
+     | nil     => O
+     end.
+
+
+
+Example test_count1:              count 1 [1;2;3;1;4;1] = 3.
+Proof. reflexivity. Qed.
+Example test_count2:              count 6 [1;2;3;1;4;1] = 0.
+Proof. reflexivity. Qed.
+
+
+
+Definition sum : bag -> bag -> bag
+  := app.
+
+Example test_sum1:              count 1 (sum [1;2;3] [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+
+Definition add (v : nat) (s : bag) : bag
+  := cons v s.
+
+Example test_add1:                count 1 (add 1 [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+Example test_add2:                count 5 (add 1 [1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint member (v : nat) (s : bag) : bool
+  := match s with
+     | n :: s' => if n =? v then true else member v s'
+     | nil    => false
+     end.
+
+Example test_member1:             member 1 [1;4;1] = true.
+Proof. reflexivity. Qed.
+
+Example test_member2:             member 2 [1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint remove_one (v : nat) (s : bag) : bag
+  := match s with
+     | n :: s' => if n =? v then s' else n :: remove_one v s'
+     | nil     => nil
+     end.
+
+Example test_remove_one1:
+  count 5 (remove_one 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one2:
+  count 5 (remove_one 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one3:
+  count 4 (remove_one 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+
+Example test_remove_one4:
+  count 5 (remove_one 5 [2;1;5;4;5;1;4]) = 1.
+Proof. reflexivity. Qed.
+
+Fixpoint remove_all (v:nat) (s:bag) : bag
+  := match s with
+     | n :: s' => if n =? v then remove_all v s' else n :: remove_all v s'
+     | nil     => nil
+     end.
+
+Example test_remove_all1:  count 5 (remove_all 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all2:  count 5 (remove_all 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all3:  count 4 (remove_all 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+Example test_remove_all4:  count 5 (remove_all 5 [2;1;5;4;5;1;4;5;1;4]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint included (s1 : bag) (s2 : bag) : bool
+  := match s1 with
+     | n :: s1' => if member n s2 then included s1' (remove_one n s2) else false
+     | nil      => true
+     end.
+
+Example test_included1:              included [1;2] [2;1;4;1] = true.
+Proof. reflexivity. Qed.
+Example test_included2:              included [1;2;2] [2;1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_add_inc_count : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem nil_app : forall l : natlist,
+  [] ++ l = l.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma lemma_append_tail_same_length_3 : forall n h : nat, forall l'' : natlist, forall IHl' : Nat.pred (length (h :: l'')) =
+length (tl (h :: l'')), forall IHl'' : Nat.pred (length l'') = length (tl l'') ->
+l'' = tl l'', h :: l'' = l''.
+
+Proof.
+intros n h l'' IHl' IHl''.
+induction l'' as [|x l'''] eqn:E.
+- (* l'' = nil *)
+  simpl.
+reflexivity.
+- (* l'' = x :: l''' *)
+  simpl.
+rewrite IHl''.
+simpl in IHl'.
+rewrite IHl'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #410)
+Error in step "reflexivity.".
+Message: In environment
+n, h : nat
+l'' : natlist
+E : l'' = [ ]
+IHl' : Nat.pred (length [h]) = length (tl [h])
+IHl'' : Nat.pred (length [ ]) = length (tl [ ]) ->
+        [ ] = tl [ ]
+Unable to unify "[ ]" with 
+"[h]"..
+Goal: [h] = [ ].
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_empty_list_appended_4 : forall n h : nat, forall l'' : natlist, forall E : l'' = [ ], forall IHl' : Nat.pred (length [h]) = length (tl [h]), forall IHl'' : Nat.pred (length [ ]) = length (tl [ ]) ->
+[ ] = tl [ ], [h] = [ ].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+From LF Require Export Induction.
+Module NatList.
+
+
+
+
+
+
+Inductive natprod : Type :=
+  | pair (n1 n2 : nat).
+
+
+
+Check (pair 3 5) : natprod.
+
+
+
+Definition fst (p : natprod) : nat :=
+  match p with
+  | pair x y => x
+  end.
+
+Definition snd (p : natprod) : nat :=
+  match p with
+  | pair x y => y
+  end.
+
+Compute (fst (pair 3 5)).
+
+
+
+
+Notation "( x , y )" := (pair x y).
+
+
+
+Compute (fst (3,5)).
+
+Definition fst' (p : natprod) : nat :=
+  match p with
+  | (x,y) => x
+  end.
+
+Definition snd' (p : natprod) : nat :=
+  match p with
+  | (x,y) => y
+  end.
+
+Definition swap_pair (p : natprod) : natprod :=
+  match p with
+  | (x,y) => (y,x)
+  end.
+
+
+
+
+
+Theorem surjective_pairing' : forall (n m : nat),
+  (n,m) = (fst (n,m), snd (n,m)).
+Proof.
+  reflexivity. Qed.
+
+
+
+Theorem surjective_pairing_stuck : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  simpl. 
+Abort.
+
+
+
+Theorem surjective_pairing : forall (p : natprod),
+  p = (fst p, snd p).
+Proof.
+  intros p. destruct p as [n m]. simpl. reflexivity. Qed.
+
+
+
+
+Theorem snd_fst_is_swap : forall (p : natprod),
+  (snd p, fst p) = swap_pair p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+Theorem fst_swap_is_snd : forall (p : natprod),
+  fst (swap_pair p) = snd p.
+Proof.
+  destruct p. reflexivity. Qed.
+
+
+
+
+
+
+
+Inductive natlist : Type :=
+  | nil
+  | cons (n : nat) (l : natlist).
+
+
+
+Definition mylist := cons 1 (cons 2 (cons 3 nil)).
+
+
+
+Notation "x :: l" := (cons x l)
+                     (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
+
+
+
+Definition mylist1 := 1 :: (2 :: (3 :: nil)).
+Definition mylist2 := 1 :: 2 :: 3 :: nil.
+Definition mylist3 := [1;2;3].
+
+
+
+
+
+
+
+
+Fixpoint repeat (n count : nat) : natlist :=
+  match count with
+  | O => nil
+  | S count' => n :: (repeat n count')
+  end.
+
+
+
+
+
+
+Fixpoint length (l:natlist) : nat :=
+  match l with
+  | nil => O
+  | h :: t => S (length t)
+  end.
+
+
+
+
+
+
+Fixpoint app (l1 l2 : natlist) : natlist :=
+  match l1 with
+  | nil    => l2
+  | h :: t => h :: (app t l2)
+  end.
+
+
+
+Notation "x ++ y" := (app x y)
+                     (right associativity, at level 60).
+
+Example test_app1:             [1;2;3] ++ [4;5] = [1;2;3;4;5].
+Proof. reflexivity. Qed.
+Example test_app2:             nil ++ [4;5] = [4;5].
+Proof. reflexivity. Qed.
+Example test_app3:             [1;2;3] ++ nil = [1;2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition hd (default : nat) (l : natlist) : nat :=
+  match l with
+  | nil => default
+  | h :: t => h
+  end.
+
+Definition tl (l : natlist) : natlist :=
+  match l with
+  | nil => nil
+  | h :: t => t
+  end.
+
+Example test_hd1:             hd 0 [1;2;3] = 1.
+Proof. reflexivity. Qed.
+Example test_hd2:             hd 0 [] = 0.
+Proof. reflexivity. Qed.
+Example test_tl:              tl [1;2;3] = [2;3].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint nonzeros (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | O :: t => nonzeros t
+     | n :: t => n :: nonzeros t
+     end.
+
+Example test_nonzeros:
+  nonzeros [0;1;0;2;3;0;0] = [1;2;3].
+Proof. reflexivity. Qed.
+
+Fixpoint oddmembers (l:natlist) : natlist
+  := match l with
+     | nil    => nil
+     | n :: t => match odd n with
+                | false => oddmembers t
+                | true  => n :: oddmembers t
+                end
+     end.
+
+Example test_oddmembers:
+  oddmembers [0;1;0;2;3;0;0] = [1;3].
+Proof. reflexivity. Qed.
+
+
+
+Definition countoddmembers (l:natlist) : nat
+  := length (oddmembers l).
+
+Example test_countoddmembers1:
+  countoddmembers [1;0;3;1;4;5] = 4.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers2:
+  countoddmembers [0;2;4] = 0.
+Proof. reflexivity. Qed.
+
+Example test_countoddmembers3:
+  countoddmembers nil = 0.
+Proof. reflexivity. Qed.
+
+
+
+
+Fixpoint alternate (l1 l2 : natlist) : natlist
+  := match l1, l2 with
+     | x1 :: l1', x2 :: l2' => x1 :: x2 :: alternate l1' l2'
+     | l1, nil              => l1
+     | nil, l2              => l2
+     end.
+
+Example test_alternate1:
+  alternate [1;2;3] [4;5;6] = [1;4;2;5;3;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate2:
+  alternate [1] [4;5;6] = [1;4;5;6].
+Proof. reflexivity. Qed.
+
+Example test_alternate3:
+  alternate [1;2;3] [4] = [1;4;2;3].
+Proof. reflexivity. Qed.
+
+Example test_alternate4:
+  alternate [] [20;30] = [20;30].
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Definition bag := natlist.
+
+
+
+Fixpoint count (v : nat) (s : bag) : nat
+  := match s with
+     | n :: s' => if v =? n then S (count v s') else count v s'
+     | nil     => O
+     end.
+
+
+
+Example test_count1:              count 1 [1;2;3;1;4;1] = 3.
+Proof. reflexivity. Qed.
+Example test_count2:              count 6 [1;2;3;1;4;1] = 0.
+Proof. reflexivity. Qed.
+
+
+
+Definition sum : bag -> bag -> bag
+  := app.
+
+Example test_sum1:              count 1 (sum [1;2;3] [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+
+Definition add (v : nat) (s : bag) : bag
+  := cons v s.
+
+Example test_add1:                count 1 (add 1 [1;4;1]) = 3.
+Proof. reflexivity. Qed.
+Example test_add2:                count 5 (add 1 [1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint member (v : nat) (s : bag) : bool
+  := match s with
+     | n :: s' => if n =? v then true else member v s'
+     | nil    => false
+     end.
+
+Example test_member1:             member 1 [1;4;1] = true.
+Proof. reflexivity. Qed.
+
+Example test_member2:             member 2 [1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Fixpoint remove_one (v : nat) (s : bag) : bag
+  := match s with
+     | n :: s' => if n =? v then s' else n :: remove_one v s'
+     | nil     => nil
+     end.
+
+Example test_remove_one1:
+  count 5 (remove_one 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one2:
+  count 5 (remove_one 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+
+Example test_remove_one3:
+  count 4 (remove_one 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+
+Example test_remove_one4:
+  count 5 (remove_one 5 [2;1;5;4;5;1;4]) = 1.
+Proof. reflexivity. Qed.
+
+Fixpoint remove_all (v:nat) (s:bag) : bag
+  := match s with
+     | n :: s' => if n =? v then remove_all v s' else n :: remove_all v s'
+     | nil     => nil
+     end.
+
+Example test_remove_all1:  count 5 (remove_all 5 [2;1;5;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all2:  count 5 (remove_all 5 [2;1;4;1]) = 0.
+Proof. reflexivity. Qed.
+Example test_remove_all3:  count 4 (remove_all 5 [2;1;4;5;1;4]) = 2.
+Proof. reflexivity. Qed.
+Example test_remove_all4:  count 5 (remove_all 5 [2;1;5;4;5;1;4;5;1;4]) = 0.
+Proof. reflexivity. Qed.
+
+Fixpoint included (s1 : bag) (s2 : bag) : bool
+  := match s1 with
+     | n :: s1' => if member n s2 then included s1' (remove_one n s2) else false
+     | nil      => true
+     end.
+
+Example test_included1:              included [1;2] [2;1;4;1] = true.
+Proof. reflexivity. Qed.
+Example test_included2:              included [1;2;2] [2;1;4;1] = false.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+Definition manual_grade_for_add_inc_count : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem nil_app : forall l : natlist,
+  [] ++ l = l.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+Lemma helper_lemma_empty_list_appended_4 : forall n h : nat, forall l'' : natlist, forall E : l'' = [ ], forall IHl' : Nat.pred (length [h]) = length (tl [h]), forall IHl'' : Nat.pred (length [ ]) = length (tl [ ]) ->
+[ ] = tl [ ], [h] = [ ].
+
+Proof.
+intros n h l'' E IHl' IHl''.
+(* We need to prove that [h] = [].
+We can do this by induction on the length of [h].
+*)
+induction (length [h]) as [|n' IHn'].
+(* Base case: length [h] = 0.
+*)
+(* In this case, we know that hd [h] = h and tl [h] = [].
+*)
+(* We also know that length [h] = 0, so we can rewrite E to be true.
+*)
+(* Therefore, we have [h] = [].
+*)
+reflexivity.
+(* Inductive case: length [h] = S n'.
+*)
+(* We know that length [h] = S n' by the induction hypothesis.
+*)
+(* We also know that hd [h] = h and tl [h] = [].
+*)
+(* We can rewrite E to be true.
+*)
+(* We also know that length (tl [h]) = n' by the induction hypothesis.
+*)
+(* We also know that length [h] = S n' by the induction hypothesis.
+*)
+(* Therefore, we have [h] = [].
+*)
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #406)
+Error in step "reflexivity.".
+Message: In environment
+n, h : nat
+l'' : natlist
+E : l'' = [ ]
+IHl' : Nat.pred 0 = length (tl [h])
+IHl'' : Nat.pred (length [ ]) = length (tl [ ]) ->
+        [ ] = tl [ ]
+Unable to unify "[ ]" with 
+"[h]"..
+Goal: [h] = [ ].
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_empty_list_appending_5 : forall n h : nat, forall l'' : natlist, forall E : l'' = [ ], forall IHl' : Nat.pred 0 = length (tl [h]), forall IHl'' : Nat.pred (length [ ]) = length (tl [ ]) ->
+[ ] = tl [ ], [h] = [ ].
+
+
+Error proving tl_length_pred
+MAX LEMMA DEPTH REACHED. GIVING UP.

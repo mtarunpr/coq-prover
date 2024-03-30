@@ -1,0 +1,532 @@
+PROVING next_nat_partial_function
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+
+
+Theorem next_nat_partial_function : partial_function next_nat.
+
+Proof.
+(* We need to prove that next_nat is a partial function.
+A partial function is defined as a function that is total or a function that is defined on all of its domain.
+In this case, we need to prove that next_nat is defined on all of its domain.
+*)
+
+  (* We will use the definition of a partial function and the definition of next_nat to prove this theorem.
+*)
+  unfold partial_function.
+intros X Y f H.
+(* We will use induction on X to prove that next_nat is defined on all of its domain.
+*)
+  induction X as [ | n IHX].
+(* Base case: X = 0 *)
+  - constructor.
+(* We need to prove that next_nat 0 n is defined.
+By the definition of next_nat, this is true when n = 0.
+*)
+    intros contra.
+inversion contra.
+constructor.
+reflexivity.
+(* Inductive case: X = S n *)
+  - intros contra.
+(* We need to prove that next_nat (S n) n is defined.
+By the definition of next_nat, this is true when n = S n.
+*)
+    inversion contra.
+constructor.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #36)
+Error in step "constructor.".
+Message: In environment
+Y, f : nat
+H : next_nat 0 Y
+H0 : next_nat 0 f
+Unable to unify "f" with "Y"..
+Goal: next_nat 0 f -> Y = f.
+
+
+TRYING TO PROVE LEMMA
+Lemma next_nat_equality_0 : forall Y f : nat, forall H : next_nat 0 Y, next_nat 0 f -> Y = f.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+
+
+Lemma next_nat_equality_0 : forall Y f : nat, forall H : next_nat 0 Y, next_nat 0 f -> Y = f.
+
+Proof.
+(*
+    We will proceed by induction on the relation next_nat.
+The base case will be when Y = 0, and the inductive case will be when Y = S n for some n.
+*)
+  intros Y f H0 Hf.
+induction H0 as [|n Hn].
+(*
+    Base case: Y = 0.
+In this case, we have next_nat 0 Y, so Y must be 0.
+We also have next_nat 0 f.
+Since Y = 0 and f = 0, we can conclude that Y = f.
+*)
+  - simpl.
+reflexivity.
+(*
+    Inductive case: Y = S n.
+We have next_nat 0 (S n) and next_nat 0 f.
+By the induction hypothesis, we know that S n = f.
+Therefore, Y = S n = f, so we can conclude that Y = f.
+*)
+  - simpl.
+rewrite Hn.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #30)
+Error in step "induction H0 as [|n Hn].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 1 patterns..
+Goal: Y = f.
+
+
+TRYING TO PROVE LEMMA
+Lemma next_nat_equality_1 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+
+
+Lemma next_nat_equality_1 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+Proof.
+(* We will proceed by induction on Hf, the hypothesis that next_nat 0 f.
+*)
+  intros Y f H0 Hf.
+(* We will need to use the induction principle for next_nat.
+*)
+  induction Hf as [|n Hf'].
+(* Case 1: Hf is of the form nn n.
+*)
+  - (* In this case, we have next_nat 0 (S n).
+We also have H0 : next_nat 0 Y.
+*)
+    (* We will apply the induction hypothesis Hf' : next_nat (S n) f.
+*)
+    apply (next_nat_equality_1 Y (S n) H0 Hf').
+(* This reduces the goal to proving Y = S f, which is true by definition of next_nat.
+*)
+    reflexivity.
+(* Case 2: Hf is of the form Hf' : next_nat (S n) f.
+*)
+  - (* In this case, we have next_nat (S n) f.
+We also have H0 : next_nat 0 Y.
+*)
+    (* We will apply the induction hypothesis Hf' : next_nat (S n) f.
+*)
+    apply (next_nat_equality_1 Y (S n) H0 Hf').
+(* This reduces the goal to proving Y = S f, which is true by definition of next_nat.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #30)
+Error in step "induction Hf as [|n Hf'].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 1 patterns..
+Goal: Y = f.
+
+
+TRYING TO PROVE LEMMA
+Lemma next_nat_equality_2 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+
+
+Lemma next_nat_equality_2 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+Proof.
+intros Y f H0 Hf.
+induction H0 as [|n Hn].
+- (* next_nat 0 Y *)
+    simpl.
+reflexivity.
+- (* next_nat (S n) Y *)
+    simpl in Hn.
+inversion Hn.
+subst.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #30)
+Error in step "induction H0 as [|n Hn].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 1 patterns..
+Goal: Y = f.
+
+
+TRYING TO PROVE LEMMA
+Lemma next_nat_equality_3 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+
+
+Lemma next_nat_equality_3 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+Proof.
+(*
+    We will proceed by induction on Hf.
+The base case will show that if Hf is next_nat 0 0, then Y = f.
+The inductive case will show that if Hf is next_nat n (S f), then Y = f.
+*)
+  intros Y f H0 Hf.
+induction Hf as [|n Hf].
+- (* Base case: Hf is next_nat 0 0 *)
+    (* We know that H0 is next_nat 0 Y and Hf is next_nat 0 0.
+We need to prove that Y = 0.
+*)
+    simpl in H0.
+(* H0 is now "next_nat 0 Y" which simplifies to "Y = 0" *)
+    exact H0.
+- (* Inductive case: Hf is next_nat n (S f) *)
+    (* We know that H0 is next_nat 0 Y and Hf is next_nat n (S f).
+We need to prove that Y = S f.
+*)
+    simpl in H0.
+(* H0 is now "next_nat 0 Y" which simplifies to "Y = n" *)
+    (* We also know that Hf is "next_nat n (S f)" which simplifies to "n = S f" *)
+    (* We can now rewrite Y to be n in the context of the equality Y = S f *)
+    rewrite H0 in *.
+(* Now we have "n = S f" and "n = Y" *)
+    (* We can now rewrite Y to be S f in the context of the equality n = S f *)
+    rewrite Hf in *.
+(* Now we have "S f = S f" *)
+    (* This is a trivial equality *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #30)
+Error in step "induction Hf as [|n Hf].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 1 patterns..
+Goal: Y = f.
+
+
+TRYING TO PROVE LEMMA
+Lemma next_nat_equality_4 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+
+
+Lemma next_nat_equality_4 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+Proof.
+(*
+    We will proceed by induction on Hf.
+The base case will show that if Hf is next_nat 0 0, then Y = f.
+The inductive case will show that if Hf is next_nat n (S f), then Y = f.
+*)
+  intros Y f H0 Hf.
+induction Hf as [|n Hf].
+- (* Base case: Hf is next_nat 0 0 *)
+    (* We know that H0 is next_nat 0 Y and Hf is next_nat 0 0.
+We need to prove that Y = 0.
+*)
+    simpl in H0.
+(* H0 is now "next_nat 0 Y" which simplifies to "Y = 0" *)
+    exact H0.
+- (* Inductive case: Hf is next_nat n (S f) *)
+    (* We know that H0 is next_nat 0 Y and Hf is next_nat n (S f).
+We need to prove that Y = S f.
+*)
+    simpl in H0.
+(* H0 is now "next_nat 0 Y" which simplifies to "Y = n" *)
+    (* We also know that Hf is "next_nat n (S f)" which simplifies to "n = S f" *)
+    (* We can now rewrite Y to be n in the context of the equality Y = S f *)
+    rewrite H0 in *.
+(* Now we have "n = S f" and "n = Y" *)
+    (* We can now rewrite Y to be S f in the context of the equality n = S f *)
+    rewrite Hf in *.
+(* Now we have "S f = S f" *)
+    (* This is a trivial equality *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #30)
+Error in step "induction Hf as [|n Hf].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 1 patterns..
+Goal: Y = f.
+
+
+TRYING TO PROVE LEMMA
+Lemma next_nat_equality_5 : forall Y f : nat, forall H0 : next_nat 0 Y, forall Hf : next_nat 0 f, Y = f.
+
+
+Error proving next_nat_partial_function
+MAX LEMMA DEPTH REACHED. GIVING UP.

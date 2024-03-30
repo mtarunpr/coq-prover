@@ -1,0 +1,985 @@
+PROVING booltree_ind_type_correct
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+
+
+Theorem booltree_ind_type_correct : booltree_ind_type.
+
+Proof.
+(* We will prove booltree_ind_type_correct by induction on the structure of booltree.
+*)
+  intros P Hbase Hleaf Hbranch b.
+(* We will use the induction principle for booltree.
+*)
+  induction b as [| b' b'' t1 t2 IH1 IH2].
+- (* Case bt_empty: *)
+    (* We know that P bt_empty holds by the base_case.
+*)
+    apply Hbase.
+- (* Case bt_leaf: *)
+    (* We know that P (bt_leaf b'') holds by the leaf_case.
+*)
+    apply Hleaf.
+- (* Case bt_branch: *)
+    (* We apply the branch_case to b', t1, and t2.
+*)
+    apply Hbranch.
+- (* We have IH1 : P t1 holds by the induction hypothesis.
+*)
+      apply IH1.
+- (* We have IH2 : P t2 holds by the induction hypothesis.
+*)
+      apply IH2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #90)
+Error in step "induction b as [| b' b'' t1 t2 IH1 IH2].".
+Message: Expects a disjunctive pattern with 3 branches..
+Goal: P b.
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_property_lemma_0 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+
+
+Lemma booltree_property_lemma_0 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+Proof.
+(* We will prove the lemma by induction on the structure of booltree.
+*)
+  intros P Hbase Hleaf Hbranch b.
+induction b as [| b1 b2 b3 HIb1 HIb2 HIb3]; clear HIb1 HIb2 HIb3.
+(* Base case: b is bt_empty *)
+  - apply Hbase.
+(* Inductive case: b is bt_leaf b *)
+  - apply Hleaf.
+(* Inductive case: b is bt_branch b t1 t2 *)
+  - apply Hbranch.
+(* We need to prove P t1 and P t2 *)
+    - apply HIb1.
+- apply HIb2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #90)
+Error in step "induction b as [| b1 b2 b3 HIb1 HIb2 HIb3]; clear HIb1 HIb2 HIb3.".
+Message: Expects a disjunctive pattern with 3 branches..
+Goal: P b.
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_property_lemma_1 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+
+
+Lemma booltree_property_lemma_1 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+Proof.
+(* We will prove the lemma by induction on the structure of booltree.
+*)
+  intros P Hbase Hleaf Hbranch b.
+induction b as [| b1 b2 b3 HIb1 HIb2 HIb3].
+(* Base case: b is bt_empty *)
+  - apply Hbase.
+(* Inductive case: b is bt_leaf b *)
+  - apply Hleaf.
+(* Inductive case: b is bt_branch b t1 t2 *)
+  - apply Hbranch.
+(* We need to prove P t1 and P t2 *)
+    - apply HIb1.
+- apply HIb2.
+(* The property P holds for all booltrees b *)
+  - apply HIb3.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #90)
+Error in step "induction b as [| b1 b2 b3 HIb1 HIb2 HIb3].".
+Message: Expects a disjunctive pattern with 3 branches..
+Goal: P b.
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_property_lemma_2 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+
+
+Lemma booltree_property_lemma_2 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+Proof.
+intros P Hbase Hleaf Hbranch b.
+induction b as [| b1 b2]; try reflexivity.
+- (* bt_empty case *)
+    apply Hbase.
+- (* bt_leaf case *)
+    apply Hleaf.
+- (* bt_branch case *)
+    apply Hbranch.
+- (* b1 subgoal *)
+      apply IHb1.
+- (* b2 subgoal *)
+      apply IHb2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #90)
+Error in step "induction b as [| b1 b2]; try reflexivity.".
+Message: Expects a disjunctive pattern with 3 branches..
+Goal: P b.
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_property_lemma_3 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+
+
+Lemma booltree_property_lemma_3 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+Proof.
+intros P Hbase Hleaf Hbranch b.
+induction b as [| b1 b2]; try reflexivity.
+- (* bt_empty case *)
+    apply Hbase.
+- (* bt_leaf case *)
+    apply Hleaf.
+- (* bt_branch case *)
+    apply Hbranch.
+- (* b1 subgoal *)
+      apply IHb1.
+- (* b2 subgoal *)
+      apply IHb2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #90)
+Error in step "induction b as [| b1 b2]; try reflexivity.".
+Message: Expects a disjunctive pattern with 3 branches..
+Goal: P b.
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_property_lemma_4 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+
+
+Lemma booltree_property_lemma_4 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+Proof.
+intros P Hbase Hleaf Hbranch b.
+induction b as [| b1 b2]; try reflexivity.
+- (* bt_empty case *)
+    apply Hbase.
+- (* bt_leaf case *)
+    apply Hleaf.
+- (* bt_branch case *)
+    apply Hbranch.
+- (* b1 subgoal *)
+      apply IHb1.
+- (* b2 subgoal *)
+      apply IHb2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #90)
+Error in step "induction b as [| b1 b2]; try reflexivity.".
+Message: Expects a disjunctive pattern with 3 branches..
+Goal: P b.
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_property_lemma_5 : forall P : booltree_property_type, forall Hbase : base_case P, forall Hleaf : leaf_case P, forall Hbranch : branch_case P, forall b : booltree, P b.
+
+
+Error proving booltree_ind_type_correct
+MAX LEMMA DEPTH REACHED. GIVING UP.

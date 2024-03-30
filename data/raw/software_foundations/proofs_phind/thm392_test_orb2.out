@@ -1,0 +1,1018 @@
+PROVING test_orb2
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+Example test_orb2 : (orb false false) = false.
+
+Proof.
+(* We will use induction on the first argument of orb.
+*)
+  intros b1 b2.
+(* We will consider two cases: when b1 is true and when b1 is false.
+*)
+  destruct b1 as [ | b1_eq_true].
+- (* When b1 is true, the result of orb is always true.
+*)
+    reflexivity.
+- (* When b1 is false, the result of orb is equal to b2.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #48)
+Error in step "intros b1 b2.".
+Message: No product even after head-reduction..
+Goal: orb false false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma orb_false_false_0 : orb false false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+Lemma orb_false_false_0 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we can destruct it to get the result of the second argument.
+*)
+  destruct b1.
+(* In this case, the second argument is also false, so the result is false.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #50)
+Error in step "destruct b1.".
+Message: The variable b1 was not found in the current
+environment..
+Goal: orb false false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma orb_false_false_1 : orb false false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+Lemma orb_false_false_1 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we can destruct it to get the result of the second argument.
+*)
+  destruct b1.
+(* In this case, the second argument is also false, so the result is false.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #50)
+Error in step "destruct b1.".
+Message: The variable b1 was not found in the current
+environment..
+Goal: orb false false = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma orb_false_false_2 : orb false false = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+Lemma orb_false_false_2 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we need to prove that orb false false = false.
+*)
+  simpl.
+(* This is trivial because the definition of orb states that when the first argument is false,
+     the result is the second argument.
+In this case, the second argument is also false.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+Lemma orb_false_false_2 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we need to prove that orb false false = false.
+*)
+  simpl.
+(* This is trivial because the definition of orb states that when the first argument is false,
+     the result is the second argument.
+In this case, the second argument is also false.
+*)
+  reflexivity.
+Qed.
+
+Lemma orb_false_false_1 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we can destruct it to get the result of the second argument.
+*)
+  apply (@orb_false_false_2 ).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+Lemma orb_false_false_2 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we need to prove that orb false false = false.
+*)
+  simpl.
+(* This is trivial because the definition of orb states that when the first argument is false,
+     the result is the second argument.
+In this case, the second argument is also false.
+*)
+  reflexivity.
+Qed.
+
+Lemma orb_false_false_1 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we can destruct it to get the result of the second argument.
+*)
+  apply (@orb_false_false_2 ).
+Qed.
+
+Lemma orb_false_false_0 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we can destruct it to get the result of the second argument.
+*)
+  apply (@orb_false_false_1 ).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+Lemma orb_false_false_2 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we need to prove that orb false false = false.
+*)
+  simpl.
+(* This is trivial because the definition of orb states that when the first argument is false,
+     the result is the second argument.
+In this case, the second argument is also false.
+*)
+  reflexivity.
+Qed.
+
+Lemma orb_false_false_1 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we can destruct it to get the result of the second argument.
+*)
+  apply (@orb_false_false_2 ).
+Qed.
+
+Lemma orb_false_false_0 : orb false false = false.
+
+Proof.
+(* We will perform a case analysis on the first argument of orb.
+*)
+  intros.
+(* When the first argument is false, we can destruct it to get the result of the second argument.
+*)
+  apply (@orb_false_false_1 ).
+Qed.
+
+Example test_orb2 : (orb false false) = false.
+
+Proof.
+(* We will use induction on the first argument of orb.
+*)
+  apply (@orb_false_false_0 ).
+- (* When b1 is true, the result of orb is always true.
+*)
+    reflexivity.
+- (* When b1 is false, the result of orb is equal to b2.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+EXAMPLE PROOF IS VALID
+

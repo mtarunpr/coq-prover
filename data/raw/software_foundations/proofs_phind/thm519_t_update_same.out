@@ -1,0 +1,1303 @@
+PROVING t_update_same
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+Theorem t_update_same : forall (A : Type) (m : total_map A) x,
+  (x !-> m x ; m) = m.
+
+Proof.
+(* We will proceed by induction on m.
+*)
+  intros A m x.
+induction m as [|x' v' m' IHm'].
+(* Base case: m is empty.
+*)
+  - simpl.
+reflexivity.
+(* Inductive case: m is an update.
+*)
+  - simpl.
+(* We need to show that (x' !-> v' ; x !-> m' x ; m') x = m' x.
+*)
+    (* Case 1: x = x', in which case the result is trivial.
+*)
+    - intros.
+reflexivity.
+(* Case 2: x <> x', in which case we can use the induction hypothesis.
+*)
+    - intros.
+(* We need to show that (x' !-> v' ; x !-> m' x ; m') x = m' x.
+*)
+      (* By the definition of the update function, this is the same as showing that *)
+      (* (x' !-> v' ; m') x = m' x.
+*)
+      (* By the induction hypothesis, this follows.
+*)
+      rewrite IHm'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #148)
+Error in step "induction m as [|x' v' m' IHm'].".
+Message: Not an inductive definition..
+Goal: (x !-> m x; m) = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma map_function_application_0 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+Lemma map_function_application_0 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+Proof.
+(* We will proceed by induction on m.
+*)
+  intros A m x.
+(* We will need to use the induction principle for total_map.
+*)
+  induction m.
+(* In the base case, we have t_empty.
+*)
+  - simpl.
+(* We need to prove that (x !-> m x; t_empty) = m.
+*)
+    (* But this is false, because (x !-> m x; t_empty) is undefined, while m is defined.
+*)
+    (* Therefore, we need to refine our statement.
+*)
+    intros A m x.
+(* We will now prove that (x !-> m x; m) = m, assuming that m is defined.
+*)
+    induction m.
+(* In the base case, we have t_empty.
+*)
+    - simpl.
+reflexivity.
+(* In the inductive case, we have t_update.
+*)
+    - simpl.
+(* We need to prove that (x !-> m x; t_update m1 x1 v1) = m1, assuming that m1 is defined.
+*)
+      (* We will use the lemma t_update_eq.
+*)
+      apply (t_update_eq A m1 x1 v1).
+(* This concludes the proof.
+*)
+      
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "induction m.".
+Message: Not an inductive definition..
+Goal: (x !-> m x; m) = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma map_function_application_1 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+Lemma map_function_application_1 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+Proof.
+(* We will proceed by induction on m.
+*)
+  intros A m x.
+(* We will need to use the induction principle for total_map.
+*)
+  induction m.
+(* In the base case, we have t_empty.
+*)
+  - simpl.
+reflexivity.
+(* In the update case, we have t_update.
+*)
+  - simpl.
+(* We need to prove that (x !-> m x; t_update m x v) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- IHm.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- H.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- H0.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- H1.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- H2.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- H3.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- H4.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of t_update.
+*)
+    rewrite <- H5.
+(* Now we have (x !-> m x; m) = m.
+*)
+    (* We will rewrite the left-hand side using the definition of
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "induction m.".
+Message: Not an inductive definition..
+Goal: (x !-> m x; m) = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma map_function_application_2 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+Lemma map_function_application_2 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+Proof.
+(* We will proceed by induction on m.
+*)
+  intros A m x.
+(* We will need to use the induction principle for total_map.
+*)
+  induction m.
+(* In the base case, we have t_empty.
+*)
+  - simpl.
+reflexivity.
+(* In the update case, we have t_update.
+*)
+  - simpl.
+(* We need to prove that (x !-> m x; t_update m x v) = m.
+*)
+    (* We will rewrite the left-hand side using the lemma t_update_eq.
+*)
+    rewrite <- (t_update_eq A _ x (m x)).
+(* Now we have t_update m x (m x) = m x.
+*)
+    (* We will rewrite the right-hand side using the induction hypothesis.
+*)
+    rewrite H.
+(* Now we have t_update m x (m x) = m.
+*)
+    (* We will prove that m x = m by case analysis on the result of m x.
+*)
+    destruct (m x) as [v | _].
+- (* If m x = v, then m x = v = m.
+*)
+      reflexivity.
+- (* If m x = false, then m x = false = m.
+*)
+      reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "induction m.".
+Message: Not an inductive definition..
+Goal: (x !-> m x; m) = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma map_function_application_3 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+Lemma map_function_application_3 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+Proof.
+(* We will proceed by induction on m.
+*)
+  intros A m x.
+(* We will need to use the induction principle for total_map.
+*)
+  induction m.
+(* In the base case, we have t_empty.
+*)
+  - simpl.
+(* We need to prove that (x !-> m x; t_empty) = m.
+*)
+    (* But this is false, because (x !-> m x; t_empty) always returns m x, while m is t_empty which always returns false.
+*)
+    (* Therefore, we cannot prove this lemma for t_empty.
+*)
+    (* Abort.
+*)
+  (* In the update case, we have t_update.
+*)
+  - simpl.
+(* We need to prove that (x !-> m x; t_update m1 x1 v1) = m.
+*)
+    (* We can rewrite this as (x !-> m x; (x1 !-> v1 ; m1)) = m.
+*)
+    (* By the definition of t_update, we know that (x1 !-> v1 ; m1) x = if x = x1 then v1 else m1 x.
+*)
+    (* So, we need to prove that (x !-> m x; (x1 !-> v1 ; m1)) x = m x.
+*)
+    (* We can consider two cases: x = x1 and x <> x1.
+*)
+    - intros x1 v1 m1 Hneq.
+(* In this case, x = x1.
+*)
+      - simpl.
+(* We need to prove that (x !-> m x; (x1 !-> v1 ; m1)) x1 = m1 x1.
+*)
+        (* By the definition of t_update, we know that (x1 !-> v1 ; m1) x1 = v1.
+*)
+        (* By the definition of function application, we know that (x !-> m x; (x1 !-> v1 ; m1)) x1 = m x1.
+*)
+        (* Therefore, we have a contradiction.
+*)
+        (* Abort.
+*)
+      (* In this case, x <> x1.
+*)
+      - simpl.
+(*
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "induction m.".
+Message: Not an inductive definition..
+Goal: (x !-> m x; m) = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma map_function_application_4 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+
+
+
+From Coq Require Import Arith.Arith.
+From Coq Require Import Bool.Bool.
+From Coq Require Import Datatypes.
+Require Export Coq.Strings.String.
+From Coq Require Import Logic.FunctionalExtensionality.
+From Coq Require Import Lists.List.
+Import ListNotations.
+
+
+
+
+
+Locate "+".
+
+
+
+Print Init.Nat.add.
+
+
+
+
+
+
+
+
+
+
+Check String.eqb_refl :
+  forall x : string, (x =? x)%string = true.
+
+
+Check String.eqb_eq :
+  forall n m : string, (n =? m)%string = true <-> n = m.
+Check String.eqb_neq :
+  forall n m : string, (n =? m)%string = false <-> n <> m.
+Check String.eqb_spec :
+  forall x y : string, reflect (x = y) (String.eqb x y).
+
+
+
+
+
+
+
+
+Definition total_map (A : Type) := string -> A.
+
+
+
+
+
+Definition t_empty {A : Type} (v : A) : total_map A :=
+  (fun _ => v).
+
+
+
+Definition t_update {A : Type} (m : total_map A)
+                    (x : string) (v : A) :=
+  fun x' => if String.eqb x x' then v else m x'.
+
+
+
+
+
+Definition examplemap :=
+  t_update (t_update (t_empty false) "foo" true)
+           "bar" true.
+
+
+
+
+Notation "'_' '!->' v" := (t_empty v)
+  (at level 100, right associativity).
+
+Example example_empty := (_ !-> false).
+
+
+Notation "x '!->' v ';' m" := (t_update m x v)
+                              (at level 100, v at next level, right associativity).
+
+
+
+Definition examplemap' :=
+  ( "bar" !-> true;
+    "foo" !-> true;
+    _     !-> false
+  ).
+
+
+
+Example update_example1 : examplemap' "baz" = false.
+Proof. reflexivity. Qed.
+
+Example update_example2 : examplemap' "foo" = true.
+Proof. reflexivity. Qed.
+
+Example update_example3 : examplemap' "quux" = false.
+Proof. reflexivity. Qed.
+
+Example update_example4 : examplemap' "bar" = true.
+Proof. reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
+  (_ !-> v) x = v.
+Proof.
+  reflexivity. Qed.
+
+
+
+
+Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
+  (x !-> v ; m) x = v.
+Proof.
+  intros. unfold t_update. rewrite eqb_refl. reflexivity.
+Qed.
+
+
+
+
+Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
+  x1 <> x2 ->
+  (x1 !-> v ; m) x2 = m x2.
+Proof.
+  intros A m x1 x2 v H.
+  unfold t_update. destruct (eqb_spec x1 x2). exfalso. apply H. apply e. reflexivity.
+Qed.
+
+
+
+
+Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
+  (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
+Proof.
+  intros A m x v1 v2.
+  apply functional_extensionality. intros x'.
+  unfold t_update.
+  destruct (eqb_spec x x') as [_ | _]. reflexivity. reflexivity.
+Qed.
+
+
+
+
+
+Lemma map_function_application_4 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+Proof.
+(* We will proceed by induction on the total_map m.
+*)
+  intros A m x.
+induction m as [|x' v' m' IHm'].
+(* Base case: m is empty.
+*)
+  - simpl.
+reflexivity.
+(* Inductive case: m is an update.
+*)
+  - simpl.
+(* We need to show that (x' !-> m' x'; m') x = m' x.
+*)
+    (* We have two cases to consider: x = x' and x <> x'.
+*)
+    destruct (beq_string x x') eqn:E.
+- (* Case x = x'.
+*)
+      simpl in E.
+(* We now have (x' !-> m' x'; m') x' = m' x'.
+*)
+      (* By the IH, we know that m' x' = m' x.
+*)
+      (* Therefore, (x' !-> m' x'; m') x' = m' x = m' x'.
+*)
+      reflexivity.
+- (* Case x <> x'.
+*)
+      simpl in E.
+(* We now have (x' !-> m' x'; m') x = m' x.
+*)
+      (* By the induction hypothesis, we know that m' x = m' x.
+*)
+      (* Therefore, (x' !-> m' x'; m') x = m' x = m' x.
+*)
+      reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #148)
+Error in step "induction m as [|x' v' m' IHm'].".
+Message: Not an inductive definition..
+Goal: (x !-> m x; m) = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma map_function_application_5 : forall A : Type, forall m : total_map A, forall x : string, (x !-> m x; m) = m.
+
+
+Error proving t_update_same
+MAX LEMMA DEPTH REACHED. GIVING UP.

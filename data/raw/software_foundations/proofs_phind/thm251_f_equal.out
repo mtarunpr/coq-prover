@@ -1,0 +1,1863 @@
+PROVING f_equal
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+
+
+Theorem f_equal : forall (A B : Type) (f: A -> B) (x y: A),
+  x = y -> f x = f y.
+
+Proof.
+(*
+     We will proceed by induction on the equality of x and y.
+The base case will be when x = y, and the inductive case
+     will be when x = y -> f x = f y.
+*)
+  intros A B f x y H.
+(*
+     In the base case, we have x = y, and we need to prove f x = f y.
+By the reflexivity of equality, f x = f x.
+*)
+  reflexivity.
+(*
+     In the inductive case, we have x = y -> f x = f y, and we need
+     to prove f (S x) = f (S y).
+By the definition of function application, this is equivalent
+     to f x = f y -> f (S x) = f (S y).
+*)
+  induction H as [|x' y' IH].
+- (* x' = y' *)
+    reflexivity.
+- (* x' = y' -> f x' = f y' *)
+    exact IH.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #288)
+Error in step "reflexivity.".
+Message: In environment
+A : Type
+B : Type
+f : A -> B
+x, y : A
+H : x = y
+Unable to unify "f y" with "f x"..
+Goal: f x = f y.
+
+
+TRYING TO PROVE LEMMA
+Lemma function_equality_preserved_under_argument_equality_0 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+
+
+Lemma function_equality_preserved_under_argument_equality_0 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+Proof.
+(*
+     We will proceed by induction on the equality H : x = y.
+The base case will be when x = y, and we will show that f x = f y.
+The inductive case will be when x = y -> x' = y', and we will show that f x = f y' -> f x' = f y.
+*)
+  intros A B f x y H.
+(*
+     We will use the induction hypothesis on the equality H : x = y.
+This will allow us to conclude that f x = f y.
+*)
+  induction H as [|x' Hx'y'].
+- (* Base case: x = y *)
+    reflexivity.
+- (* Inductive case: x = y -> x' = y' *)
+    (*
+       We have Hx'y' : x' = y' and the induction hypothesis IHx'y' : f x' = f y'.
+We will now show that f x = f y' -> f x' = f y.
+*)
+    intros Hfxy'.
+(*
+       We will use the induction hypothesis IHx'y' to rewrite f x' in the goal.
+This will give us f x = f y.
+*)
+    subst.
+(*
+       Now we have f x = f y and f x = f y' in the context.
+We will now rewrite f y in the goal using the equality f x = f y'.
+*)
+    rewrite Hfxy'.
+(*
+       Now we have f y = f y' in the context, which is exactly what we wanted to prove.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "induction H as [|x' Hx'y'].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 0 patterns..
+Goal: f x = f y.
+
+
+TRYING TO PROVE LEMMA
+Lemma function_equality_preserved_under_argument_equality_1 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+
+
+Lemma function_equality_preserved_under_argument_equality_1 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+Proof.
+(*
+     We will proceed by induction on the equality H : x = y.
+The base case will be when x = y, and we will show that f x = f y.
+The inductive case will be when x = y -> x' = y', and we will show that f x = f y' -> f x' = f y.
+*)
+  intros A B f x y H.
+(*
+     We will use the induction hypothesis on the equality H : x = y.
+This will allow us to conclude that f x = f y.
+*)
+  induction H as [|x' Hx'y'].
+- (* Base case: x = y *)
+    reflexivity.
+- (* Inductive case: x = y -> x' = y' *)
+    (*
+       We have Hx'y' : x' = y' and the induction hypothesis IHx'y' : f x' = f y'.
+We will now show that f x = f y' -> f x' = f y.
+*)
+    intros Hfxy'.
+(*
+       We will use the induction hypothesis IHx'y' to rewrite f x' in the goal.
+This will give us f x = f y, which is what we need to prove.
+*)
+    subst.
+(*
+       Now we have f x = f y as our goal, which is already proved by the base case.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "induction H as [|x' Hx'y'].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 0 patterns..
+Goal: f x = f y.
+
+
+TRYING TO PROVE LEMMA
+Lemma function_equality_preserved_under_argument_equality_2 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+
+
+Lemma function_equality_preserved_under_argument_equality_2 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+Proof.
+(*
+     We will proceed by induction on the equality H : x = y.
+The base case will be when x = y, and we will show that f x = f y.
+The inductive case will be when x = y -> x' = y', and we will show that f x = f y' -> f x' = f y.
+*)
+  intros A B f x y H.
+(*
+     We will use the induction hypothesis on the equality H : x = y.
+This will allow us to conclude that f x = f y.
+*)
+  induction H as [|x' Hx'y'].
+- (* Base case: x = y *)
+    reflexivity.
+- (* Inductive case: x = y -> x' = y' *)
+    (*
+       We have Hx'y' : x' = y' and the induction hypothesis IHx'y' : f x' = f y'.
+We will now show that f x = f y' -> f x' = f y.
+*)
+    intros Hfxy'.
+(*
+       We will use the induction hypothesis IHx'y' to rewrite f x' in the goal.
+This will give us f x = f y.
+*)
+    subst.
+(*
+       Now we have f x = f y and f x = f y' in the context.
+We will now rewrite f y in the goal using the equality f x = f y'.
+*)
+    rewrite Hfxy'.
+(*
+       Now we have f y = f y' in the context, which is exactly what we wanted to prove.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "induction H as [|x' Hx'y'].".
+Message: Expects a disjunctive pattern with 1 branch or a
+conjunctive pattern made of 0 patterns..
+Goal: f x = f y.
+
+
+TRYING TO PROVE LEMMA
+Lemma function_equality_preserved_under_argument_equality_3 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+
+
+Lemma function_equality_preserved_under_argument_equality_3 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+Proof.
+(*
+     We will prove the lemma by applying the function f to both x and y,
+     and then using the equality H to show that the results are equal.
+*)
+  intros A B f x y H.
+(*
+     Now we apply the function f to x and y.
+This gives us two new goals: f x = f x and f y = f x.
+*)
+  apply f in H.
+(*
+     Now we have the goal f y = f x.
+We can rewrite this goal with H to get the goal f y = f y,
+     which is trivially true.
+*)
+  rewrite H in H.
+(*
+     Now we have the goal f y = f y, which is true by reflexivity.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error in step "apply f in H.".
+Message: Unable to apply lemma of type "A -> B"
+on hypothesis of type "x = y"..
+Goal: f x = f y.
+
+
+TRYING TO PROVE LEMMA
+Lemma function_equality_preserved_under_argument_equality_4 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+Proof.
+  intros n m o H.
+  
+  injection H as H1 H2.
+  rewrite H1. rewrite H2. reflexivity.
+Qed.
+
+
+Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
+  x :: y :: l = z :: j ->
+  j = z :: l ->
+  x = y.
+Proof.
+  intros X x y z l j eq1 eq2.
+  injection eq1 as H G.
+  rewrite eq2 in G.
+  injection G as G.
+  rewrite H. rewrite G.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Theorem discriminate_ex1 : forall (n m : nat),
+  false = true ->
+  n = m.
+Proof.
+  intros n m contra. discriminate contra. Qed.
+
+Theorem discriminate_ex2 : forall (n : nat),
+  S n = O ->
+  2 + 2 = 5.
+Proof.
+  intros n contra. discriminate contra. Qed.
+
+
+
+
+
+
+Example discriminate_ex3 :
+  forall (X : Type) (x y z : X) (l j : list X),
+    x :: y :: l = [] ->
+    x = z.
+Proof.
+  intros X x y z l j contra.
+  discriminate contra.
+Qed.
+
+
+
+Theorem eqb_0_l : forall n,
+   0 =? n = true -> n = 0.
+Proof.
+  intros n.
+
+
+
+  destruct n as [| n'] eqn:E.
+  - 
+    intros H. reflexivity.
+
+
+
+  - 
+    simpl.
+
+
+
+    intros H. discriminate H.
+Qed.
+
+
+
+
+
+Lemma function_equality_preserved_under_argument_equality_4 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+Proof.
+(*
+     We will prove the lemma by applying the function f to both sides of the equality H.
+This is because if x = y, then f x = f y, as the function f is unchanged by the substitution of y for x.
+*)
+  intros A B f x y H.
+(*
+     Now we apply the function f to both sides of the equality H.
+This is done using the subst operator, which substitutes the term f x for x in the equality H.
+*)
+  subst (f x).
+(*
+     Now we have f x = f y, which is what we wanted to prove.
+We finish the proof with the Qed command.
+*)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #288)
+Error after step "intros A B f x y H.".
+Message: There are still unproven goals.
+Goal: f x = f y.
+
+
+TRYING TO PROVE LEMMA
+Lemma function_equality_preserved_under_argument_equality_5 : forall A : Type, forall B : Type, forall f : A -> B, forall x y : A, forall H : x = y, f x = f y.
+
+
+Error proving f_equal
+MAX LEMMA DEPTH REACHED. GIVING UP.

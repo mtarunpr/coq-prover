@@ -1,0 +1,247 @@
+PROVING test_next_weekday
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+
+
+Example test_next_weekday : (next_weekday (next_weekday saturday)) = tuesday.
+
+Proof.
+(* We will use pattern matching to destruct the input of the function next_weekday.
+*)
+  destruct (next_weekday saturday) as d.
+(* Now we have d = tuesday.
+We will now prove that d = tuesday.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #18)
+Error in step "destruct (next_weekday saturday) as d.".
+Message: Disjunctive/conjunctive introduction pattern expected..
+Goal: next_weekday (next_weekday saturday) = tuesday.
+
+
+TRYING TO PROVE LEMMA
+Lemma next_weekday_of_saturday_is_tuesday_0 : next_weekday (next_weekday saturday) = tuesday.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+
+
+Lemma next_weekday_of_saturday_is_tuesday_0 : next_weekday (next_weekday saturday) = tuesday.
+
+Proof.
+(*
+    To prove this lemma, we will use the definition of next_weekday and pattern matching.
+We want to show that next_weekday (next_weekday saturday) is equal to tuesday.
+We know that next_weekday saturday is equal to monday (from the definition of next_weekday).
+So, we want to show that next_weekday monday is equal to tuesday.
+This is true according to the definition of next_weekday.
+*)
+  apply (eq_refl (next_weekday (next_weekday saturday))).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+
+
+Lemma next_weekday_of_saturday_is_tuesday_0 : next_weekday (next_weekday saturday) = tuesday.
+
+Proof.
+(*
+    To prove this lemma, we will use the definition of next_weekday and pattern matching.
+We want to show that next_weekday (next_weekday saturday) is equal to tuesday.
+We know that next_weekday saturday is equal to monday (from the definition of next_weekday).
+So, we want to show that next_weekday monday is equal to tuesday.
+This is true according to the definition of next_weekday.
+*)
+  apply (eq_refl (next_weekday (next_weekday saturday))).
+Qed.
+
+Example test_next_weekday : (next_weekday (next_weekday saturday)) = tuesday.
+
+Proof.
+(* We will use pattern matching to destruct the input of the function next_weekday.
+*)
+  apply (@next_weekday_of_saturday_is_tuesday_0 ).
+Qed.
+
+Outdated contents in ..cache: recomputing
+EXAMPLE PROOF IS VALID
+

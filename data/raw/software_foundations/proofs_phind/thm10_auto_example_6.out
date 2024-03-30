@@ -1,0 +1,2188 @@
+PROVING auto_example_6
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+
+Proof.
+(*
+     We will proceed by induction on p.
+Base case: p = 0.
+In this case, n <= 0 -> (n <= m /\ m <= n) is trivially true,
+     so we have n = m.
+*)
+  intros n m p H H0.
+induction p as [| p' IHp'].
+- simpl.
+intros H.
+inversion H.
+subst.
+reflexivity.
+(*
+     Inductive case: p = S p'.
+We will use the induction hypothesis IHp' on the hypothesis H.
+We know that n <= S p' -> (n <= m /\ m <= n) from H.
+We also know that n <= S p' from H0.
+By the induction hypothesis IHp', we have n = m.
+*)
+  simpl.
+apply IHp' in H0.
+apply H in H0.
+exact H0.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #172)
+Error in step "intros H.".
+Message: H is already used..
+Goal: n = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_inequality_lemma_0 : forall n m : nat, forall H : n <= 0 -> n <= m <= n, forall H0 : n <= 0, n = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma nat_inequality_lemma_0 : forall n m : nat, forall H : n <= 0 -> n <= m <= n, forall H0 : n <= 0, n = m.
+
+Proof.
+(* We will proceed by induction on n.
+*)
+  intros n m H H0.
+induction n as [|n' IHn'].
+(* Base case: n = 0 *)
+  - simpl.
+(* We know n <= 0 from H0, so we can rewrite this to S (0 <= m) *)
+    rewrite H0 in H.
+(* Now we have H : 0 <= m *)
+    (* We want to prove n = m, but since n = 0, this is equivalent to proving 0 = m *)
+    (* We know 0 <= m, so we can apply the lemma le_antisym to prove 0 = m *)
+    apply (le_antisym 0 m H).
+(* Inductive case: n = S n' *)
+  - simpl.
+(* We know n' <= 0 from H0, so we can rewrite this to S (n' <= m) *)
+    rewrite H0 in H.
+(* Now we have H : S n' <= m <= S n' *)
+    (* We want to prove S n' = m *)
+    (* We know S n' <= m, so we can apply the induction hypothesis IHn' to prove S n' = m *)
+    apply (IHn' m H).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #172)
+Error in step "rewrite H0 in H.".
+Message: Tactic failure: Failed to progress..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_lower_bound_of_m_1 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall H0 : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_lower_bound_of_m_1 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall H0 : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume the negation of the conclusion,
+     i.e., m <> 0.
+*)
+  intros m H contra_m.
+(* We now have H : 0 <= 0 -> 0 <= m <= 0 and contra_m : m <> 0.
+We will use H
+     to derive a contradiction.
+*)
+  apply (H H0) in contra_m.
+(* Now we have contra_m : 0 <= m /\ m <= 0 /\ m <> 0.
+We will use the fact that
+     m <> 0 to derive a contradiction with the fact that m <= 0.
+*)
+  apply (le_lt_or_eq_dec contra_m) in H0.
+(* Now we have H0 : m < 0 \/ m = 0, and we have already used the case m = 0.
+Therefore, we must have m < 0.
+*)
+  left.
+(* Now we have m < 0, which contradicts the fact that m <= 0.
+*)
+  apply lt_le_not_le in contra_m.
+(* Now we have contra_m : m <= 0 -> False, and we have already used the case
+     m <= 0.
+Therefore, we must have m > 0.
+*)
+  right.
+(* Now we have m > 0, which contradicts the fact that m = 0.
+*)
+  apply neq_le_not_le in contra_m.
+(* Now we have contra_m : m <= 0 -> False, and we have already used the case
+     m <= 0.
+Therefore, we must have m >= 0.
+*)
+  right.
+(* Now we have m >= 0, which contradicts the fact that m < 0.
+*)
+  apply lt_ge_not_ge in contra_m.
+(* Now we have contra_m : m >= 0 -> False, and we have already used the case
+     m >= 0.
+Therefore, we must have m < 0.
+*)
+  left.
+(* Now we have m < 0, which contradicts the fact that m >= 0.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "apply (H H0) in contra_m.".
+Message: The variable H0 was not found in the current
+environment..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_2 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_2 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H1 in H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+ 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_3 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_3 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H1 in H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+ 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_4 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_4 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H1 in H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = 0.
+But we have contra_m : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = 0.
+But we have H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H1 in H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_5 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_5 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H1 in H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 <= 0 is true by reflexivity of <=.
+*)
+  apply H0.
+(* Now we have H0 : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 = 0 is true by reflexivity of =.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 = 0.
+We will derive a contradiction from these.
+*)
+ 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_6 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_6 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the fact that 0 is the smallest natural number.
+*)
+  (* We will show that m <= 0 -> m = 0.
+*)
+  assert (H2 : m = 0) by apply le_antisym; assumption.
+(* Now we have H2 : m = 0.
+We will show that this contradicts contra_m : 0 <= 0.
+*)
+  (* We will use the fact that equality of natural numbers is decidable.
+*)
+  (* We will show that m = 0 -> 0 = m.
+*)
+  assert (H3 : 0 = m) by apply eq_sym; assumption.
+(* Now we have H3 : 0 = m.
+We will derive a contradiction from H3 and contra_m.
+*)
+  (* We will use the fact that equality of natural numbers is decidable.
+*)
+  (* We will show that 0 = m -> 0 <= m.
+*)
+  assert (H4 : 0 <= m) by apply eq_dec; assumption.
+(* Now we have H4 : 0 <= m.
+We will derive a contradiction from H4 and H0.
+*)
+  (* We will use the fact that equality of natural numbers is decidable.
+*)
+  (* We will show that 0 <= m -> m <= 0.
+*)
+  assert (H5 : m <= 0) by apply eq_dec; assumption.
+(* Now we have H5 : m <= 0.
+We will derive a contradiction from H5 and H1.
+*)
+  (* We will use the fact that equality of natural numbers is decidable.
+*)
+  (* We will show that m <= 0 -> 0 = m.
+*)
+  assert (H6 : 0 = m) by apply eq_dec; assumption.
+(* Now we have H6 : 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_7 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_7 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have a hypothesis contra_m : 0 <= 0, which is absurd because 0 is not less than or equal to 0.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 <= 0, which is absurd.
+*)
+  apply le_n_S in H0.
+(* Now we have H0 : 0 <= S m, which is absurd because we have H1 : m <= 0.
+*)
+  apply le_trans in H0.
+(* Now we have H0 : S m <= 0, which is absurd because we have H1 : m <= 0.
+*)
+  apply le_trans in H0.
+(* Now we have H0 : 0 <= m, which is absurd because we have H1 : m <= 0.
+*)
+  apply le_trans in H0.
+(* Now we have H0 : 0 <= m, which is absurd because we have H1 : m <= 0.
+*)
+  apply le_trans in H0.
+(* Now we have H0 : 0 <= m, which is absurd because we have H1 : m <= 0.
+*)
+  apply le_trans in H0.
+(* Now we have H0 : 0 <= m, which is absurd because we have H1 : m <= 0.
+*)
+  apply le_trans in H0.
+(* Now we have H0 : 0 <= m, which is absurd because we have H1 : m <= 0.
+*)
+  apply le_trans in H0.
+(*
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_8 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_8 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H1.
+(* Now we have H1 : 0 = m.
+But we have H0 : 0 <= m.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have contra_m : 0 <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in contra_m.
+(* Now we have contra_m : 0 = 0.
+But we have H0 : 0 = m.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = 0.
+But we have contra_m : 0 = m.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in contra_m.
+(* Now we have contra_m : 0 = 0.
+But we have H0 : 0 = m.
+We will derive a contradiction from these.
+*)
+  (* We will use
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_9 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+
+
+Lemma zero_is_unique_9 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+Proof.
+(* We will proceed by contradiction.
+Assume m is not 0.
+*)
+  intros m H contra_m.
+assert (H0 : 0 <= m) by apply H.
+assert (H1 : m <= 0) by apply H.
+(* We have H0 : 0 <= m and H1 : m <= 0.
+We will derive a contradiction from these.
+*)
+  (* We will use the lemma le_antisym to prove the contradiction.
+*)
+  apply le_antisym in H0.
+(* Now we have H0 : 0 = m.
+But we have a hypothesis contra_m : 0 <= 0, which is absurd because 0 is not less than or equal to 0.
+*)
+  apply contra_m in H0.
+(* Now we have H0 : 0 <= 0, which is absurd.
+*)
+  apply le_lt_irrefl in H0.
+(* We have derived a contradiction, so we can conclude that our initial assumption (m is not 0) must be false.
+*)
+  (* Therefore, m must be 0.
+*)
+  exact H0.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #166)
+Error in step "assert (H0 : 0 <= m) by apply H.".
+Message: Proof is not complete..
+Goal: 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_is_unique_10 : forall m : nat, forall H : 0 <= 0 -> 0 <= m <= 0, forall contra_m : 0 <= 0, 0 = m.
+
+
+Error proving auto_example_6
+MAX LEMMA DEPTH REACHED. GIVING UP.

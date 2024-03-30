@@ -1,0 +1,4702 @@
+PROVING All_In
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+Lemma factor_is_O:
+  forall n m : nat, n = 0 \/ m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m [Hn | Hm].
+  - 
+    rewrite Hn. reflexivity.
+  - 
+    rewrite Hm. rewrite <- mult_n_O.
+    reflexivity.
+Qed.
+
+
+
+Lemma or_intro_l : forall A B : Prop, A -> A \/ B.
+Proof.
+  intros A B HA.
+  left.
+  apply HA.
+Qed.
+
+
+
+Lemma zero_or_succ :
+  forall n : nat, n = 0 \/ n = S (pred n).
+Proof.
+  
+  intros [|n'].
+  - left. reflexivity.
+  - right. reflexivity.
+Qed.
+
+
+Lemma mult_is_O :
+  forall n m, n * m = 0 -> n = 0 \/ m = 0.
+Proof.
+  intros n m H.
+  destruct n.
+  - left. reflexivity.
+  - right. destruct m.
+    + reflexivity.
+    + discriminate H.
+Qed.
+
+
+
+Theorem or_commut : forall P Q : Prop,
+  P \/ Q  -> Q \/ P.
+Proof.
+  intros P Q [HP | HQ].
+  - right. apply HP.
+  - left. apply HQ.
+Qed.
+
+
+
+
+
+
+
+Module NotPlayground.
+
+Definition not (P:Prop) := P -> False.
+
+Notation "~ x" := (not x) : type_scope.
+
+Check not : Prop -> Prop.
+
+End NotPlayground.
+
+
+
+Theorem ex_falso_quodlibet : forall (P:Prop),
+  False -> P.
+Proof.
+  
+  intros P contra.
+  destruct contra.  Qed.
+
+
+
+
+
+Theorem not_implies_our_not : forall (P:Prop),
+  ~ P -> (forall (Q:Prop), P -> Q).
+Proof.
+  intros P HNP Q contra.
+  unfold not in HNP.
+  apply HNP in contra. destruct contra.
+Qed.
+
+
+
+
+
+
+Theorem zero_not_one : 0 <> 1.
+Proof.
+  
+  unfold not.
+  
+  intros contra.
+  
+  discriminate contra.
+Qed.
+
+
+
+Theorem not_False :
+  ~ False.
+Proof.
+  unfold not. intros H. destruct H. Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  
+  intros P Q [HP HNA]. unfold not in HNA.
+  apply HNA in HP. destruct HP.  Qed.
+
+Theorem double_neg : forall P : Prop,
+  P -> ~~P.
+Proof.
+  
+  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+
+
+
+
+
+
+Definition manual_grade_for_double_neg_inf : option (nat*string) := None.
+
+
+
+Theorem contrapositive : forall (P Q : Prop),
+  (P -> Q) -> (~Q -> ~P).
+Proof.
+  intros P Q HPQ HQ HP.
+  unfold not in HQ. apply HPQ in HP. apply HQ in HP. apply HP.
+Qed.
+
+
+
+Theorem not_both_true_and_false : forall P : Prop,
+  ~ (P /\ ~P).
+Proof.
+  intros P H.
+  apply contradiction_implies_anything with (Q:=False) in H.
+  apply H.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_not_PNP : option (nat*string) := None.
+
+
+
+Theorem de_morgan_not_or : forall (P Q : Prop),
+    ~ (P \/ Q) -> ~P /\ ~Q.
+Proof.
+  intros P Q HPQ.
+  unfold not in HPQ.
+  split.
+  - intros HP. apply or_intro_l  with (B:=Q) in HP. apply HPQ. apply HP.
+  - intros HQ. apply or_intro_l  with (B:=P) in HQ. apply or_commut in HQ. apply HPQ. apply HQ.
+Qed.
+
+
+
+
+Theorem not_true_is_false : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros b H.
+  destruct b eqn:HE.
+  - 
+    unfold not in H.
+    apply ex_falso_quodlibet.
+    apply H. reflexivity.
+  - 
+    reflexivity.
+Qed.
+
+
+
+Theorem not_true_is_false' : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.          
+  - 
+    unfold not in H.
+    exfalso.                
+    apply H. reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma True_is_true : True.
+Proof. apply I. Qed.
+
+
+
+
+
+
+
+Definition disc_fn (n: nat) : Prop :=
+  match n with
+  | O => True
+  | S _ => False
+  end.
+
+Theorem disc_example : forall n, ~ (O = S n).
+Proof.
+  intros n H1.
+  assert (H2 : disc_fn O). { simpl. apply I. }
+  rewrite H1 in H2. simpl in H2. apply H2.
+Qed.
+
+
+
+
+
+
+
+
+Module IffPlayground.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                      (at level 95, no associativity)
+                      : type_scope.
+
+End IffPlayground.
+
+Theorem iff_sym : forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+Proof.
+  
+  intros P Q [HAB HBA].
+  split.
+  -  apply HBA.
+  -  apply HAB.  Qed.
+
+Lemma not_true_iff_false : forall b,
+  b <> true <-> b = false.
+Proof.
+  
+  intros b. split.
+  -  apply not_true_is_false.
+  - 
+    intros H. rewrite H. intros H'. discriminate H'.
+Qed.
+
+
+
+Lemma apply_iff_example1:
+  forall P Q R : Prop, (P <-> Q) -> (Q -> R) -> (P -> R).
+  intros P Q R Hiff H HP. apply H.  apply Hiff. apply HP.
+Qed.
+
+Lemma apply_iff_example2:
+  forall P Q R : Prop, (P <-> Q) -> (P -> R) -> (Q -> R).
+  intros P Q R Hiff H HQ. apply H.  apply Hiff. apply HQ.
+Qed.
+
+
+
+Theorem iff_refl : forall P : Prop,
+  P <-> P.
+Proof.
+  intros P.
+  split. intros H. apply H. intros H. apply H.  Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+  (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof.
+  intros P Q R H1 H2. split.
+  - intros H. apply proj1 in H1. apply H1 in H. apply proj1 in H2. apply H2 in H. apply H.
+  - intros H. apply proj2 in H2. apply H2 in H. apply proj2 in H1. apply H1 in H. apply H.
+Qed.
+
+
+
+Theorem or_distributes_over_and : forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+Proof.
+  intros P Q R.
+  split.
+  -  intros [HP | [HQ HR]].
+    +  split. left. apply HP. left. apply HP.
+    +  split.  right. apply HQ. right. apply HR.
+  -  intros [[HP1 | HQ] [HP2 | HR]].
+    + left. apply HP1.
+    + left. apply HP1.
+    + left. apply HP2.
+    + right. apply and_intro. apply HQ. apply HR.
+Qed.
+
+
+
+
+
+
+
+From Coq Require Import Setoids.Setoid.
+
+
+
+
+
+Lemma mul_eq_0 : forall n m, n * m = 0 <-> n = 0 \/ m = 0.
+Proof.
+  split.
+  - apply mult_is_O.
+  - apply factor_is_O.
+Qed.
+
+Theorem or_assoc :
+  forall P Q R : Prop, P \/ (Q \/ R) <-> (P \/ Q) \/ R.
+Proof.
+  intros P Q R. split.
+  - intros [H | [H | H]].
+    + left. left. apply H.
+    + left. right. apply H.
+    + right. apply H.
+  - intros [[H | H] | H].
+    + left. apply H.
+    + right. left. apply H.
+    + right. right. apply H.
+Qed.
+
+
+
+Lemma mul_eq_0_ternary :
+  forall n m p, n * m * p = 0 <-> n = 0 \/ m = 0 \/ p = 0.
+Proof.
+  intros n m p.
+  rewrite mul_eq_0. rewrite mul_eq_0. rewrite or_assoc.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Definition Even x := exists n : nat, x = double n.
+
+Lemma four_is_Even : Even 4.
+Proof.
+  unfold Even. exists 2. reflexivity.
+Qed.
+
+
+
+Theorem exists_example_2 : forall n,
+  (exists m, n = 4 + m) ->
+  (exists o, n = 2 + o).
+Proof.
+  
+  intros n [m Hm]. 
+  exists (2 + m).
+  apply Hm.  Qed.
+
+
+
+Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+Proof.
+  intros X P H [x E].
+  unfold not in E. apply E. apply H.
+Qed.
+
+
+
+
+Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
+  (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
+Proof.
+  intros X P Q.
+  split.
+  - intros [x [HP | HQ]].
+    + left. exists x. apply HP.
+    + right. exists x. apply HQ.
+  - intros [[x HP] | [x HQ]].
+    + exists x. left. apply HP.
+    + exists x. right. apply HQ.
+Qed.
+
+
+
+Theorem leb_plus_exists : forall n m, n <=? m = true -> exists x, m = n+x.
+Proof.
+  induction n.
+  - intros. exists m. reflexivity.
+  - destruct m.
+    + simpl. discriminate.
+    + simpl.
+      intros H. apply IHn in H. destruct H as [x0 H].
+      rewrite H. exists x0. reflexivity.
+Qed.
+
+Theorem plus_exists_leb : forall n m, (exists x, m = n+x) -> n <=? m = true.
+Proof.
+  intros.
+  destruct H.
+  generalize dependent m.
+  induction n.
+  - reflexivity.
+  - intros.
+    destruct m.
+    + discriminate H.
+    + rewrite add_comm in H. rewrite <- plus_n_Sm in H. injection H as H.
+      rewrite add_comm in H.
+      apply IHn in H. apply H.
+Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+  | [] => False
+  | x' :: l' => x' = x \/ In x l'
+  end.
+
+
+
+Example In_example_1 : In 4 [1; 2; 3; 4; 5].
+Proof.
+  
+  simpl. right. right. right. left. reflexivity.
+Qed.
+
+Example In_example_2 :
+  forall n, In n [2; 4] ->
+  exists n', n = 2 * n'.
+Proof.
+  
+  simpl.
+  intros n [H | [H | []]].
+  - exists 1. rewrite <- H. reflexivity.
+  - exists 2. rewrite <- H. reflexivity.
+Qed.
+
+
+
+
+
+
+Theorem In_map :
+  forall (A B : Type) (f : A -> B) (l : list A) (x : A),
+         In x l ->
+         In (f x) (map f l).
+Proof.
+  intros A B f l x.
+  induction l as [|x' l' IHl'].
+  - 
+    simpl. intros [].
+  - 
+    simpl. intros [H | H].
+    + rewrite H. left. reflexivity.
+    + right. apply IHl'. apply H.
+Qed.
+
+
+
+
+Theorem In_map_iff :
+  forall (A B : Type) (f : A -> B) (l : list A) (y : B),
+         In y (map f l) <->
+         exists x, f x = y /\ In x l.
+Proof.
+  intros A B f l y. split.
+  - 
+    induction l as [| x' l'].
+    + simpl. intros [].
+    + simpl. intros [H | H].
+      * 
+        exists x'. split. apply H. left. reflexivity.
+      * 
+        apply IHl' in H. destruct H as [x [H1 H2]].
+        exists x. split. apply H1. right. apply H2.
+  - 
+    intros [x [H1 H2]]. rewrite <- H1. apply In_map. apply H2.
+Qed.
+
+
+
+Theorem In_app_iff : forall A l l' (a:A),
+  In a (l++l') <-> In a l \/ In a l'.
+Proof.
+  intros A l. induction l as [|a' l' IH].
+  + split. right. apply H. intros [H | H]. destruct H. apply H.
+  + split.
+    - intros [H | H].
+      * left. left. apply H.
+      * simpl. apply or_assoc. right. apply IH. apply H.
+    - intros [H | H].
+      * destruct H as [H' | H'].
+        left. apply H'.
+        right. apply IH. left. apply H'.
+      * right. apply IH. right. apply H.
+Qed.
+
+
+
+
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
+  := match l with
+     | [] => True
+     | (x :: l') => P x /\ All P l'
+     end.
+
+
+
+Theorem All_In : forall T (P : T -> Prop) (l : list T),
+    (forall x, In x l -> P x) <->
+    All P l.
+
+Proof.
+(* We will prove this theorem by induction on the list l.
+*)
+  intros T P l.
+(* We will need to use the following lemmas: *)
+  (* - In_app_iff: In a (l++l') <-> In a l \/ In a l' *)
+  (* - All_app: All P (l++l') <-> All P l /\ All P l' *)
+  (* - All_In_intro: In x l -> P x -> All P l *)
+  (* - All_In_elim: All P l -> In x l -> P x *)
+  (* - All_In_iff: All P l <-> (forall x, In x l -> P x) *)
+  (* We will also need to use the following tactics: *)
+  (* - induction: to perform induction on the list l *)
+  (* - simpl: to simplify the goal *)
+  (* - split: to split the goal into two subgoals *)
+  (* - constructor: to introduce the constructors of the inductive type *)
+  (* - apply: to apply a lemma to the goal *)
+  (* - assumption: to use a hypothesis *)
+  (* - left; right: to focus on one of the two subgoals *)
+  (* - rewrite: to rewrite a term using a lemma *)
+  (* - inversion: to perform case analysis on a term *)
+  induction l as [|x l' IHl'].
+- (* Base case: l = [] *)
+    simpl.
+(* Goal: (forall x, In x [] -> P x) <-> All P [] *)
+    (* Both sides of the equivalence are true because the premise is false *)
+    (* (there is no x such that In x [] is true) and All P [] is also true *)
+    (* (since there are no elements in the empty list).
+*)
+    constructor.
+constructor.
+reflexivity.
+- (* Inductive case: l = x :: l' *)
+    simpl.
+(* Goal: (forall x, In x (x :: l') -> P x) <-> All P (x :: l') *)
+    (* We will split the goal into two subgoals: *)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #1332)
+Error in step "reflexivity.".
+Message: Cannot find a relation to rewrite..
+Goal: True -> forall x : T, False -> P x.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_forall_type_exists_prop_0 : forall T : Type, forall P : T -> Prop, True -> forall x : T, False -> P x.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+Lemma factor_is_O:
+  forall n m : nat, n = 0 \/ m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m [Hn | Hm].
+  - 
+    rewrite Hn. reflexivity.
+  - 
+    rewrite Hm. rewrite <- mult_n_O.
+    reflexivity.
+Qed.
+
+
+
+Lemma or_intro_l : forall A B : Prop, A -> A \/ B.
+Proof.
+  intros A B HA.
+  left.
+  apply HA.
+Qed.
+
+
+
+Lemma zero_or_succ :
+  forall n : nat, n = 0 \/ n = S (pred n).
+Proof.
+  
+  intros [|n'].
+  - left. reflexivity.
+  - right. reflexivity.
+Qed.
+
+
+Lemma mult_is_O :
+  forall n m, n * m = 0 -> n = 0 \/ m = 0.
+Proof.
+  intros n m H.
+  destruct n.
+  - left. reflexivity.
+  - right. destruct m.
+    + reflexivity.
+    + discriminate H.
+Qed.
+
+
+
+Theorem or_commut : forall P Q : Prop,
+  P \/ Q  -> Q \/ P.
+Proof.
+  intros P Q [HP | HQ].
+  - right. apply HP.
+  - left. apply HQ.
+Qed.
+
+
+
+
+
+
+
+Module NotPlayground.
+
+Definition not (P:Prop) := P -> False.
+
+Notation "~ x" := (not x) : type_scope.
+
+Check not : Prop -> Prop.
+
+End NotPlayground.
+
+
+
+Theorem ex_falso_quodlibet : forall (P:Prop),
+  False -> P.
+Proof.
+  
+  intros P contra.
+  destruct contra.  Qed.
+
+
+
+
+
+Theorem not_implies_our_not : forall (P:Prop),
+  ~ P -> (forall (Q:Prop), P -> Q).
+Proof.
+  intros P HNP Q contra.
+  unfold not in HNP.
+  apply HNP in contra. destruct contra.
+Qed.
+
+
+
+
+
+
+Theorem zero_not_one : 0 <> 1.
+Proof.
+  
+  unfold not.
+  
+  intros contra.
+  
+  discriminate contra.
+Qed.
+
+
+
+Theorem not_False :
+  ~ False.
+Proof.
+  unfold not. intros H. destruct H. Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  
+  intros P Q [HP HNA]. unfold not in HNA.
+  apply HNA in HP. destruct HP.  Qed.
+
+Theorem double_neg : forall P : Prop,
+  P -> ~~P.
+Proof.
+  
+  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+
+
+
+
+
+
+Definition manual_grade_for_double_neg_inf : option (nat*string) := None.
+
+
+
+Theorem contrapositive : forall (P Q : Prop),
+  (P -> Q) -> (~Q -> ~P).
+Proof.
+  intros P Q HPQ HQ HP.
+  unfold not in HQ. apply HPQ in HP. apply HQ in HP. apply HP.
+Qed.
+
+
+
+Theorem not_both_true_and_false : forall P : Prop,
+  ~ (P /\ ~P).
+Proof.
+  intros P H.
+  apply contradiction_implies_anything with (Q:=False) in H.
+  apply H.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_not_PNP : option (nat*string) := None.
+
+
+
+Theorem de_morgan_not_or : forall (P Q : Prop),
+    ~ (P \/ Q) -> ~P /\ ~Q.
+Proof.
+  intros P Q HPQ.
+  unfold not in HPQ.
+  split.
+  - intros HP. apply or_intro_l  with (B:=Q) in HP. apply HPQ. apply HP.
+  - intros HQ. apply or_intro_l  with (B:=P) in HQ. apply or_commut in HQ. apply HPQ. apply HQ.
+Qed.
+
+
+
+
+Theorem not_true_is_false : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros b H.
+  destruct b eqn:HE.
+  - 
+    unfold not in H.
+    apply ex_falso_quodlibet.
+    apply H. reflexivity.
+  - 
+    reflexivity.
+Qed.
+
+
+
+Theorem not_true_is_false' : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.          
+  - 
+    unfold not in H.
+    exfalso.                
+    apply H. reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma True_is_true : True.
+Proof. apply I. Qed.
+
+
+
+
+
+
+
+Definition disc_fn (n: nat) : Prop :=
+  match n with
+  | O => True
+  | S _ => False
+  end.
+
+Theorem disc_example : forall n, ~ (O = S n).
+Proof.
+  intros n H1.
+  assert (H2 : disc_fn O). { simpl. apply I. }
+  rewrite H1 in H2. simpl in H2. apply H2.
+Qed.
+
+
+
+
+
+
+
+
+Module IffPlayground.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                      (at level 95, no associativity)
+                      : type_scope.
+
+End IffPlayground.
+
+Theorem iff_sym : forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+Proof.
+  
+  intros P Q [HAB HBA].
+  split.
+  -  apply HBA.
+  -  apply HAB.  Qed.
+
+Lemma not_true_iff_false : forall b,
+  b <> true <-> b = false.
+Proof.
+  
+  intros b. split.
+  -  apply not_true_is_false.
+  - 
+    intros H. rewrite H. intros H'. discriminate H'.
+Qed.
+
+
+
+Lemma apply_iff_example1:
+  forall P Q R : Prop, (P <-> Q) -> (Q -> R) -> (P -> R).
+  intros P Q R Hiff H HP. apply H.  apply Hiff. apply HP.
+Qed.
+
+Lemma apply_iff_example2:
+  forall P Q R : Prop, (P <-> Q) -> (P -> R) -> (Q -> R).
+  intros P Q R Hiff H HQ. apply H.  apply Hiff. apply HQ.
+Qed.
+
+
+
+Theorem iff_refl : forall P : Prop,
+  P <-> P.
+Proof.
+  intros P.
+  split. intros H. apply H. intros H. apply H.  Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+  (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof.
+  intros P Q R H1 H2. split.
+  - intros H. apply proj1 in H1. apply H1 in H. apply proj1 in H2. apply H2 in H. apply H.
+  - intros H. apply proj2 in H2. apply H2 in H. apply proj2 in H1. apply H1 in H. apply H.
+Qed.
+
+
+
+Theorem or_distributes_over_and : forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+Proof.
+  intros P Q R.
+  split.
+  -  intros [HP | [HQ HR]].
+    +  split. left. apply HP. left. apply HP.
+    +  split.  right. apply HQ. right. apply HR.
+  -  intros [[HP1 | HQ] [HP2 | HR]].
+    + left. apply HP1.
+    + left. apply HP1.
+    + left. apply HP2.
+    + right. apply and_intro. apply HQ. apply HR.
+Qed.
+
+
+
+
+
+
+
+From Coq Require Import Setoids.Setoid.
+
+
+
+
+
+Lemma mul_eq_0 : forall n m, n * m = 0 <-> n = 0 \/ m = 0.
+Proof.
+  split.
+  - apply mult_is_O.
+  - apply factor_is_O.
+Qed.
+
+Theorem or_assoc :
+  forall P Q R : Prop, P \/ (Q \/ R) <-> (P \/ Q) \/ R.
+Proof.
+  intros P Q R. split.
+  - intros [H | [H | H]].
+    + left. left. apply H.
+    + left. right. apply H.
+    + right. apply H.
+  - intros [[H | H] | H].
+    + left. apply H.
+    + right. left. apply H.
+    + right. right. apply H.
+Qed.
+
+
+
+Lemma mul_eq_0_ternary :
+  forall n m p, n * m * p = 0 <-> n = 0 \/ m = 0 \/ p = 0.
+Proof.
+  intros n m p.
+  rewrite mul_eq_0. rewrite mul_eq_0. rewrite or_assoc.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Definition Even x := exists n : nat, x = double n.
+
+Lemma four_is_Even : Even 4.
+Proof.
+  unfold Even. exists 2. reflexivity.
+Qed.
+
+
+
+Theorem exists_example_2 : forall n,
+  (exists m, n = 4 + m) ->
+  (exists o, n = 2 + o).
+Proof.
+  
+  intros n [m Hm]. 
+  exists (2 + m).
+  apply Hm.  Qed.
+
+
+
+Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+Proof.
+  intros X P H [x E].
+  unfold not in E. apply E. apply H.
+Qed.
+
+
+
+
+Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
+  (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
+Proof.
+  intros X P Q.
+  split.
+  - intros [x [HP | HQ]].
+    + left. exists x. apply HP.
+    + right. exists x. apply HQ.
+  - intros [[x HP] | [x HQ]].
+    + exists x. left. apply HP.
+    + exists x. right. apply HQ.
+Qed.
+
+
+
+Theorem leb_plus_exists : forall n m, n <=? m = true -> exists x, m = n+x.
+Proof.
+  induction n.
+  - intros. exists m. reflexivity.
+  - destruct m.
+    + simpl. discriminate.
+    + simpl.
+      intros H. apply IHn in H. destruct H as [x0 H].
+      rewrite H. exists x0. reflexivity.
+Qed.
+
+Theorem plus_exists_leb : forall n m, (exists x, m = n+x) -> n <=? m = true.
+Proof.
+  intros.
+  destruct H.
+  generalize dependent m.
+  induction n.
+  - reflexivity.
+  - intros.
+    destruct m.
+    + discriminate H.
+    + rewrite add_comm in H. rewrite <- plus_n_Sm in H. injection H as H.
+      rewrite add_comm in H.
+      apply IHn in H. apply H.
+Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+  | [] => False
+  | x' :: l' => x' = x \/ In x l'
+  end.
+
+
+
+Example In_example_1 : In 4 [1; 2; 3; 4; 5].
+Proof.
+  
+  simpl. right. right. right. left. reflexivity.
+Qed.
+
+Example In_example_2 :
+  forall n, In n [2; 4] ->
+  exists n', n = 2 * n'.
+Proof.
+  
+  simpl.
+  intros n [H | [H | []]].
+  - exists 1. rewrite <- H. reflexivity.
+  - exists 2. rewrite <- H. reflexivity.
+Qed.
+
+
+
+
+
+
+Theorem In_map :
+  forall (A B : Type) (f : A -> B) (l : list A) (x : A),
+         In x l ->
+         In (f x) (map f l).
+Proof.
+  intros A B f l x.
+  induction l as [|x' l' IHl'].
+  - 
+    simpl. intros [].
+  - 
+    simpl. intros [H | H].
+    + rewrite H. left. reflexivity.
+    + right. apply IHl'. apply H.
+Qed.
+
+
+
+
+Theorem In_map_iff :
+  forall (A B : Type) (f : A -> B) (l : list A) (y : B),
+         In y (map f l) <->
+         exists x, f x = y /\ In x l.
+Proof.
+  intros A B f l y. split.
+  - 
+    induction l as [| x' l'].
+    + simpl. intros [].
+    + simpl. intros [H | H].
+      * 
+        exists x'. split. apply H. left. reflexivity.
+      * 
+        apply IHl' in H. destruct H as [x [H1 H2]].
+        exists x. split. apply H1. right. apply H2.
+  - 
+    intros [x [H1 H2]]. rewrite <- H1. apply In_map. apply H2.
+Qed.
+
+
+
+Theorem In_app_iff : forall A l l' (a:A),
+  In a (l++l') <-> In a l \/ In a l'.
+Proof.
+  intros A l. induction l as [|a' l' IH].
+  + split. right. apply H. intros [H | H]. destruct H. apply H.
+  + split.
+    - intros [H | H].
+      * left. left. apply H.
+      * simpl. apply or_assoc. right. apply IH. apply H.
+    - intros [H | H].
+      * destruct H as [H' | H'].
+        left. apply H'.
+        right. apply IH. left. apply H'.
+      * right. apply IH. right. apply H.
+Qed.
+
+
+
+
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
+  := match l with
+     | [] => True
+     | (x :: l') => P x /\ All P l'
+     end.
+
+
+
+Lemma helper_lemma_forall_type_exists_prop_0 : forall T : Type, forall P : T -> Prop, True -> forall x : T, False -> P x.
+
+Proof.
+(* The goal is to prove the lemma:
+     "forall T : Type, forall P : T -> Prop, True -> forall x : T, False -> P x".
+We will proceed by induction on the type T.
+*)
+  intros T P H True False_x x.
+(* We first consider the case where T is a sum type.
+*)
+  induction T as [ | T1 T2].
+- (* Base case: T is a sum type.
+*)
+    (* We need to prove P x.
+Since we have False_x : False x, we can use the
+       ex_falso_quodlibet theorem to derive any proposition P from False.
+*)
+    apply (ex_falso_quodlibet False_x).
+- (* Inductive case: T is a product type.
+*)
+    (* We need to prove P x.
+Since we have False_x : False x, we can use the
+       ex_falso_quodlibet theorem to derive any proposition P from False.
+*)
+    apply (ex_falso_quodlibet False_x).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1320)
+Error in step "intros T P H True False_x x.".
+Message: No product even after head-reduction..
+Goal: forall (T : Type) (P : T -> Prop),
+True -> forall x : T, False -> P x.
+
+
+TRYING TO PROVE LEMMA
+Lemma contradiction_implies_anything_1 : forall (T : Type) (P : T -> Prop),
+True -> forall x : T, False -> P x.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+Lemma factor_is_O:
+  forall n m : nat, n = 0 \/ m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m [Hn | Hm].
+  - 
+    rewrite Hn. reflexivity.
+  - 
+    rewrite Hm. rewrite <- mult_n_O.
+    reflexivity.
+Qed.
+
+
+
+Lemma or_intro_l : forall A B : Prop, A -> A \/ B.
+Proof.
+  intros A B HA.
+  left.
+  apply HA.
+Qed.
+
+
+
+Lemma zero_or_succ :
+  forall n : nat, n = 0 \/ n = S (pred n).
+Proof.
+  
+  intros [|n'].
+  - left. reflexivity.
+  - right. reflexivity.
+Qed.
+
+
+Lemma mult_is_O :
+  forall n m, n * m = 0 -> n = 0 \/ m = 0.
+Proof.
+  intros n m H.
+  destruct n.
+  - left. reflexivity.
+  - right. destruct m.
+    + reflexivity.
+    + discriminate H.
+Qed.
+
+
+
+Theorem or_commut : forall P Q : Prop,
+  P \/ Q  -> Q \/ P.
+Proof.
+  intros P Q [HP | HQ].
+  - right. apply HP.
+  - left. apply HQ.
+Qed.
+
+
+
+
+
+
+
+Module NotPlayground.
+
+Definition not (P:Prop) := P -> False.
+
+Notation "~ x" := (not x) : type_scope.
+
+Check not : Prop -> Prop.
+
+End NotPlayground.
+
+
+
+Theorem ex_falso_quodlibet : forall (P:Prop),
+  False -> P.
+Proof.
+  
+  intros P contra.
+  destruct contra.  Qed.
+
+
+
+
+
+Theorem not_implies_our_not : forall (P:Prop),
+  ~ P -> (forall (Q:Prop), P -> Q).
+Proof.
+  intros P HNP Q contra.
+  unfold not in HNP.
+  apply HNP in contra. destruct contra.
+Qed.
+
+
+
+
+
+
+Theorem zero_not_one : 0 <> 1.
+Proof.
+  
+  unfold not.
+  
+  intros contra.
+  
+  discriminate contra.
+Qed.
+
+
+
+Theorem not_False :
+  ~ False.
+Proof.
+  unfold not. intros H. destruct H. Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  
+  intros P Q [HP HNA]. unfold not in HNA.
+  apply HNA in HP. destruct HP.  Qed.
+
+Theorem double_neg : forall P : Prop,
+  P -> ~~P.
+Proof.
+  
+  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+
+
+
+
+
+
+Definition manual_grade_for_double_neg_inf : option (nat*string) := None.
+
+
+
+Theorem contrapositive : forall (P Q : Prop),
+  (P -> Q) -> (~Q -> ~P).
+Proof.
+  intros P Q HPQ HQ HP.
+  unfold not in HQ. apply HPQ in HP. apply HQ in HP. apply HP.
+Qed.
+
+
+
+Theorem not_both_true_and_false : forall P : Prop,
+  ~ (P /\ ~P).
+Proof.
+  intros P H.
+  apply contradiction_implies_anything with (Q:=False) in H.
+  apply H.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_not_PNP : option (nat*string) := None.
+
+
+
+Theorem de_morgan_not_or : forall (P Q : Prop),
+    ~ (P \/ Q) -> ~P /\ ~Q.
+Proof.
+  intros P Q HPQ.
+  unfold not in HPQ.
+  split.
+  - intros HP. apply or_intro_l  with (B:=Q) in HP. apply HPQ. apply HP.
+  - intros HQ. apply or_intro_l  with (B:=P) in HQ. apply or_commut in HQ. apply HPQ. apply HQ.
+Qed.
+
+
+
+
+Theorem not_true_is_false : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros b H.
+  destruct b eqn:HE.
+  - 
+    unfold not in H.
+    apply ex_falso_quodlibet.
+    apply H. reflexivity.
+  - 
+    reflexivity.
+Qed.
+
+
+
+Theorem not_true_is_false' : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.          
+  - 
+    unfold not in H.
+    exfalso.                
+    apply H. reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma True_is_true : True.
+Proof. apply I. Qed.
+
+
+
+
+
+
+
+Definition disc_fn (n: nat) : Prop :=
+  match n with
+  | O => True
+  | S _ => False
+  end.
+
+Theorem disc_example : forall n, ~ (O = S n).
+Proof.
+  intros n H1.
+  assert (H2 : disc_fn O). { simpl. apply I. }
+  rewrite H1 in H2. simpl in H2. apply H2.
+Qed.
+
+
+
+
+
+
+
+
+Module IffPlayground.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                      (at level 95, no associativity)
+                      : type_scope.
+
+End IffPlayground.
+
+Theorem iff_sym : forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+Proof.
+  
+  intros P Q [HAB HBA].
+  split.
+  -  apply HBA.
+  -  apply HAB.  Qed.
+
+Lemma not_true_iff_false : forall b,
+  b <> true <-> b = false.
+Proof.
+  
+  intros b. split.
+  -  apply not_true_is_false.
+  - 
+    intros H. rewrite H. intros H'. discriminate H'.
+Qed.
+
+
+
+Lemma apply_iff_example1:
+  forall P Q R : Prop, (P <-> Q) -> (Q -> R) -> (P -> R).
+  intros P Q R Hiff H HP. apply H.  apply Hiff. apply HP.
+Qed.
+
+Lemma apply_iff_example2:
+  forall P Q R : Prop, (P <-> Q) -> (P -> R) -> (Q -> R).
+  intros P Q R Hiff H HQ. apply H.  apply Hiff. apply HQ.
+Qed.
+
+
+
+Theorem iff_refl : forall P : Prop,
+  P <-> P.
+Proof.
+  intros P.
+  split. intros H. apply H. intros H. apply H.  Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+  (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof.
+  intros P Q R H1 H2. split.
+  - intros H. apply proj1 in H1. apply H1 in H. apply proj1 in H2. apply H2 in H. apply H.
+  - intros H. apply proj2 in H2. apply H2 in H. apply proj2 in H1. apply H1 in H. apply H.
+Qed.
+
+
+
+Theorem or_distributes_over_and : forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+Proof.
+  intros P Q R.
+  split.
+  -  intros [HP | [HQ HR]].
+    +  split. left. apply HP. left. apply HP.
+    +  split.  right. apply HQ. right. apply HR.
+  -  intros [[HP1 | HQ] [HP2 | HR]].
+    + left. apply HP1.
+    + left. apply HP1.
+    + left. apply HP2.
+    + right. apply and_intro. apply HQ. apply HR.
+Qed.
+
+
+
+
+
+
+
+From Coq Require Import Setoids.Setoid.
+
+
+
+
+
+Lemma mul_eq_0 : forall n m, n * m = 0 <-> n = 0 \/ m = 0.
+Proof.
+  split.
+  - apply mult_is_O.
+  - apply factor_is_O.
+Qed.
+
+Theorem or_assoc :
+  forall P Q R : Prop, P \/ (Q \/ R) <-> (P \/ Q) \/ R.
+Proof.
+  intros P Q R. split.
+  - intros [H | [H | H]].
+    + left. left. apply H.
+    + left. right. apply H.
+    + right. apply H.
+  - intros [[H | H] | H].
+    + left. apply H.
+    + right. left. apply H.
+    + right. right. apply H.
+Qed.
+
+
+
+Lemma mul_eq_0_ternary :
+  forall n m p, n * m * p = 0 <-> n = 0 \/ m = 0 \/ p = 0.
+Proof.
+  intros n m p.
+  rewrite mul_eq_0. rewrite mul_eq_0. rewrite or_assoc.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Definition Even x := exists n : nat, x = double n.
+
+Lemma four_is_Even : Even 4.
+Proof.
+  unfold Even. exists 2. reflexivity.
+Qed.
+
+
+
+Theorem exists_example_2 : forall n,
+  (exists m, n = 4 + m) ->
+  (exists o, n = 2 + o).
+Proof.
+  
+  intros n [m Hm]. 
+  exists (2 + m).
+  apply Hm.  Qed.
+
+
+
+Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+Proof.
+  intros X P H [x E].
+  unfold not in E. apply E. apply H.
+Qed.
+
+
+
+
+Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
+  (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
+Proof.
+  intros X P Q.
+  split.
+  - intros [x [HP | HQ]].
+    + left. exists x. apply HP.
+    + right. exists x. apply HQ.
+  - intros [[x HP] | [x HQ]].
+    + exists x. left. apply HP.
+    + exists x. right. apply HQ.
+Qed.
+
+
+
+Theorem leb_plus_exists : forall n m, n <=? m = true -> exists x, m = n+x.
+Proof.
+  induction n.
+  - intros. exists m. reflexivity.
+  - destruct m.
+    + simpl. discriminate.
+    + simpl.
+      intros H. apply IHn in H. destruct H as [x0 H].
+      rewrite H. exists x0. reflexivity.
+Qed.
+
+Theorem plus_exists_leb : forall n m, (exists x, m = n+x) -> n <=? m = true.
+Proof.
+  intros.
+  destruct H.
+  generalize dependent m.
+  induction n.
+  - reflexivity.
+  - intros.
+    destruct m.
+    + discriminate H.
+    + rewrite add_comm in H. rewrite <- plus_n_Sm in H. injection H as H.
+      rewrite add_comm in H.
+      apply IHn in H. apply H.
+Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+  | [] => False
+  | x' :: l' => x' = x \/ In x l'
+  end.
+
+
+
+Example In_example_1 : In 4 [1; 2; 3; 4; 5].
+Proof.
+  
+  simpl. right. right. right. left. reflexivity.
+Qed.
+
+Example In_example_2 :
+  forall n, In n [2; 4] ->
+  exists n', n = 2 * n'.
+Proof.
+  
+  simpl.
+  intros n [H | [H | []]].
+  - exists 1. rewrite <- H. reflexivity.
+  - exists 2. rewrite <- H. reflexivity.
+Qed.
+
+
+
+
+
+
+Theorem In_map :
+  forall (A B : Type) (f : A -> B) (l : list A) (x : A),
+         In x l ->
+         In (f x) (map f l).
+Proof.
+  intros A B f l x.
+  induction l as [|x' l' IHl'].
+  - 
+    simpl. intros [].
+  - 
+    simpl. intros [H | H].
+    + rewrite H. left. reflexivity.
+    + right. apply IHl'. apply H.
+Qed.
+
+
+
+
+Theorem In_map_iff :
+  forall (A B : Type) (f : A -> B) (l : list A) (y : B),
+         In y (map f l) <->
+         exists x, f x = y /\ In x l.
+Proof.
+  intros A B f l y. split.
+  - 
+    induction l as [| x' l'].
+    + simpl. intros [].
+    + simpl. intros [H | H].
+      * 
+        exists x'. split. apply H. left. reflexivity.
+      * 
+        apply IHl' in H. destruct H as [x [H1 H2]].
+        exists x. split. apply H1. right. apply H2.
+  - 
+    intros [x [H1 H2]]. rewrite <- H1. apply In_map. apply H2.
+Qed.
+
+
+
+Theorem In_app_iff : forall A l l' (a:A),
+  In a (l++l') <-> In a l \/ In a l'.
+Proof.
+  intros A l. induction l as [|a' l' IH].
+  + split. right. apply H. intros [H | H]. destruct H. apply H.
+  + split.
+    - intros [H | H].
+      * left. left. apply H.
+      * simpl. apply or_assoc. right. apply IH. apply H.
+    - intros [H | H].
+      * destruct H as [H' | H'].
+        left. apply H'.
+        right. apply IH. left. apply H'.
+      * right. apply IH. right. apply H.
+Qed.
+
+
+
+
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
+  := match l with
+     | [] => True
+     | (x :: l') => P x /\ All P l'
+     end.
+
+
+
+Lemma contradiction_implies_anything_1 : forall (T : Type) (P : T -> Prop),
+True -> forall x : T, False -> P x.
+
+Proof.
+(* The theorem states that if we have a proof of True and a proof of False,
+     then we can derive any proposition P about an element x of type T.
+We will proceed by contradiction.
+Assume the negation of our goal,
+     that is, there exists an x of type T such that P x is false.
+*)
+  intros T P H True H_contr.
+(* We now have a contradiction: True and False.
+We can use ex_falso_quodlibet
+     to derive any proposition P about an element x of type T.
+*)
+  apply (ex_falso_quodlibet (exists x : T, P x)).
+(* We have shown that our initial assumption (H_contr) leads to a contradiction.
+Therefore, we can conclude that our initial assumption was false, i.e.,
+     for all x of type T, P x is true.
+*)
+  intros x.
+apply H_contr.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1322)
+Error in step "apply (ex_falso_quodlibet (exists x : T, P x)).".
+Message: In environment
+T : Type
+P : T -> Prop
+H : Logic.True
+True : T
+H_contr : False
+Unable to unify "exists x : T, P x" with 
+"P True"..
+Goal: P True.
+
+
+TRYING TO PROVE LEMMA
+Lemma logical_consistency_of_proposition_2 : forall T : Type, forall P : T -> Prop, forall H : Logic.True, forall True : T, forall H_contr : False, P True.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+Lemma factor_is_O:
+  forall n m : nat, n = 0 \/ m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m [Hn | Hm].
+  - 
+    rewrite Hn. reflexivity.
+  - 
+    rewrite Hm. rewrite <- mult_n_O.
+    reflexivity.
+Qed.
+
+
+
+Lemma or_intro_l : forall A B : Prop, A -> A \/ B.
+Proof.
+  intros A B HA.
+  left.
+  apply HA.
+Qed.
+
+
+
+Lemma zero_or_succ :
+  forall n : nat, n = 0 \/ n = S (pred n).
+Proof.
+  
+  intros [|n'].
+  - left. reflexivity.
+  - right. reflexivity.
+Qed.
+
+
+Lemma mult_is_O :
+  forall n m, n * m = 0 -> n = 0 \/ m = 0.
+Proof.
+  intros n m H.
+  destruct n.
+  - left. reflexivity.
+  - right. destruct m.
+    + reflexivity.
+    + discriminate H.
+Qed.
+
+
+
+Theorem or_commut : forall P Q : Prop,
+  P \/ Q  -> Q \/ P.
+Proof.
+  intros P Q [HP | HQ].
+  - right. apply HP.
+  - left. apply HQ.
+Qed.
+
+
+
+
+
+
+
+Module NotPlayground.
+
+Definition not (P:Prop) := P -> False.
+
+Notation "~ x" := (not x) : type_scope.
+
+Check not : Prop -> Prop.
+
+End NotPlayground.
+
+
+
+Theorem ex_falso_quodlibet : forall (P:Prop),
+  False -> P.
+Proof.
+  
+  intros P contra.
+  destruct contra.  Qed.
+
+
+
+
+
+Theorem not_implies_our_not : forall (P:Prop),
+  ~ P -> (forall (Q:Prop), P -> Q).
+Proof.
+  intros P HNP Q contra.
+  unfold not in HNP.
+  apply HNP in contra. destruct contra.
+Qed.
+
+
+
+
+
+
+Theorem zero_not_one : 0 <> 1.
+Proof.
+  
+  unfold not.
+  
+  intros contra.
+  
+  discriminate contra.
+Qed.
+
+
+
+Theorem not_False :
+  ~ False.
+Proof.
+  unfold not. intros H. destruct H. Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  
+  intros P Q [HP HNA]. unfold not in HNA.
+  apply HNA in HP. destruct HP.  Qed.
+
+Theorem double_neg : forall P : Prop,
+  P -> ~~P.
+Proof.
+  
+  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+
+
+
+
+
+
+Definition manual_grade_for_double_neg_inf : option (nat*string) := None.
+
+
+
+Theorem contrapositive : forall (P Q : Prop),
+  (P -> Q) -> (~Q -> ~P).
+Proof.
+  intros P Q HPQ HQ HP.
+  unfold not in HQ. apply HPQ in HP. apply HQ in HP. apply HP.
+Qed.
+
+
+
+Theorem not_both_true_and_false : forall P : Prop,
+  ~ (P /\ ~P).
+Proof.
+  intros P H.
+  apply contradiction_implies_anything with (Q:=False) in H.
+  apply H.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_not_PNP : option (nat*string) := None.
+
+
+
+Theorem de_morgan_not_or : forall (P Q : Prop),
+    ~ (P \/ Q) -> ~P /\ ~Q.
+Proof.
+  intros P Q HPQ.
+  unfold not in HPQ.
+  split.
+  - intros HP. apply or_intro_l  with (B:=Q) in HP. apply HPQ. apply HP.
+  - intros HQ. apply or_intro_l  with (B:=P) in HQ. apply or_commut in HQ. apply HPQ. apply HQ.
+Qed.
+
+
+
+
+Theorem not_true_is_false : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros b H.
+  destruct b eqn:HE.
+  - 
+    unfold not in H.
+    apply ex_falso_quodlibet.
+    apply H. reflexivity.
+  - 
+    reflexivity.
+Qed.
+
+
+
+Theorem not_true_is_false' : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.          
+  - 
+    unfold not in H.
+    exfalso.                
+    apply H. reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma True_is_true : True.
+Proof. apply I. Qed.
+
+
+
+
+
+
+
+Definition disc_fn (n: nat) : Prop :=
+  match n with
+  | O => True
+  | S _ => False
+  end.
+
+Theorem disc_example : forall n, ~ (O = S n).
+Proof.
+  intros n H1.
+  assert (H2 : disc_fn O). { simpl. apply I. }
+  rewrite H1 in H2. simpl in H2. apply H2.
+Qed.
+
+
+
+
+
+
+
+
+Module IffPlayground.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                      (at level 95, no associativity)
+                      : type_scope.
+
+End IffPlayground.
+
+Theorem iff_sym : forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+Proof.
+  
+  intros P Q [HAB HBA].
+  split.
+  -  apply HBA.
+  -  apply HAB.  Qed.
+
+Lemma not_true_iff_false : forall b,
+  b <> true <-> b = false.
+Proof.
+  
+  intros b. split.
+  -  apply not_true_is_false.
+  - 
+    intros H. rewrite H. intros H'. discriminate H'.
+Qed.
+
+
+
+Lemma apply_iff_example1:
+  forall P Q R : Prop, (P <-> Q) -> (Q -> R) -> (P -> R).
+  intros P Q R Hiff H HP. apply H.  apply Hiff. apply HP.
+Qed.
+
+Lemma apply_iff_example2:
+  forall P Q R : Prop, (P <-> Q) -> (P -> R) -> (Q -> R).
+  intros P Q R Hiff H HQ. apply H.  apply Hiff. apply HQ.
+Qed.
+
+
+
+Theorem iff_refl : forall P : Prop,
+  P <-> P.
+Proof.
+  intros P.
+  split. intros H. apply H. intros H. apply H.  Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+  (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof.
+  intros P Q R H1 H2. split.
+  - intros H. apply proj1 in H1. apply H1 in H. apply proj1 in H2. apply H2 in H. apply H.
+  - intros H. apply proj2 in H2. apply H2 in H. apply proj2 in H1. apply H1 in H. apply H.
+Qed.
+
+
+
+Theorem or_distributes_over_and : forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+Proof.
+  intros P Q R.
+  split.
+  -  intros [HP | [HQ HR]].
+    +  split. left. apply HP. left. apply HP.
+    +  split.  right. apply HQ. right. apply HR.
+  -  intros [[HP1 | HQ] [HP2 | HR]].
+    + left. apply HP1.
+    + left. apply HP1.
+    + left. apply HP2.
+    + right. apply and_intro. apply HQ. apply HR.
+Qed.
+
+
+
+
+
+
+
+From Coq Require Import Setoids.Setoid.
+
+
+
+
+
+Lemma mul_eq_0 : forall n m, n * m = 0 <-> n = 0 \/ m = 0.
+Proof.
+  split.
+  - apply mult_is_O.
+  - apply factor_is_O.
+Qed.
+
+Theorem or_assoc :
+  forall P Q R : Prop, P \/ (Q \/ R) <-> (P \/ Q) \/ R.
+Proof.
+  intros P Q R. split.
+  - intros [H | [H | H]].
+    + left. left. apply H.
+    + left. right. apply H.
+    + right. apply H.
+  - intros [[H | H] | H].
+    + left. apply H.
+    + right. left. apply H.
+    + right. right. apply H.
+Qed.
+
+
+
+Lemma mul_eq_0_ternary :
+  forall n m p, n * m * p = 0 <-> n = 0 \/ m = 0 \/ p = 0.
+Proof.
+  intros n m p.
+  rewrite mul_eq_0. rewrite mul_eq_0. rewrite or_assoc.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Definition Even x := exists n : nat, x = double n.
+
+Lemma four_is_Even : Even 4.
+Proof.
+  unfold Even. exists 2. reflexivity.
+Qed.
+
+
+
+Theorem exists_example_2 : forall n,
+  (exists m, n = 4 + m) ->
+  (exists o, n = 2 + o).
+Proof.
+  
+  intros n [m Hm]. 
+  exists (2 + m).
+  apply Hm.  Qed.
+
+
+
+Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+Proof.
+  intros X P H [x E].
+  unfold not in E. apply E. apply H.
+Qed.
+
+
+
+
+Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
+  (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
+Proof.
+  intros X P Q.
+  split.
+  - intros [x [HP | HQ]].
+    + left. exists x. apply HP.
+    + right. exists x. apply HQ.
+  - intros [[x HP] | [x HQ]].
+    + exists x. left. apply HP.
+    + exists x. right. apply HQ.
+Qed.
+
+
+
+Theorem leb_plus_exists : forall n m, n <=? m = true -> exists x, m = n+x.
+Proof.
+  induction n.
+  - intros. exists m. reflexivity.
+  - destruct m.
+    + simpl. discriminate.
+    + simpl.
+      intros H. apply IHn in H. destruct H as [x0 H].
+      rewrite H. exists x0. reflexivity.
+Qed.
+
+Theorem plus_exists_leb : forall n m, (exists x, m = n+x) -> n <=? m = true.
+Proof.
+  intros.
+  destruct H.
+  generalize dependent m.
+  induction n.
+  - reflexivity.
+  - intros.
+    destruct m.
+    + discriminate H.
+    + rewrite add_comm in H. rewrite <- plus_n_Sm in H. injection H as H.
+      rewrite add_comm in H.
+      apply IHn in H. apply H.
+Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+  | [] => False
+  | x' :: l' => x' = x \/ In x l'
+  end.
+
+
+
+Example In_example_1 : In 4 [1; 2; 3; 4; 5].
+Proof.
+  
+  simpl. right. right. right. left. reflexivity.
+Qed.
+
+Example In_example_2 :
+  forall n, In n [2; 4] ->
+  exists n', n = 2 * n'.
+Proof.
+  
+  simpl.
+  intros n [H | [H | []]].
+  - exists 1. rewrite <- H. reflexivity.
+  - exists 2. rewrite <- H. reflexivity.
+Qed.
+
+
+
+
+
+
+Theorem In_map :
+  forall (A B : Type) (f : A -> B) (l : list A) (x : A),
+         In x l ->
+         In (f x) (map f l).
+Proof.
+  intros A B f l x.
+  induction l as [|x' l' IHl'].
+  - 
+    simpl. intros [].
+  - 
+    simpl. intros [H | H].
+    + rewrite H. left. reflexivity.
+    + right. apply IHl'. apply H.
+Qed.
+
+
+
+
+Theorem In_map_iff :
+  forall (A B : Type) (f : A -> B) (l : list A) (y : B),
+         In y (map f l) <->
+         exists x, f x = y /\ In x l.
+Proof.
+  intros A B f l y. split.
+  - 
+    induction l as [| x' l'].
+    + simpl. intros [].
+    + simpl. intros [H | H].
+      * 
+        exists x'. split. apply H. left. reflexivity.
+      * 
+        apply IHl' in H. destruct H as [x [H1 H2]].
+        exists x. split. apply H1. right. apply H2.
+  - 
+    intros [x [H1 H2]]. rewrite <- H1. apply In_map. apply H2.
+Qed.
+
+
+
+Theorem In_app_iff : forall A l l' (a:A),
+  In a (l++l') <-> In a l \/ In a l'.
+Proof.
+  intros A l. induction l as [|a' l' IH].
+  + split. right. apply H. intros [H | H]. destruct H. apply H.
+  + split.
+    - intros [H | H].
+      * left. left. apply H.
+      * simpl. apply or_assoc. right. apply IH. apply H.
+    - intros [H | H].
+      * destruct H as [H' | H'].
+        left. apply H'.
+        right. apply IH. left. apply H'.
+      * right. apply IH. right. apply H.
+Qed.
+
+
+
+
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
+  := match l with
+     | [] => True
+     | (x :: l') => P x /\ All P l'
+     end.
+
+
+
+Lemma logical_consistency_of_proposition_2 : forall T : Type, forall P : T -> Prop, forall H : Logic.True, forall True : T, forall H_contr : False, P True.
+
+Proof.
+(* We are asked to prove a lemma about the logical consistency of a proposition.
+The statement is universally quantified over a type T, a proposition P, a proof of True, and a proof of False.
+The goal is to prove P True under these assumptions.
+The statement is a bit strange because it assumes both True and its negation False, which is contradictory.
+However, in Coq, we can have such contradictory assumptions.
+To prove this lemma, we can use the ex_falso_quodlibet theorem, which states that from a contradiction, we can prove any proposition.
+We first apply the contradiction_implies_anything lemma to derive a proof of P True from the assumption H_contr.
+Then, we apply the True proposition to this proof to obtain the final proof of P True.
+*)
+  intros T P H True H_contr.
+apply (contradiction_implies_anything H_contr).
+apply (ex_falso_quodlibet H_contr).
+apply True.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1322)
+Error in step "apply (contradiction_implies_anything H_contr).".
+Message: In environment
+T : Type
+P : T -> Prop
+H : Logic.True
+True : T
+H_contr : False
+The term "H_contr" has type 
+"False" while it is expected to have type 
+"Prop"..
+Goal: P True.
+
+
+TRYING TO PROVE LEMMA
+Lemma logical_consistency_of_proposition_3 : forall T : Type, forall P : T -> Prop, forall H : Logic.True, forall True : T, forall H_contr : False, P True.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+Lemma factor_is_O:
+  forall n m : nat, n = 0 \/ m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m [Hn | Hm].
+  - 
+    rewrite Hn. reflexivity.
+  - 
+    rewrite Hm. rewrite <- mult_n_O.
+    reflexivity.
+Qed.
+
+
+
+Lemma or_intro_l : forall A B : Prop, A -> A \/ B.
+Proof.
+  intros A B HA.
+  left.
+  apply HA.
+Qed.
+
+
+
+Lemma zero_or_succ :
+  forall n : nat, n = 0 \/ n = S (pred n).
+Proof.
+  
+  intros [|n'].
+  - left. reflexivity.
+  - right. reflexivity.
+Qed.
+
+
+Lemma mult_is_O :
+  forall n m, n * m = 0 -> n = 0 \/ m = 0.
+Proof.
+  intros n m H.
+  destruct n.
+  - left. reflexivity.
+  - right. destruct m.
+    + reflexivity.
+    + discriminate H.
+Qed.
+
+
+
+Theorem or_commut : forall P Q : Prop,
+  P \/ Q  -> Q \/ P.
+Proof.
+  intros P Q [HP | HQ].
+  - right. apply HP.
+  - left. apply HQ.
+Qed.
+
+
+
+
+
+
+
+Module NotPlayground.
+
+Definition not (P:Prop) := P -> False.
+
+Notation "~ x" := (not x) : type_scope.
+
+Check not : Prop -> Prop.
+
+End NotPlayground.
+
+
+
+Theorem ex_falso_quodlibet : forall (P:Prop),
+  False -> P.
+Proof.
+  
+  intros P contra.
+  destruct contra.  Qed.
+
+
+
+
+
+Theorem not_implies_our_not : forall (P:Prop),
+  ~ P -> (forall (Q:Prop), P -> Q).
+Proof.
+  intros P HNP Q contra.
+  unfold not in HNP.
+  apply HNP in contra. destruct contra.
+Qed.
+
+
+
+
+
+
+Theorem zero_not_one : 0 <> 1.
+Proof.
+  
+  unfold not.
+  
+  intros contra.
+  
+  discriminate contra.
+Qed.
+
+
+
+Theorem not_False :
+  ~ False.
+Proof.
+  unfold not. intros H. destruct H. Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  
+  intros P Q [HP HNA]. unfold not in HNA.
+  apply HNA in HP. destruct HP.  Qed.
+
+Theorem double_neg : forall P : Prop,
+  P -> ~~P.
+Proof.
+  
+  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+
+
+
+
+
+
+Definition manual_grade_for_double_neg_inf : option (nat*string) := None.
+
+
+
+Theorem contrapositive : forall (P Q : Prop),
+  (P -> Q) -> (~Q -> ~P).
+Proof.
+  intros P Q HPQ HQ HP.
+  unfold not in HQ. apply HPQ in HP. apply HQ in HP. apply HP.
+Qed.
+
+
+
+Theorem not_both_true_and_false : forall P : Prop,
+  ~ (P /\ ~P).
+Proof.
+  intros P H.
+  apply contradiction_implies_anything with (Q:=False) in H.
+  apply H.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_not_PNP : option (nat*string) := None.
+
+
+
+Theorem de_morgan_not_or : forall (P Q : Prop),
+    ~ (P \/ Q) -> ~P /\ ~Q.
+Proof.
+  intros P Q HPQ.
+  unfold not in HPQ.
+  split.
+  - intros HP. apply or_intro_l  with (B:=Q) in HP. apply HPQ. apply HP.
+  - intros HQ. apply or_intro_l  with (B:=P) in HQ. apply or_commut in HQ. apply HPQ. apply HQ.
+Qed.
+
+
+
+
+Theorem not_true_is_false : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros b H.
+  destruct b eqn:HE.
+  - 
+    unfold not in H.
+    apply ex_falso_quodlibet.
+    apply H. reflexivity.
+  - 
+    reflexivity.
+Qed.
+
+
+
+Theorem not_true_is_false' : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.          
+  - 
+    unfold not in H.
+    exfalso.                
+    apply H. reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma True_is_true : True.
+Proof. apply I. Qed.
+
+
+
+
+
+
+
+Definition disc_fn (n: nat) : Prop :=
+  match n with
+  | O => True
+  | S _ => False
+  end.
+
+Theorem disc_example : forall n, ~ (O = S n).
+Proof.
+  intros n H1.
+  assert (H2 : disc_fn O). { simpl. apply I. }
+  rewrite H1 in H2. simpl in H2. apply H2.
+Qed.
+
+
+
+
+
+
+
+
+Module IffPlayground.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                      (at level 95, no associativity)
+                      : type_scope.
+
+End IffPlayground.
+
+Theorem iff_sym : forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+Proof.
+  
+  intros P Q [HAB HBA].
+  split.
+  -  apply HBA.
+  -  apply HAB.  Qed.
+
+Lemma not_true_iff_false : forall b,
+  b <> true <-> b = false.
+Proof.
+  
+  intros b. split.
+  -  apply not_true_is_false.
+  - 
+    intros H. rewrite H. intros H'. discriminate H'.
+Qed.
+
+
+
+Lemma apply_iff_example1:
+  forall P Q R : Prop, (P <-> Q) -> (Q -> R) -> (P -> R).
+  intros P Q R Hiff H HP. apply H.  apply Hiff. apply HP.
+Qed.
+
+Lemma apply_iff_example2:
+  forall P Q R : Prop, (P <-> Q) -> (P -> R) -> (Q -> R).
+  intros P Q R Hiff H HQ. apply H.  apply Hiff. apply HQ.
+Qed.
+
+
+
+Theorem iff_refl : forall P : Prop,
+  P <-> P.
+Proof.
+  intros P.
+  split. intros H. apply H. intros H. apply H.  Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+  (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof.
+  intros P Q R H1 H2. split.
+  - intros H. apply proj1 in H1. apply H1 in H. apply proj1 in H2. apply H2 in H. apply H.
+  - intros H. apply proj2 in H2. apply H2 in H. apply proj2 in H1. apply H1 in H. apply H.
+Qed.
+
+
+
+Theorem or_distributes_over_and : forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+Proof.
+  intros P Q R.
+  split.
+  -  intros [HP | [HQ HR]].
+    +  split. left. apply HP. left. apply HP.
+    +  split.  right. apply HQ. right. apply HR.
+  -  intros [[HP1 | HQ] [HP2 | HR]].
+    + left. apply HP1.
+    + left. apply HP1.
+    + left. apply HP2.
+    + right. apply and_intro. apply HQ. apply HR.
+Qed.
+
+
+
+
+
+
+
+From Coq Require Import Setoids.Setoid.
+
+
+
+
+
+Lemma mul_eq_0 : forall n m, n * m = 0 <-> n = 0 \/ m = 0.
+Proof.
+  split.
+  - apply mult_is_O.
+  - apply factor_is_O.
+Qed.
+
+Theorem or_assoc :
+  forall P Q R : Prop, P \/ (Q \/ R) <-> (P \/ Q) \/ R.
+Proof.
+  intros P Q R. split.
+  - intros [H | [H | H]].
+    + left. left. apply H.
+    + left. right. apply H.
+    + right. apply H.
+  - intros [[H | H] | H].
+    + left. apply H.
+    + right. left. apply H.
+    + right. right. apply H.
+Qed.
+
+
+
+Lemma mul_eq_0_ternary :
+  forall n m p, n * m * p = 0 <-> n = 0 \/ m = 0 \/ p = 0.
+Proof.
+  intros n m p.
+  rewrite mul_eq_0. rewrite mul_eq_0. rewrite or_assoc.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Definition Even x := exists n : nat, x = double n.
+
+Lemma four_is_Even : Even 4.
+Proof.
+  unfold Even. exists 2. reflexivity.
+Qed.
+
+
+
+Theorem exists_example_2 : forall n,
+  (exists m, n = 4 + m) ->
+  (exists o, n = 2 + o).
+Proof.
+  
+  intros n [m Hm]. 
+  exists (2 + m).
+  apply Hm.  Qed.
+
+
+
+Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+Proof.
+  intros X P H [x E].
+  unfold not in E. apply E. apply H.
+Qed.
+
+
+
+
+Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
+  (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
+Proof.
+  intros X P Q.
+  split.
+  - intros [x [HP | HQ]].
+    + left. exists x. apply HP.
+    + right. exists x. apply HQ.
+  - intros [[x HP] | [x HQ]].
+    + exists x. left. apply HP.
+    + exists x. right. apply HQ.
+Qed.
+
+
+
+Theorem leb_plus_exists : forall n m, n <=? m = true -> exists x, m = n+x.
+Proof.
+  induction n.
+  - intros. exists m. reflexivity.
+  - destruct m.
+    + simpl. discriminate.
+    + simpl.
+      intros H. apply IHn in H. destruct H as [x0 H].
+      rewrite H. exists x0. reflexivity.
+Qed.
+
+Theorem plus_exists_leb : forall n m, (exists x, m = n+x) -> n <=? m = true.
+Proof.
+  intros.
+  destruct H.
+  generalize dependent m.
+  induction n.
+  - reflexivity.
+  - intros.
+    destruct m.
+    + discriminate H.
+    + rewrite add_comm in H. rewrite <- plus_n_Sm in H. injection H as H.
+      rewrite add_comm in H.
+      apply IHn in H. apply H.
+Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+  | [] => False
+  | x' :: l' => x' = x \/ In x l'
+  end.
+
+
+
+Example In_example_1 : In 4 [1; 2; 3; 4; 5].
+Proof.
+  
+  simpl. right. right. right. left. reflexivity.
+Qed.
+
+Example In_example_2 :
+  forall n, In n [2; 4] ->
+  exists n', n = 2 * n'.
+Proof.
+  
+  simpl.
+  intros n [H | [H | []]].
+  - exists 1. rewrite <- H. reflexivity.
+  - exists 2. rewrite <- H. reflexivity.
+Qed.
+
+
+
+
+
+
+Theorem In_map :
+  forall (A B : Type) (f : A -> B) (l : list A) (x : A),
+         In x l ->
+         In (f x) (map f l).
+Proof.
+  intros A B f l x.
+  induction l as [|x' l' IHl'].
+  - 
+    simpl. intros [].
+  - 
+    simpl. intros [H | H].
+    + rewrite H. left. reflexivity.
+    + right. apply IHl'. apply H.
+Qed.
+
+
+
+
+Theorem In_map_iff :
+  forall (A B : Type) (f : A -> B) (l : list A) (y : B),
+         In y (map f l) <->
+         exists x, f x = y /\ In x l.
+Proof.
+  intros A B f l y. split.
+  - 
+    induction l as [| x' l'].
+    + simpl. intros [].
+    + simpl. intros [H | H].
+      * 
+        exists x'. split. apply H. left. reflexivity.
+      * 
+        apply IHl' in H. destruct H as [x [H1 H2]].
+        exists x. split. apply H1. right. apply H2.
+  - 
+    intros [x [H1 H2]]. rewrite <- H1. apply In_map. apply H2.
+Qed.
+
+
+
+Theorem In_app_iff : forall A l l' (a:A),
+  In a (l++l') <-> In a l \/ In a l'.
+Proof.
+  intros A l. induction l as [|a' l' IH].
+  + split. right. apply H. intros [H | H]. destruct H. apply H.
+  + split.
+    - intros [H | H].
+      * left. left. apply H.
+      * simpl. apply or_assoc. right. apply IH. apply H.
+    - intros [H | H].
+      * destruct H as [H' | H'].
+        left. apply H'.
+        right. apply IH. left. apply H'.
+      * right. apply IH. right. apply H.
+Qed.
+
+
+
+
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
+  := match l with
+     | [] => True
+     | (x :: l') => P x /\ All P l'
+     end.
+
+
+
+Lemma logical_consistency_of_proposition_3 : forall T : Type, forall P : T -> Prop, forall H : Logic.True, forall True : T, forall H_contr : False, P True.
+
+Proof.
+(* We are given that T is a type, P is a proposition over T, H is a proof of True, True is a value of type T, and H_contr is a proof of False.
+We need to prove P True.
+*)
+  (* Since H_contr is a proof of False, we can use the ex_falso_quodlibet theorem to derive a proof of any proposition P from a proof of False.
+*)
+  apply (ex_falso_quodlibet H_contr).
+(* Now we have a proof of P True.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1320)
+Error in step "apply (ex_falso_quodlibet H_contr).".
+Message: The variable H_contr was not found in the current
+environment..
+Goal: forall (T : Type) (P : T -> Prop),
+True -> forall True : T, False -> P True.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_forall_type_implies_4 : forall (T : Type) (P : T -> Prop),
+True -> forall True : T, False -> P True.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+Lemma succ_inj : injective S.
+Proof.
+  intros n m H. injection H as H1. apply H1.
+Qed.
+
+
+
+Check @eq : forall A : Type, A -> A -> Prop.
+
+
+
+
+
+
+
+
+
+
+
+Example and_example : 3 + 4 = 7 /\ 2 * 2 = 4.
+
+
+
+Proof.
+  split.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+Lemma and_intro : forall A B : Prop, A -> B -> A /\ B.
+Proof.
+  intros A B HA HB. split.
+  - apply HA.
+  - apply HB.
+Qed.
+
+
+
+Example and_example' : 3 + 4 = 7 /\ 2 * 2 = 4.
+Proof.
+  apply and_intro.
+  -  reflexivity.
+  -  reflexivity.
+Qed.
+
+
+Example and_exercise :
+  forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
+Proof.
+  intros n m H.
+  split.
+  - destruct m in H.
+    + rewrite <- plus_n_O in H. apply H.
+    + rewrite <- plus_n_Sm in H. discriminate H.
+  - destruct n in H.
+    + rewrite -> plus_n_O in H. apply H.
+    + simpl in H. discriminate H.
+Qed.
+
+
+
+
+Lemma and_example2 :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  
+  intros n m H.
+  destruct H as [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2' :
+  forall n m : nat, n = 0 /\ m = 0 -> n + m = 0.
+Proof.
+  intros n m [Hn Hm].
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example2'' :
+  forall n m : nat, n = 0 -> m = 0 -> n + m = 0.
+Proof.
+  intros n m Hn Hm.
+  rewrite Hn. rewrite Hm.
+  reflexivity.
+Qed.
+
+
+
+Lemma and_example3 :
+  forall n m : nat, n + m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m H.
+  apply and_exercise in H.
+  destruct H as [Hn Hm].
+  rewrite Hn. reflexivity.
+Qed.
+
+
+
+Lemma proj1 : forall P Q : Prop,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ.
+  destruct HPQ as [HP _].
+  apply HP.  Qed.
+
+
+Lemma proj2 : forall P Q : Prop,
+  P /\ Q -> Q.
+Proof.
+  intros P Q [_ HQ].
+  apply HQ.
+Qed.
+
+
+
+
+Theorem and_commut : forall P Q : Prop,
+  P /\ Q -> Q /\ P.
+Proof.
+  intros P Q [HP HQ].
+  split.
+    -  apply HQ.
+    -  apply HP.  Qed.
+
+
+
+Theorem and_assoc : forall P Q R : Prop,
+  P /\ (Q /\ R) -> (P /\ Q) /\ R.
+Proof.
+  intros P Q R [HP [HQ HR]].
+  split.
+  + split. apply HP. apply HQ.
+  + apply HR.
+Qed.
+
+
+
+
+Check and : Prop -> Prop -> Prop.
+
+
+
+
+
+
+
+
+Lemma factor_is_O:
+  forall n m : nat, n = 0 \/ m = 0 -> n * m = 0.
+Proof.
+  
+  intros n m [Hn | Hm].
+  - 
+    rewrite Hn. reflexivity.
+  - 
+    rewrite Hm. rewrite <- mult_n_O.
+    reflexivity.
+Qed.
+
+
+
+Lemma or_intro_l : forall A B : Prop, A -> A \/ B.
+Proof.
+  intros A B HA.
+  left.
+  apply HA.
+Qed.
+
+
+
+Lemma zero_or_succ :
+  forall n : nat, n = 0 \/ n = S (pred n).
+Proof.
+  
+  intros [|n'].
+  - left. reflexivity.
+  - right. reflexivity.
+Qed.
+
+
+Lemma mult_is_O :
+  forall n m, n * m = 0 -> n = 0 \/ m = 0.
+Proof.
+  intros n m H.
+  destruct n.
+  - left. reflexivity.
+  - right. destruct m.
+    + reflexivity.
+    + discriminate H.
+Qed.
+
+
+
+Theorem or_commut : forall P Q : Prop,
+  P \/ Q  -> Q \/ P.
+Proof.
+  intros P Q [HP | HQ].
+  - right. apply HP.
+  - left. apply HQ.
+Qed.
+
+
+
+
+
+
+
+Module NotPlayground.
+
+Definition not (P:Prop) := P -> False.
+
+Notation "~ x" := (not x) : type_scope.
+
+Check not : Prop -> Prop.
+
+End NotPlayground.
+
+
+
+Theorem ex_falso_quodlibet : forall (P:Prop),
+  False -> P.
+Proof.
+  
+  intros P contra.
+  destruct contra.  Qed.
+
+
+
+
+
+Theorem not_implies_our_not : forall (P:Prop),
+  ~ P -> (forall (Q:Prop), P -> Q).
+Proof.
+  intros P HNP Q contra.
+  unfold not in HNP.
+  apply HNP in contra. destruct contra.
+Qed.
+
+
+
+
+
+
+Theorem zero_not_one : 0 <> 1.
+Proof.
+  
+  unfold not.
+  
+  intros contra.
+  
+  discriminate contra.
+Qed.
+
+
+
+Theorem not_False :
+  ~ False.
+Proof.
+  unfold not. intros H. destruct H. Qed.
+
+Theorem contradiction_implies_anything : forall P Q : Prop,
+  (P /\ ~P) -> Q.
+Proof.
+  
+  intros P Q [HP HNA]. unfold not in HNA.
+  apply HNA in HP. destruct HP.  Qed.
+
+Theorem double_neg : forall P : Prop,
+  P -> ~~P.
+Proof.
+  
+  intros P H. unfold not. intros G. apply G. apply H.  Qed.
+
+
+
+
+
+
+Definition manual_grade_for_double_neg_inf : option (nat*string) := None.
+
+
+
+Theorem contrapositive : forall (P Q : Prop),
+  (P -> Q) -> (~Q -> ~P).
+Proof.
+  intros P Q HPQ HQ HP.
+  unfold not in HQ. apply HPQ in HP. apply HQ in HP. apply HP.
+Qed.
+
+
+
+Theorem not_both_true_and_false : forall P : Prop,
+  ~ (P /\ ~P).
+Proof.
+  intros P H.
+  apply contradiction_implies_anything with (Q:=False) in H.
+  apply H.
+Qed.
+
+
+
+
+
+
+
+Definition manual_grade_for_informal_not_PNP : option (nat*string) := None.
+
+
+
+Theorem de_morgan_not_or : forall (P Q : Prop),
+    ~ (P \/ Q) -> ~P /\ ~Q.
+Proof.
+  intros P Q HPQ.
+  unfold not in HPQ.
+  split.
+  - intros HP. apply or_intro_l  with (B:=Q) in HP. apply HPQ. apply HP.
+  - intros HQ. apply or_intro_l  with (B:=P) in HQ. apply or_commut in HQ. apply HPQ. apply HQ.
+Qed.
+
+
+
+
+Theorem not_true_is_false : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros b H.
+  destruct b eqn:HE.
+  - 
+    unfold not in H.
+    apply ex_falso_quodlibet.
+    apply H. reflexivity.
+  - 
+    reflexivity.
+Qed.
+
+
+
+Theorem not_true_is_false' : forall b : bool,
+  b <> true -> b = false.
+Proof.
+  intros [] H.          
+  - 
+    unfold not in H.
+    exfalso.                
+    apply H. reflexivity.
+  -  reflexivity.
+Qed.
+
+
+
+
+
+
+Lemma True_is_true : True.
+Proof. apply I. Qed.
+
+
+
+
+
+
+
+Definition disc_fn (n: nat) : Prop :=
+  match n with
+  | O => True
+  | S _ => False
+  end.
+
+Theorem disc_example : forall n, ~ (O = S n).
+Proof.
+  intros n H1.
+  assert (H2 : disc_fn O). { simpl. apply I. }
+  rewrite H1 in H2. simpl in H2. apply H2.
+Qed.
+
+
+
+
+
+
+
+
+Module IffPlayground.
+
+Definition iff (P Q : Prop) := (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q)
+                      (at level 95, no associativity)
+                      : type_scope.
+
+End IffPlayground.
+
+Theorem iff_sym : forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+Proof.
+  
+  intros P Q [HAB HBA].
+  split.
+  -  apply HBA.
+  -  apply HAB.  Qed.
+
+Lemma not_true_iff_false : forall b,
+  b <> true <-> b = false.
+Proof.
+  
+  intros b. split.
+  -  apply not_true_is_false.
+  - 
+    intros H. rewrite H. intros H'. discriminate H'.
+Qed.
+
+
+
+Lemma apply_iff_example1:
+  forall P Q R : Prop, (P <-> Q) -> (Q -> R) -> (P -> R).
+  intros P Q R Hiff H HP. apply H.  apply Hiff. apply HP.
+Qed.
+
+Lemma apply_iff_example2:
+  forall P Q R : Prop, (P <-> Q) -> (P -> R) -> (Q -> R).
+  intros P Q R Hiff H HQ. apply H.  apply Hiff. apply HQ.
+Qed.
+
+
+
+Theorem iff_refl : forall P : Prop,
+  P <-> P.
+Proof.
+  intros P.
+  split. intros H. apply H. intros H. apply H.  Qed.
+
+Theorem iff_trans : forall P Q R : Prop,
+  (P <-> Q) -> (Q <-> R) -> (P <-> R).
+Proof.
+  intros P Q R H1 H2. split.
+  - intros H. apply proj1 in H1. apply H1 in H. apply proj1 in H2. apply H2 in H. apply H.
+  - intros H. apply proj2 in H2. apply H2 in H. apply proj2 in H1. apply H1 in H. apply H.
+Qed.
+
+
+
+Theorem or_distributes_over_and : forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+Proof.
+  intros P Q R.
+  split.
+  -  intros [HP | [HQ HR]].
+    +  split. left. apply HP. left. apply HP.
+    +  split.  right. apply HQ. right. apply HR.
+  -  intros [[HP1 | HQ] [HP2 | HR]].
+    + left. apply HP1.
+    + left. apply HP1.
+    + left. apply HP2.
+    + right. apply and_intro. apply HQ. apply HR.
+Qed.
+
+
+
+
+
+
+
+From Coq Require Import Setoids.Setoid.
+
+
+
+
+
+Lemma mul_eq_0 : forall n m, n * m = 0 <-> n = 0 \/ m = 0.
+Proof.
+  split.
+  - apply mult_is_O.
+  - apply factor_is_O.
+Qed.
+
+Theorem or_assoc :
+  forall P Q R : Prop, P \/ (Q \/ R) <-> (P \/ Q) \/ R.
+Proof.
+  intros P Q R. split.
+  - intros [H | [H | H]].
+    + left. left. apply H.
+    + left. right. apply H.
+    + right. apply H.
+  - intros [[H | H] | H].
+    + left. apply H.
+    + right. left. apply H.
+    + right. right. apply H.
+Qed.
+
+
+
+Lemma mul_eq_0_ternary :
+  forall n m p, n * m * p = 0 <-> n = 0 \/ m = 0 \/ p = 0.
+Proof.
+  intros n m p.
+  rewrite mul_eq_0. rewrite mul_eq_0. rewrite or_assoc.
+  reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+Definition Even x := exists n : nat, x = double n.
+
+Lemma four_is_Even : Even 4.
+Proof.
+  unfold Even. exists 2. reflexivity.
+Qed.
+
+
+
+Theorem exists_example_2 : forall n,
+  (exists m, n = 4 + m) ->
+  (exists o, n = 2 + o).
+Proof.
+  
+  intros n [m Hm]. 
+  exists (2 + m).
+  apply Hm.  Qed.
+
+
+
+Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+Proof.
+  intros X P H [x E].
+  unfold not in E. apply E. apply H.
+Qed.
+
+
+
+
+Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
+  (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
+Proof.
+  intros X P Q.
+  split.
+  - intros [x [HP | HQ]].
+    + left. exists x. apply HP.
+    + right. exists x. apply HQ.
+  - intros [[x HP] | [x HQ]].
+    + exists x. left. apply HP.
+    + exists x. right. apply HQ.
+Qed.
+
+
+
+Theorem leb_plus_exists : forall n m, n <=? m = true -> exists x, m = n+x.
+Proof.
+  induction n.
+  - intros. exists m. reflexivity.
+  - destruct m.
+    + simpl. discriminate.
+    + simpl.
+      intros H. apply IHn in H. destruct H as [x0 H].
+      rewrite H. exists x0. reflexivity.
+Qed.
+
+Theorem plus_exists_leb : forall n m, (exists x, m = n+x) -> n <=? m = true.
+Proof.
+  intros.
+  destruct H.
+  generalize dependent m.
+  induction n.
+  - reflexivity.
+  - intros.
+    destruct m.
+    + discriminate H.
+    + rewrite add_comm in H. rewrite <- plus_n_Sm in H. injection H as H.
+      rewrite add_comm in H.
+      apply IHn in H. apply H.
+Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+  | [] => False
+  | x' :: l' => x' = x \/ In x l'
+  end.
+
+
+
+Example In_example_1 : In 4 [1; 2; 3; 4; 5].
+Proof.
+  
+  simpl. right. right. right. left. reflexivity.
+Qed.
+
+Example In_example_2 :
+  forall n, In n [2; 4] ->
+  exists n', n = 2 * n'.
+Proof.
+  
+  simpl.
+  intros n [H | [H | []]].
+  - exists 1. rewrite <- H. reflexivity.
+  - exists 2. rewrite <- H. reflexivity.
+Qed.
+
+
+
+
+
+
+Theorem In_map :
+  forall (A B : Type) (f : A -> B) (l : list A) (x : A),
+         In x l ->
+         In (f x) (map f l).
+Proof.
+  intros A B f l x.
+  induction l as [|x' l' IHl'].
+  - 
+    simpl. intros [].
+  - 
+    simpl. intros [H | H].
+    + rewrite H. left. reflexivity.
+    + right. apply IHl'. apply H.
+Qed.
+
+
+
+
+Theorem In_map_iff :
+  forall (A B : Type) (f : A -> B) (l : list A) (y : B),
+         In y (map f l) <->
+         exists x, f x = y /\ In x l.
+Proof.
+  intros A B f l y. split.
+  - 
+    induction l as [| x' l'].
+    + simpl. intros [].
+    + simpl. intros [H | H].
+      * 
+        exists x'. split. apply H. left. reflexivity.
+      * 
+        apply IHl' in H. destruct H as [x [H1 H2]].
+        exists x. split. apply H1. right. apply H2.
+  - 
+    intros [x [H1 H2]]. rewrite <- H1. apply In_map. apply H2.
+Qed.
+
+
+
+Theorem In_app_iff : forall A l l' (a:A),
+  In a (l++l') <-> In a l \/ In a l'.
+Proof.
+  intros A l. induction l as [|a' l' IH].
+  + split. right. apply H. intros [H | H]. destruct H. apply H.
+  + split.
+    - intros [H | H].
+      * left. left. apply H.
+      * simpl. apply or_assoc. right. apply IH. apply H.
+    - intros [H | H].
+      * destruct H as [H' | H'].
+        left. apply H'.
+        right. apply IH. left. apply H'.
+      * right. apply IH. right. apply H.
+Qed.
+
+
+
+
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
+  := match l with
+     | [] => True
+     | (x :: l') => P x /\ All P l'
+     end.
+
+
+
+Lemma helper_lemma_forall_type_implies_4 : forall (T : Type) (P : T -> Prop),
+True -> forall True : T, False -> P True.
+
+Proof.
+(* The goal is to prove the lemma "helper_lemma_forall_type_implies_4".
+We are given a type T and a proposition P that depends on an element of type T.
+We are also given two propositions: True and False.
+The goal is to prove that if we have a proof of True, then for any element True of type T,
+     we can derive a proof of P True.
+To prove this lemma, we will use the axiom of the excluded middle, which states that for any proposition P,
+     either P is true or ~P is true.
+In other words, P is false if and only if ~P is true.
+We will first assume that we have a proof of True.
+Then, we will use the axiom of the excluded middle
+     to derive a proof of P True.
+Since we have a proof of True, we know that P True is true.
+Therefore,
+     we can apply the introduction rule for the implication to conclude the proof of the lemma.
+*)
+  intros T P H True False.
+apply (axiom_of_excluded_middle True (fun x => P x)).
+- intros H1.
+apply H.
+apply H1.
+- intros H2.
+apply False.
+apply H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1322)
+Error in step "apply (axiom_of_excluded_middle True (fun x => P x)).".
+Message: The variable axiom_of_excluded_middle was not found
+in the current environment..
+Goal: P True.
+
+
+TRYING TO PROVE LEMMA
+Lemma logical_consequence_of_true_5 : forall T : Type, forall P : T -> Prop, forall H : Logic.True, forall True : T, forall False : Logic.False, P True.
+
+
+Error proving All_In
+MAX LEMMA DEPTH REACHED. GIVING UP.

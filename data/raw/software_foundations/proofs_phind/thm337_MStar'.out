@@ -1,0 +1,4967 @@
+PROVING MStar'
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+Theorem ev_double : forall n,
+  ev (double n).
+Proof.
+  induction n.
+  - apply ev_0.
+  - simpl. apply ev_SS. apply IHn.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem ev_inversion : forall (n : nat),
+    ev n ->
+    (n = 0) \/ (exists n', n = S (S n') /\ ev n').
+Proof.
+  intros n E.  destruct E as [ | n' E'] eqn:EE.
+  - 
+    left. reflexivity.
+  - 
+    right. exists n'. split. reflexivity. apply E'.
+Qed.
+
+
+
+
+
+Theorem evSS_ev : forall n, ev (S (S n)) -> ev n.
+Proof.
+  intros n H. apply ev_inversion in H.  destruct H as [H0|H1].
+  - discriminate.
+  - destruct H1 as [n' [Hnm Hev]]. injection Hnm as Heq.
+    rewrite Heq. apply Hev.
+Qed.
+
+
+
+Theorem evSS_ev' : forall n,
+  ev (S (S n)) -> ev n.
+Proof.
+  intros n E.  inversion E as [| n' E' Heq].
+  
+  apply E'.
+Qed.
+
+
+
+Theorem one_not_even : ~ ev 1.
+Proof.
+  intros H. apply ev_inversion in H.  destruct H as [ | [m [Hm _]]].
+  - discriminate.
+  - discriminate.
+Qed.
+
+Theorem one_not_even' : ~ ev 1.
+Proof.
+  intros H. inversion H. Qed.
+
+
+
+Theorem SSSSev__even : forall n,
+  ev (S (S (S (S n)))) -> ev n.
+Proof.
+  intros n H. inversion H as [| n0 H0 Heq0]. inversion H0 as [| n1 H1 Heq1].
+  apply H1.
+Qed.
+
+
+
+
+Theorem ev5_nonsense :
+  ev 5 -> 2 + 2 = 9.
+Proof.
+  intros H.
+  inversion H as [| n0 H0 Heq0].
+  inversion H0 as [| n1 H1 Heq1].
+  inversion H1.
+Qed.
+
+
+
+
+Theorem inversion_ex1 : forall (n m o : nat),
+  [n; m] = [o; o] -> [n] = [m].
+Proof.
+  intros n m o H. inversion H. reflexivity. Qed.
+
+Theorem inversion_ex2 : forall (n : nat),
+  S n = O -> 2 + 2 = 5.
+Proof.
+  intros n contra. inversion contra. Qed.
+
+
+
+
+
+Lemma ev_Even_firsttry : forall n,
+  ev n -> Even n.
+Proof.
+   unfold Even.
+
+
+
+  intros n E. inversion E as [EQ' | n' E' EQ'].
+  -  exists 0. reflexivity.
+  - 
+    assert (H: (exists k', n' = double k')
+               -> (exists n0, S (S n') = double n0)).
+        { intros [k' EQ'']. exists (S k'). simpl.
+          rewrite <- EQ''. reflexivity. }
+    apply H.
+
+    
+
+    generalize dependent E'.
+
+    
+Abort.
+
+
+
+
+
+
+
+
+
+
+Lemma ev_Even : forall n,
+  ev n -> Even n.
+Proof.
+  intros n E.
+  induction E as [|n' E' IH].
+  - 
+    unfold Even. exists 0. reflexivity.
+  - 
+    unfold Even in IH.
+    destruct IH as [k Hk].
+    rewrite Hk.
+    unfold Even. exists (S k). simpl. reflexivity.
+Qed.
+
+
+
+
+
+Theorem ev_Even_iff : forall n,
+  ev n <-> Even n.
+Proof.
+  intros n. split.
+  -  apply ev_Even.
+  -  unfold Even. intros [k Hk]. rewrite Hk. apply ev_double.
+Qed.
+
+
+
+
+
+
+Theorem ev_sum : forall n m, ev n -> ev m -> ev (n + m).
+Proof.
+  intros n m En Em.
+  induction En.
+  - apply Em.
+  - simpl. apply ev_SS. apply IHEn.
+Qed.
+
+
+
+
+Inductive ev' : nat -> Prop :=
+  | ev'_0 : ev' 0
+  | ev'_2 : ev' 2
+  | ev'_sum n m (Hn : ev' n) (Hm : ev' m) : ev' (n + m).
+
+
+
+Theorem ev'_ev : forall n, ev' n <-> ev n.
+Proof.
+  intros n.
+  split.
+  - intros H. induction H.
+    + apply ev_0.
+    + apply ev_SS. apply ev_0.
+    + apply ev_sum. apply IHev'1. apply IHev'2.
+  - intros H. induction H.
+    + apply ev'_0.
+    + rewrite <- plus_1_l with (S n). rewrite <- plus_n_Sm. rewrite <- plus_1_l.
+      rewrite add_assoc. apply ev'_sum.
+      * apply ev'_2.
+      * apply IHev.
+Qed.
+
+
+
+Theorem ev_ev__ev : forall n m,
+  ev (n+m) -> ev n -> ev m.
+  
+Proof.
+  intros n m.
+  intros E1 E2.
+  induction E2.
+  - apply E1.
+  - simpl in E1. inversion E1 as [| sum E3 H]. apply (IHE2 E3).
+Qed.
+
+
+
+
+Theorem ev_plus_plus : forall n m p,
+  ev (n+m) -> ev (n+p) -> ev (m+p).
+Proof.
+  intros n m p Enm Enp.
+  apply ev_ev__ev with (n + n).
+  - assert (ev ((n + m) + (n + p))) as H.
+      { apply ev_sum. apply Enm. apply Enp. }
+    rewrite add_comm with n m in H.
+    rewrite <- add_assoc with m n (n + p) in H.
+    rewrite add_assoc with n n p in H.
+    rewrite add_comm with (n + n) p in H.
+    rewrite add_assoc with m p (n + n) in H.
+    rewrite add_comm with (m + p) (n + n) in H.
+    apply H.
+  - rewrite <- double_plus. apply ev_double.
+Qed.
+
+
+
+
+
+
+
+Module Playground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)                : le n n
+  | le_S (n m : nat) (H : le n m) : le n (S m).
+
+Notation "n <= m" := (le n m).
+
+
+
+
+
+
+
+Theorem test_le1 :
+  3 <= 3.
+Proof.
+  
+  apply le_n.  Qed.
+
+Theorem test_le2 :
+  3 <= 6.
+Proof.
+  
+  apply le_S. apply le_S. apply le_S. apply le_n.  Qed.
+
+Theorem test_le3 :
+  (2 <= 1) -> 2 + 2 = 5.
+Proof.
+  
+  intros H. inversion H. inversion H2.  Qed.
+
+
+
+Definition lt (n m : nat) := le (S n) m.
+
+Notation "m < n" := (lt m n).
+
+End Playground.
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_is_total : forall n m, total_relation n m.
+  Proof.
+  intros n m. apply (total_rel n m). Qed.
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_is_empty : forall n m, ~ empty_relation n m.
+  Proof.
+  intros n m H.
+  inversion H.
+Qed.
+
+
+
+
+
+
+
+Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
+Proof.
+  intros m n o Emn Eno.
+  induction Eno as [|o Eno IH].
+  - apply Emn.
+  - apply (le_S m o IH).
+Qed.
+
+Theorem O_le_n : forall n,
+  0 <= n.
+Proof.
+  intros n.
+  induction n.
+  - apply le_n.
+  - apply (le_S 0 n IHn).
+Qed.
+
+Theorem n_le_m__Sn_le_Sm : forall n m,
+  n <= m -> S n <= S m.
+Proof.
+  intros n m H.
+  induction H as [|m H IH].
+  - apply le_n.
+  - apply (le_S (S n) (S m) IH).
+Qed.
+
+Theorem Sn_le_Sm__n_le_m : forall n m,
+  S n <= S m -> n <= m.
+Proof.
+  intros n m H.
+  induction m.
+  - inversion H as [H0 | zero H1 H2]. apply le_n. inversion H1.
+  - inversion H as [H0 | Sm H1 H2]. apply le_n. apply (le_S n m (IHm H1)).
+Qed.
+
+Theorem lt_ge_cases : forall n m,
+  n < m \/ n >= m.
+Proof.
+  intros n m.
+  destruct m.
+  - right. apply O_le_n.
+  - induction n.
+    + left. apply n_le_m__Sn_le_Sm. apply O_le_n.
+    + destruct IHn.
+      * destruct H.
+        right. apply le_n.
+        left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply le_S. apply H.
+Qed.
+
+Theorem le_plus_l : forall a b,
+  a <= a + b.
+Proof.
+  intros a b.
+  induction b.
+  - rewrite add_0_r. apply le_n.
+  - rewrite <- plus_n_Sm. apply (le_S a (a + b) IHb).
+Qed.
+
+Theorem plus_le : forall n1 n2 m,
+  n1 + n2 <= m ->
+  n1 <= m /\ n2 <= m.
+Proof.
+  intros n1 n2 m H.
+  induction H.
+  - split.
+    + apply le_plus_l.
+    + rewrite add_comm. apply le_plus_l.
+  - destruct IHle as [H1 H2].
+    split.
+    + apply (le_S n1 m H1).
+    + apply (le_S n2 m H2).
+Qed.
+
+Theorem add_le_cases : forall n m p q,
+  n + m <= p + q -> n <= p \/ m <= q.
+  
+Proof.
+  induction n.
+  - left. apply O_le_n.
+  - intros. destruct p.
+    + right. apply plus_le in H.
+      destruct H as [H1 H2].
+      rewrite plus_O_n in H1.
+      apply H2.
+    + simpl in H.
+      rewrite plus_n_Sm with n m in H.
+      rewrite plus_n_Sm with p q in H.
+      apply IHn in H. destruct H.
+      * left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply Sn_le_Sm__n_le_m. apply H.
+Qed.
+
+Theorem plus_le_compat_l : forall n m p,
+  n <= m ->
+  p + n <= p + m.
+Proof.
+  intros n m p.
+  induction p.
+  - intros. rewrite plus_O_n. rewrite plus_O_n. apply H.
+  - intros. simpl. apply n_le_m__Sn_le_Sm. apply (IHp H).
+Qed.
+
+Theorem plus_le_compat_r : forall n m p,
+  n <= m ->
+  n + p <= m + p.
+Proof.
+  intros n m p H.
+  rewrite add_comm with n p.
+  rewrite add_comm with m p.
+  apply plus_le_compat_l.
+  apply H.
+Qed.
+
+Theorem le_plus_trans : forall n m p,
+  n <= m ->
+  n <= m + p.
+Proof.
+  intros n m p.
+  generalize dependent n.
+  generalize dependent m.
+  induction p.
+  - intros. rewrite add_comm. rewrite plus_O_n. apply H.
+  - intros. destruct H.
+    + apply le_plus_l.
+    + simpl.
+      apply IHp in H.
+      apply le_S in H. rewrite plus_n_Sm in H.
+      apply (le_S n (m + S p) H).
+Qed.
+
+Theorem n_lt_m__n_le_m : forall n m,
+  n < m ->
+  n <= m.
+Proof.
+  intros n m H.
+  apply le_S in H.
+  apply Sn_le_Sm__n_le_m in H.
+  apply H.
+Qed.
+
+Theorem plus_lt : forall n1 n2 m,
+  n1 + n2 < m ->
+  n1 < m /\ n2 < m.
+Proof.
+  intros n1 n2 m H.
+  inversion H as [H12 | n H12 Hm].
+  - split.
+    + apply n_le_m__Sn_le_Sm. apply le_plus_l.
+    + apply n_le_m__Sn_le_Sm. rewrite add_comm. apply le_plus_l.
+  - rewrite <- Hm in H. apply Sn_le_Sm__n_le_m in H.
+    apply plus_le in H. destruct H as [H1 H2].
+    split.
+    + apply n_le_m__Sn_le_Sm. apply H1.
+    + apply n_le_m__Sn_le_Sm. apply H2.
+Qed.
+
+
+
+Theorem leb_complete : forall n m,
+  n <=? m = true -> n <= m.
+Proof.
+  intros n m.
+  generalize dependent m.
+  induction n.
+  - intros. apply O_le_n.
+  - intros. destruct m.
+    + discriminate.
+    + simpl in H. apply IHn in H. apply n_le_m__Sn_le_Sm. apply H.
+Qed.
+
+Theorem leb_correct : forall n m,
+  n <= m ->
+  n <=? m = true.
+  
+Proof.
+  intros n m.
+  generalize dependent n.
+  induction m.
+  - intros. inversion H. reflexivity.
+  - destruct n.
+    + reflexivity.
+    + intros. apply Sn_le_Sm__n_le_m in H. apply (IHm n H).
+Qed.
+
+
+
+Theorem leb_iff : forall n m,
+  n <=? m = true <-> n <= m.
+Proof.
+  intros n m.
+  split.
+  - apply leb_complete.
+  - apply leb_correct.
+Qed.
+
+Theorem leb_true_trans : forall n m o,
+  n <=? m = true -> m <=? o = true -> n <=? o = true.
+Proof.
+  intros n m o Hnm Hmo.
+  apply leb_complete in Hnm.
+  apply leb_complete in Hmo.
+  apply leb_correct.
+  apply le_trans with m.
+  apply Hnm. apply Hmo.
+Qed.
+
+
+Module R.
+
+
+
+Inductive R : nat -> nat -> nat -> Prop :=
+  | c1                                     : R 0     0     0
+  | c2 m n o (H : R m     n     o        ) : R (S m) n     (S o)
+  | c3 m n o (H : R m     n     o        ) : R m     (S n) (S o)
+  | c4 m n o (H : R (S m) (S n) (S (S o))) : R m     n     o
+  | c5 m n o (H : R m     n     o        ) : R n     m     o
+.
+
+
+
+
+
+
+Definition manual_grade_for_R_provability : option (nat*string) := None.
+
+
+
+
+Definition fR : nat -> nat -> nat
+  := plus.
+
+Theorem R_equiv_fR : forall m n o, R m n o <-> fR m n = o.
+Proof.
+  split.
+  - intros. induction H.
+    + reflexivity.
+    + simpl. f_equal. apply IHR.
+    + rewrite <- plus_n_Sm. f_equal. apply IHR.
+    + simpl in IHR.
+      apply S_injective in IHR. rewrite <- plus_n_Sm in IHR.
+      apply S_injective in IHR.
+      apply IHR.
+    + rewrite add_comm in IHR. apply IHR.
+  - intros.
+    rewrite <- H.
+    destruct H.
+    induction m.
+      + induction n. apply c1. apply c3. apply IHn.
+      + simpl. apply c2. apply IHm.
+Qed.
+
+
+End R.
+
+
+
+Inductive subseq : list nat -> list nat -> Prop :=
+  | subseq0 l : subseq [] l
+  | subseq1 x l1 l2 (H : subseq l1 l2) : subseq (x :: l1) (x :: l2)
+  | subseq2 x l1 l2 (H : subseq l1 l2) : subseq l1 (x :: l2)
+.
+
+Theorem subseq_refl : forall (l : list nat), subseq l l.
+Proof.
+  induction l as [| x l IH].
+  - apply subseq0.
+  - apply (subseq1 x l l IH).
+Qed.
+
+Theorem subseq_app : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l1 (l2 ++ l3).
+Proof.
+  intros.
+  induction H as [| x l1 l2 H IH | x l1 l2 H IH].
+  - apply subseq0.
+  - simpl. apply (subseq1 x l1 (l2 ++ l3) IH).
+  - simpl. apply (subseq2 x l1 (l2 ++ l3) IH).
+Qed.
+
+Theorem subseq_trans : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l2 l3 ->
+  subseq l1 l3.
+Proof.
+  
+  intros l1 l2 l3 H12 H23.
+  generalize dependent l1.
+  induction H23 as [| x l2 l3 H23 IH | x l2 l3 H23 IH].
+  - intros.
+    assert (l1 = []) as Hl1. inversion H12. reflexivity.
+    rewrite Hl1. apply subseq0.
+  - intros. inversion H12 as [| x' l1' l2' H12' | x' l1' l2' H12'].
+    + apply subseq0.
+    + apply (subseq1 x l1' l3 (IH l1' H12')).
+    + apply (subseq2 x l1 l3 (IH l1 H12')).
+  - intros. apply (subseq2 x l1 l3 (IH l1 H12)).
+Qed.
+
+
+
+
+
+
+
+
+
+
+Module bin1.
+Inductive bin : Type :=
+  | Z
+  | B0 (n : bin)
+  | B1 (n : bin).
+End bin1.
+
+
+
+
+Module bin2.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 (n : bin) : bin
+  | B1 (n : bin) : bin.
+End bin2.
+
+
+
+Module bin3.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 : bin -> bin
+  | B1 : bin -> bin.
+End bin3.
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive reg_exp (T : Type) : Type :=
+  | EmptySet
+  | EmptyStr
+  | Char (t : T)
+  | App (r1 r2 : reg_exp T)
+  | Union (r1 r2 : reg_exp T)
+  | Star (r : reg_exp T).
+
+Arguments EmptySet {T}.
+Arguments EmptyStr {T}.
+Arguments Char {T} _.
+Arguments App {T} _ _.
+Arguments Union {T} _ _.
+Arguments Star {T} _.
+
+
+
+
+
+
+
+Reserved Notation "s =~ re" (at level 80).
+
+Inductive exp_match {T} : list T -> reg_exp T -> Prop :=
+  | MEmpty : [] =~ EmptyStr
+  | MChar x : [x] =~ (Char x)
+  | MApp s1 re1 s2 re2
+             (H1 : s1 =~ re1)
+             (H2 : s2 =~ re2)
+           : (s1 ++ s2) =~ (App re1 re2)
+  | MUnionL s1 re1 re2
+                (H1 : s1 =~ re1)
+              : s1 =~ (Union re1 re2)
+  | MUnionR re1 s2 re2
+                (H2 : s2 =~ re2)
+              : s2 =~ (Union re1 re2)
+  | MStar0 re : [] =~ (Star re)
+  | MStarApp s1 s2 re
+                 (H1 : s1 =~ re)
+                 (H2 : s2 =~ (Star re))
+               : (s1 ++ s2) =~ (Star re)
+
+  where "s =~ re" := (exp_match s re).
+
+
+
+Example reg_exp_ex1 : [1] =~ Char 1.
+Proof.
+  apply MChar.
+Qed.
+
+Example reg_exp_ex2 : [1; 2] =~ App (Char 1) (Char 2).
+Proof.
+  apply (MApp [1]).
+  - apply MChar.
+  - apply MChar.
+Qed.
+
+
+
+Example reg_exp_ex3 : ~ ([1; 2] =~ Char 1).
+Proof.
+  intros H. inversion H.
+Qed.
+
+
+
+Fixpoint reg_exp_of_list {T} (l : list T) :=
+  match l with
+  | [] => EmptyStr
+  | x :: l' => App (Char x) (reg_exp_of_list l')
+  end.
+
+Example reg_exp_ex4 : [1; 2; 3] =~ reg_exp_of_list [1; 2; 3].
+Proof.
+  simpl. apply (MApp [1]).
+  { apply MChar. }
+  apply (MApp [2]).
+  { apply MChar. }
+  apply (MApp [3]).
+  { apply MChar. }
+  apply MEmpty.
+Qed.
+
+
+
+Lemma MStar1 :
+  forall T s (re : reg_exp T) ,
+    s =~ re ->
+    s =~ Star re.
+Proof.
+  intros T s re H.
+  rewrite <- (app_nil_r _ s).
+  apply MStarApp.
+  - apply H.
+  - apply MStar0.
+Qed.
+
+
+
+
+
+Lemma empty_is_empty : forall T (s : list T),
+  ~ (s =~ EmptySet).
+Proof.
+  unfold not. intros. inversion H.
+Qed.
+
+Lemma MUnion' : forall T (s : list T) (re1 re2 : reg_exp T),
+  s =~ re1 \/ s =~ re2 ->
+  s =~ Union re1 re2.
+Proof.
+  intros.
+  destruct H.
+  - apply MUnionL. apply H.
+  - apply MUnionR. apply H.
+Qed.
+
+
+
+
+
+Lemma MStar' : forall T (ss : list (list T)) (re : reg_exp T),
+  (forall s, In s ss -> s =~ re) ->
+  fold app ss [] =~ Star re.
+
+Proof.
+(* We will proceed by induction on the list ss.
+*)
+  intros T ss re H.
+(* We will need the following lemmas later.
+*)
+  assert (H1 : forall s, In s ss -> s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H2.
+(* We will need the following lemmas later.
+*)
+  assert (H3 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H4.
+(* We will need the following lemmas later.
+*)
+  assert (H5 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H6.
+(* We will need the following lemmas later.
+*)
+  assert (H7 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H8.
+(* We will need the following lemmas later.
+*)
+  assert (H9 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H10.
+(* We will need the following lemmas later.
+*)
+  assert (H11 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H12.
+(* We will need the following lemmas later.
+*)
+  assert (H13 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H14.
+(* We will need the following lemmas later.
+*)
+  assert (H15 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H16.
+(* We will need the following lemmas later.
+*)
+  assert (H17 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H18.
+(* We will need the following lemmas later.
+*)
+  assert (H19 : s =~ re).
+(* This is our induction hypothesis.
+*)
+  intros s H20.
+(* We will need the following lemmas later.
+*)
+  assert (H21 : s =~ re).
+(* This is our induction hypothesis.
+*)
+ 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1446)
+Error in step "intros s H4.".
+Message: s is already used..
+Goal: s =~ re.
+
+
+TRYING TO PROVE LEMMA
+Lemma list_regex_matching_helper_0 : forall T : Type, forall ss : list (list T), forall re : reg_exp T, forall H : forall s : list T, In s ss -> s =~ re, forall s : list T, forall H2 : In s ss, s =~ re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+Theorem ev_double : forall n,
+  ev (double n).
+Proof.
+  induction n.
+  - apply ev_0.
+  - simpl. apply ev_SS. apply IHn.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem ev_inversion : forall (n : nat),
+    ev n ->
+    (n = 0) \/ (exists n', n = S (S n') /\ ev n').
+Proof.
+  intros n E.  destruct E as [ | n' E'] eqn:EE.
+  - 
+    left. reflexivity.
+  - 
+    right. exists n'. split. reflexivity. apply E'.
+Qed.
+
+
+
+
+
+Theorem evSS_ev : forall n, ev (S (S n)) -> ev n.
+Proof.
+  intros n H. apply ev_inversion in H.  destruct H as [H0|H1].
+  - discriminate.
+  - destruct H1 as [n' [Hnm Hev]]. injection Hnm as Heq.
+    rewrite Heq. apply Hev.
+Qed.
+
+
+
+Theorem evSS_ev' : forall n,
+  ev (S (S n)) -> ev n.
+Proof.
+  intros n E.  inversion E as [| n' E' Heq].
+  
+  apply E'.
+Qed.
+
+
+
+Theorem one_not_even : ~ ev 1.
+Proof.
+  intros H. apply ev_inversion in H.  destruct H as [ | [m [Hm _]]].
+  - discriminate.
+  - discriminate.
+Qed.
+
+Theorem one_not_even' : ~ ev 1.
+Proof.
+  intros H. inversion H. Qed.
+
+
+
+Theorem SSSSev__even : forall n,
+  ev (S (S (S (S n)))) -> ev n.
+Proof.
+  intros n H. inversion H as [| n0 H0 Heq0]. inversion H0 as [| n1 H1 Heq1].
+  apply H1.
+Qed.
+
+
+
+
+Theorem ev5_nonsense :
+  ev 5 -> 2 + 2 = 9.
+Proof.
+  intros H.
+  inversion H as [| n0 H0 Heq0].
+  inversion H0 as [| n1 H1 Heq1].
+  inversion H1.
+Qed.
+
+
+
+
+Theorem inversion_ex1 : forall (n m o : nat),
+  [n; m] = [o; o] -> [n] = [m].
+Proof.
+  intros n m o H. inversion H. reflexivity. Qed.
+
+Theorem inversion_ex2 : forall (n : nat),
+  S n = O -> 2 + 2 = 5.
+Proof.
+  intros n contra. inversion contra. Qed.
+
+
+
+
+
+Lemma ev_Even_firsttry : forall n,
+  ev n -> Even n.
+Proof.
+   unfold Even.
+
+
+
+  intros n E. inversion E as [EQ' | n' E' EQ'].
+  -  exists 0. reflexivity.
+  - 
+    assert (H: (exists k', n' = double k')
+               -> (exists n0, S (S n') = double n0)).
+        { intros [k' EQ'']. exists (S k'). simpl.
+          rewrite <- EQ''. reflexivity. }
+    apply H.
+
+    
+
+    generalize dependent E'.
+
+    
+Abort.
+
+
+
+
+
+
+
+
+
+
+Lemma ev_Even : forall n,
+  ev n -> Even n.
+Proof.
+  intros n E.
+  induction E as [|n' E' IH].
+  - 
+    unfold Even. exists 0. reflexivity.
+  - 
+    unfold Even in IH.
+    destruct IH as [k Hk].
+    rewrite Hk.
+    unfold Even. exists (S k). simpl. reflexivity.
+Qed.
+
+
+
+
+
+Theorem ev_Even_iff : forall n,
+  ev n <-> Even n.
+Proof.
+  intros n. split.
+  -  apply ev_Even.
+  -  unfold Even. intros [k Hk]. rewrite Hk. apply ev_double.
+Qed.
+
+
+
+
+
+
+Theorem ev_sum : forall n m, ev n -> ev m -> ev (n + m).
+Proof.
+  intros n m En Em.
+  induction En.
+  - apply Em.
+  - simpl. apply ev_SS. apply IHEn.
+Qed.
+
+
+
+
+Inductive ev' : nat -> Prop :=
+  | ev'_0 : ev' 0
+  | ev'_2 : ev' 2
+  | ev'_sum n m (Hn : ev' n) (Hm : ev' m) : ev' (n + m).
+
+
+
+Theorem ev'_ev : forall n, ev' n <-> ev n.
+Proof.
+  intros n.
+  split.
+  - intros H. induction H.
+    + apply ev_0.
+    + apply ev_SS. apply ev_0.
+    + apply ev_sum. apply IHev'1. apply IHev'2.
+  - intros H. induction H.
+    + apply ev'_0.
+    + rewrite <- plus_1_l with (S n). rewrite <- plus_n_Sm. rewrite <- plus_1_l.
+      rewrite add_assoc. apply ev'_sum.
+      * apply ev'_2.
+      * apply IHev.
+Qed.
+
+
+
+Theorem ev_ev__ev : forall n m,
+  ev (n+m) -> ev n -> ev m.
+  
+Proof.
+  intros n m.
+  intros E1 E2.
+  induction E2.
+  - apply E1.
+  - simpl in E1. inversion E1 as [| sum E3 H]. apply (IHE2 E3).
+Qed.
+
+
+
+
+Theorem ev_plus_plus : forall n m p,
+  ev (n+m) -> ev (n+p) -> ev (m+p).
+Proof.
+  intros n m p Enm Enp.
+  apply ev_ev__ev with (n + n).
+  - assert (ev ((n + m) + (n + p))) as H.
+      { apply ev_sum. apply Enm. apply Enp. }
+    rewrite add_comm with n m in H.
+    rewrite <- add_assoc with m n (n + p) in H.
+    rewrite add_assoc with n n p in H.
+    rewrite add_comm with (n + n) p in H.
+    rewrite add_assoc with m p (n + n) in H.
+    rewrite add_comm with (m + p) (n + n) in H.
+    apply H.
+  - rewrite <- double_plus. apply ev_double.
+Qed.
+
+
+
+
+
+
+
+Module Playground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)                : le n n
+  | le_S (n m : nat) (H : le n m) : le n (S m).
+
+Notation "n <= m" := (le n m).
+
+
+
+
+
+
+
+Theorem test_le1 :
+  3 <= 3.
+Proof.
+  
+  apply le_n.  Qed.
+
+Theorem test_le2 :
+  3 <= 6.
+Proof.
+  
+  apply le_S. apply le_S. apply le_S. apply le_n.  Qed.
+
+Theorem test_le3 :
+  (2 <= 1) -> 2 + 2 = 5.
+Proof.
+  
+  intros H. inversion H. inversion H2.  Qed.
+
+
+
+Definition lt (n m : nat) := le (S n) m.
+
+Notation "m < n" := (lt m n).
+
+End Playground.
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_is_total : forall n m, total_relation n m.
+  Proof.
+  intros n m. apply (total_rel n m). Qed.
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_is_empty : forall n m, ~ empty_relation n m.
+  Proof.
+  intros n m H.
+  inversion H.
+Qed.
+
+
+
+
+
+
+
+Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
+Proof.
+  intros m n o Emn Eno.
+  induction Eno as [|o Eno IH].
+  - apply Emn.
+  - apply (le_S m o IH).
+Qed.
+
+Theorem O_le_n : forall n,
+  0 <= n.
+Proof.
+  intros n.
+  induction n.
+  - apply le_n.
+  - apply (le_S 0 n IHn).
+Qed.
+
+Theorem n_le_m__Sn_le_Sm : forall n m,
+  n <= m -> S n <= S m.
+Proof.
+  intros n m H.
+  induction H as [|m H IH].
+  - apply le_n.
+  - apply (le_S (S n) (S m) IH).
+Qed.
+
+Theorem Sn_le_Sm__n_le_m : forall n m,
+  S n <= S m -> n <= m.
+Proof.
+  intros n m H.
+  induction m.
+  - inversion H as [H0 | zero H1 H2]. apply le_n. inversion H1.
+  - inversion H as [H0 | Sm H1 H2]. apply le_n. apply (le_S n m (IHm H1)).
+Qed.
+
+Theorem lt_ge_cases : forall n m,
+  n < m \/ n >= m.
+Proof.
+  intros n m.
+  destruct m.
+  - right. apply O_le_n.
+  - induction n.
+    + left. apply n_le_m__Sn_le_Sm. apply O_le_n.
+    + destruct IHn.
+      * destruct H.
+        right. apply le_n.
+        left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply le_S. apply H.
+Qed.
+
+Theorem le_plus_l : forall a b,
+  a <= a + b.
+Proof.
+  intros a b.
+  induction b.
+  - rewrite add_0_r. apply le_n.
+  - rewrite <- plus_n_Sm. apply (le_S a (a + b) IHb).
+Qed.
+
+Theorem plus_le : forall n1 n2 m,
+  n1 + n2 <= m ->
+  n1 <= m /\ n2 <= m.
+Proof.
+  intros n1 n2 m H.
+  induction H.
+  - split.
+    + apply le_plus_l.
+    + rewrite add_comm. apply le_plus_l.
+  - destruct IHle as [H1 H2].
+    split.
+    + apply (le_S n1 m H1).
+    + apply (le_S n2 m H2).
+Qed.
+
+Theorem add_le_cases : forall n m p q,
+  n + m <= p + q -> n <= p \/ m <= q.
+  
+Proof.
+  induction n.
+  - left. apply O_le_n.
+  - intros. destruct p.
+    + right. apply plus_le in H.
+      destruct H as [H1 H2].
+      rewrite plus_O_n in H1.
+      apply H2.
+    + simpl in H.
+      rewrite plus_n_Sm with n m in H.
+      rewrite plus_n_Sm with p q in H.
+      apply IHn in H. destruct H.
+      * left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply Sn_le_Sm__n_le_m. apply H.
+Qed.
+
+Theorem plus_le_compat_l : forall n m p,
+  n <= m ->
+  p + n <= p + m.
+Proof.
+  intros n m p.
+  induction p.
+  - intros. rewrite plus_O_n. rewrite plus_O_n. apply H.
+  - intros. simpl. apply n_le_m__Sn_le_Sm. apply (IHp H).
+Qed.
+
+Theorem plus_le_compat_r : forall n m p,
+  n <= m ->
+  n + p <= m + p.
+Proof.
+  intros n m p H.
+  rewrite add_comm with n p.
+  rewrite add_comm with m p.
+  apply plus_le_compat_l.
+  apply H.
+Qed.
+
+Theorem le_plus_trans : forall n m p,
+  n <= m ->
+  n <= m + p.
+Proof.
+  intros n m p.
+  generalize dependent n.
+  generalize dependent m.
+  induction p.
+  - intros. rewrite add_comm. rewrite plus_O_n. apply H.
+  - intros. destruct H.
+    + apply le_plus_l.
+    + simpl.
+      apply IHp in H.
+      apply le_S in H. rewrite plus_n_Sm in H.
+      apply (le_S n (m + S p) H).
+Qed.
+
+Theorem n_lt_m__n_le_m : forall n m,
+  n < m ->
+  n <= m.
+Proof.
+  intros n m H.
+  apply le_S in H.
+  apply Sn_le_Sm__n_le_m in H.
+  apply H.
+Qed.
+
+Theorem plus_lt : forall n1 n2 m,
+  n1 + n2 < m ->
+  n1 < m /\ n2 < m.
+Proof.
+  intros n1 n2 m H.
+  inversion H as [H12 | n H12 Hm].
+  - split.
+    + apply n_le_m__Sn_le_Sm. apply le_plus_l.
+    + apply n_le_m__Sn_le_Sm. rewrite add_comm. apply le_plus_l.
+  - rewrite <- Hm in H. apply Sn_le_Sm__n_le_m in H.
+    apply plus_le in H. destruct H as [H1 H2].
+    split.
+    + apply n_le_m__Sn_le_Sm. apply H1.
+    + apply n_le_m__Sn_le_Sm. apply H2.
+Qed.
+
+
+
+Theorem leb_complete : forall n m,
+  n <=? m = true -> n <= m.
+Proof.
+  intros n m.
+  generalize dependent m.
+  induction n.
+  - intros. apply O_le_n.
+  - intros. destruct m.
+    + discriminate.
+    + simpl in H. apply IHn in H. apply n_le_m__Sn_le_Sm. apply H.
+Qed.
+
+Theorem leb_correct : forall n m,
+  n <= m ->
+  n <=? m = true.
+  
+Proof.
+  intros n m.
+  generalize dependent n.
+  induction m.
+  - intros. inversion H. reflexivity.
+  - destruct n.
+    + reflexivity.
+    + intros. apply Sn_le_Sm__n_le_m in H. apply (IHm n H).
+Qed.
+
+
+
+Theorem leb_iff : forall n m,
+  n <=? m = true <-> n <= m.
+Proof.
+  intros n m.
+  split.
+  - apply leb_complete.
+  - apply leb_correct.
+Qed.
+
+Theorem leb_true_trans : forall n m o,
+  n <=? m = true -> m <=? o = true -> n <=? o = true.
+Proof.
+  intros n m o Hnm Hmo.
+  apply leb_complete in Hnm.
+  apply leb_complete in Hmo.
+  apply leb_correct.
+  apply le_trans with m.
+  apply Hnm. apply Hmo.
+Qed.
+
+
+Module R.
+
+
+
+Inductive R : nat -> nat -> nat -> Prop :=
+  | c1                                     : R 0     0     0
+  | c2 m n o (H : R m     n     o        ) : R (S m) n     (S o)
+  | c3 m n o (H : R m     n     o        ) : R m     (S n) (S o)
+  | c4 m n o (H : R (S m) (S n) (S (S o))) : R m     n     o
+  | c5 m n o (H : R m     n     o        ) : R n     m     o
+.
+
+
+
+
+
+
+Definition manual_grade_for_R_provability : option (nat*string) := None.
+
+
+
+
+Definition fR : nat -> nat -> nat
+  := plus.
+
+Theorem R_equiv_fR : forall m n o, R m n o <-> fR m n = o.
+Proof.
+  split.
+  - intros. induction H.
+    + reflexivity.
+    + simpl. f_equal. apply IHR.
+    + rewrite <- plus_n_Sm. f_equal. apply IHR.
+    + simpl in IHR.
+      apply S_injective in IHR. rewrite <- plus_n_Sm in IHR.
+      apply S_injective in IHR.
+      apply IHR.
+    + rewrite add_comm in IHR. apply IHR.
+  - intros.
+    rewrite <- H.
+    destruct H.
+    induction m.
+      + induction n. apply c1. apply c3. apply IHn.
+      + simpl. apply c2. apply IHm.
+Qed.
+
+
+End R.
+
+
+
+Inductive subseq : list nat -> list nat -> Prop :=
+  | subseq0 l : subseq [] l
+  | subseq1 x l1 l2 (H : subseq l1 l2) : subseq (x :: l1) (x :: l2)
+  | subseq2 x l1 l2 (H : subseq l1 l2) : subseq l1 (x :: l2)
+.
+
+Theorem subseq_refl : forall (l : list nat), subseq l l.
+Proof.
+  induction l as [| x l IH].
+  - apply subseq0.
+  - apply (subseq1 x l l IH).
+Qed.
+
+Theorem subseq_app : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l1 (l2 ++ l3).
+Proof.
+  intros.
+  induction H as [| x l1 l2 H IH | x l1 l2 H IH].
+  - apply subseq0.
+  - simpl. apply (subseq1 x l1 (l2 ++ l3) IH).
+  - simpl. apply (subseq2 x l1 (l2 ++ l3) IH).
+Qed.
+
+Theorem subseq_trans : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l2 l3 ->
+  subseq l1 l3.
+Proof.
+  
+  intros l1 l2 l3 H12 H23.
+  generalize dependent l1.
+  induction H23 as [| x l2 l3 H23 IH | x l2 l3 H23 IH].
+  - intros.
+    assert (l1 = []) as Hl1. inversion H12. reflexivity.
+    rewrite Hl1. apply subseq0.
+  - intros. inversion H12 as [| x' l1' l2' H12' | x' l1' l2' H12'].
+    + apply subseq0.
+    + apply (subseq1 x l1' l3 (IH l1' H12')).
+    + apply (subseq2 x l1 l3 (IH l1 H12')).
+  - intros. apply (subseq2 x l1 l3 (IH l1 H12)).
+Qed.
+
+
+
+
+
+
+
+
+
+
+Module bin1.
+Inductive bin : Type :=
+  | Z
+  | B0 (n : bin)
+  | B1 (n : bin).
+End bin1.
+
+
+
+
+Module bin2.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 (n : bin) : bin
+  | B1 (n : bin) : bin.
+End bin2.
+
+
+
+Module bin3.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 : bin -> bin
+  | B1 : bin -> bin.
+End bin3.
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive reg_exp (T : Type) : Type :=
+  | EmptySet
+  | EmptyStr
+  | Char (t : T)
+  | App (r1 r2 : reg_exp T)
+  | Union (r1 r2 : reg_exp T)
+  | Star (r : reg_exp T).
+
+Arguments EmptySet {T}.
+Arguments EmptyStr {T}.
+Arguments Char {T} _.
+Arguments App {T} _ _.
+Arguments Union {T} _ _.
+Arguments Star {T} _.
+
+
+
+
+
+
+
+Reserved Notation "s =~ re" (at level 80).
+
+Inductive exp_match {T} : list T -> reg_exp T -> Prop :=
+  | MEmpty : [] =~ EmptyStr
+  | MChar x : [x] =~ (Char x)
+  | MApp s1 re1 s2 re2
+             (H1 : s1 =~ re1)
+             (H2 : s2 =~ re2)
+           : (s1 ++ s2) =~ (App re1 re2)
+  | MUnionL s1 re1 re2
+                (H1 : s1 =~ re1)
+              : s1 =~ (Union re1 re2)
+  | MUnionR re1 s2 re2
+                (H2 : s2 =~ re2)
+              : s2 =~ (Union re1 re2)
+  | MStar0 re : [] =~ (Star re)
+  | MStarApp s1 s2 re
+                 (H1 : s1 =~ re)
+                 (H2 : s2 =~ (Star re))
+               : (s1 ++ s2) =~ (Star re)
+
+  where "s =~ re" := (exp_match s re).
+
+
+
+Example reg_exp_ex1 : [1] =~ Char 1.
+Proof.
+  apply MChar.
+Qed.
+
+Example reg_exp_ex2 : [1; 2] =~ App (Char 1) (Char 2).
+Proof.
+  apply (MApp [1]).
+  - apply MChar.
+  - apply MChar.
+Qed.
+
+
+
+Example reg_exp_ex3 : ~ ([1; 2] =~ Char 1).
+Proof.
+  intros H. inversion H.
+Qed.
+
+
+
+Fixpoint reg_exp_of_list {T} (l : list T) :=
+  match l with
+  | [] => EmptyStr
+  | x :: l' => App (Char x) (reg_exp_of_list l')
+  end.
+
+Example reg_exp_ex4 : [1; 2; 3] =~ reg_exp_of_list [1; 2; 3].
+Proof.
+  simpl. apply (MApp [1]).
+  { apply MChar. }
+  apply (MApp [2]).
+  { apply MChar. }
+  apply (MApp [3]).
+  { apply MChar. }
+  apply MEmpty.
+Qed.
+
+
+
+Lemma MStar1 :
+  forall T s (re : reg_exp T) ,
+    s =~ re ->
+    s =~ Star re.
+Proof.
+  intros T s re H.
+  rewrite <- (app_nil_r _ s).
+  apply MStarApp.
+  - apply H.
+  - apply MStar0.
+Qed.
+
+
+
+
+
+Lemma empty_is_empty : forall T (s : list T),
+  ~ (s =~ EmptySet).
+Proof.
+  unfold not. intros. inversion H.
+Qed.
+
+Lemma MUnion' : forall T (s : list T) (re1 re2 : reg_exp T),
+  s =~ re1 \/ s =~ re2 ->
+  s =~ Union re1 re2.
+Proof.
+  intros.
+  destruct H.
+  - apply MUnionL. apply H.
+  - apply MUnionR. apply H.
+Qed.
+
+
+
+
+
+Lemma list_regex_matching_helper_0 : forall T : Type, forall ss : list (list T), forall re : reg_exp T, forall H : forall s : list T, In s ss -> s =~ re, forall s : list T, forall H2 : In s ss, s =~ re.
+
+Proof.
+(* We will prove the lemma by induction on the list ss.
+*)
+  intros T ss re H.
+(* Base case: ss is empty.
+*)
+  induction ss as [|s ss' IHss'].
+- (* If ss is empty, then the statement is false.
+*)
+    intros s H2.
+(* We can use the induction hypothesis on ss'.
+*)
+    apply IHss' in H2.
+(* We have H2 : In s ss' and H : forall s : list T, In s ss' -> s =~ re.
+*)
+    (* We can apply H to s.
+*)
+    apply H in H2.
+(* Now we have H2 : s =~ re.
+*)
+    (* We can apply H2 to finish the proof.
+*)
+    exact H2.
+- (* Inductive case: ss is s :: ss'.
+*)
+    (* We can destruct H2 to get H2 : In s (s :: ss').
+*)
+    destruct H2 as [H2 | H2'].
+- (* If H2 : In s (s :: ss'), then we can apply H to s.
+*)
+      apply H in H2.
+(* Now we have H2 : s =~ re.
+*)
+      (* We can apply H2 to finish the proof.
+*)
+      exact H2.
+- (* If H2' : In s ss', then we can use the induction hypothesis on ss'.
+*)
+      apply IHss' in H2'.
+(* We have H2' : In s ss' and IHss' : forall s : list T, In s ss' -> s =~ re.
+*)
+      (* We can apply IHss' to s.
+*)
+      apply IHss' in H2'.
+(* Now we have H2' : s =~ re.
+*)
+      (* We can apply H2' to finish the proof.
+*)
+      exact H2'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1446)
+Error in step "apply IHss' in H2.".
+Message: The variable IHss' was not found in the current
+environment..
+Goal: s =~ re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_empty_string_match_1 : forall T : Type, forall re : reg_exp T, forall H : forall s : list T, In s [ ] -> s =~ re, forall s : list T, forall H2 : In s [ ], s =~ re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+Theorem ev_double : forall n,
+  ev (double n).
+Proof.
+  induction n.
+  - apply ev_0.
+  - simpl. apply ev_SS. apply IHn.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem ev_inversion : forall (n : nat),
+    ev n ->
+    (n = 0) \/ (exists n', n = S (S n') /\ ev n').
+Proof.
+  intros n E.  destruct E as [ | n' E'] eqn:EE.
+  - 
+    left. reflexivity.
+  - 
+    right. exists n'. split. reflexivity. apply E'.
+Qed.
+
+
+
+
+
+Theorem evSS_ev : forall n, ev (S (S n)) -> ev n.
+Proof.
+  intros n H. apply ev_inversion in H.  destruct H as [H0|H1].
+  - discriminate.
+  - destruct H1 as [n' [Hnm Hev]]. injection Hnm as Heq.
+    rewrite Heq. apply Hev.
+Qed.
+
+
+
+Theorem evSS_ev' : forall n,
+  ev (S (S n)) -> ev n.
+Proof.
+  intros n E.  inversion E as [| n' E' Heq].
+  
+  apply E'.
+Qed.
+
+
+
+Theorem one_not_even : ~ ev 1.
+Proof.
+  intros H. apply ev_inversion in H.  destruct H as [ | [m [Hm _]]].
+  - discriminate.
+  - discriminate.
+Qed.
+
+Theorem one_not_even' : ~ ev 1.
+Proof.
+  intros H. inversion H. Qed.
+
+
+
+Theorem SSSSev__even : forall n,
+  ev (S (S (S (S n)))) -> ev n.
+Proof.
+  intros n H. inversion H as [| n0 H0 Heq0]. inversion H0 as [| n1 H1 Heq1].
+  apply H1.
+Qed.
+
+
+
+
+Theorem ev5_nonsense :
+  ev 5 -> 2 + 2 = 9.
+Proof.
+  intros H.
+  inversion H as [| n0 H0 Heq0].
+  inversion H0 as [| n1 H1 Heq1].
+  inversion H1.
+Qed.
+
+
+
+
+Theorem inversion_ex1 : forall (n m o : nat),
+  [n; m] = [o; o] -> [n] = [m].
+Proof.
+  intros n m o H. inversion H. reflexivity. Qed.
+
+Theorem inversion_ex2 : forall (n : nat),
+  S n = O -> 2 + 2 = 5.
+Proof.
+  intros n contra. inversion contra. Qed.
+
+
+
+
+
+Lemma ev_Even_firsttry : forall n,
+  ev n -> Even n.
+Proof.
+   unfold Even.
+
+
+
+  intros n E. inversion E as [EQ' | n' E' EQ'].
+  -  exists 0. reflexivity.
+  - 
+    assert (H: (exists k', n' = double k')
+               -> (exists n0, S (S n') = double n0)).
+        { intros [k' EQ'']. exists (S k'). simpl.
+          rewrite <- EQ''. reflexivity. }
+    apply H.
+
+    
+
+    generalize dependent E'.
+
+    
+Abort.
+
+
+
+
+
+
+
+
+
+
+Lemma ev_Even : forall n,
+  ev n -> Even n.
+Proof.
+  intros n E.
+  induction E as [|n' E' IH].
+  - 
+    unfold Even. exists 0. reflexivity.
+  - 
+    unfold Even in IH.
+    destruct IH as [k Hk].
+    rewrite Hk.
+    unfold Even. exists (S k). simpl. reflexivity.
+Qed.
+
+
+
+
+
+Theorem ev_Even_iff : forall n,
+  ev n <-> Even n.
+Proof.
+  intros n. split.
+  -  apply ev_Even.
+  -  unfold Even. intros [k Hk]. rewrite Hk. apply ev_double.
+Qed.
+
+
+
+
+
+
+Theorem ev_sum : forall n m, ev n -> ev m -> ev (n + m).
+Proof.
+  intros n m En Em.
+  induction En.
+  - apply Em.
+  - simpl. apply ev_SS. apply IHEn.
+Qed.
+
+
+
+
+Inductive ev' : nat -> Prop :=
+  | ev'_0 : ev' 0
+  | ev'_2 : ev' 2
+  | ev'_sum n m (Hn : ev' n) (Hm : ev' m) : ev' (n + m).
+
+
+
+Theorem ev'_ev : forall n, ev' n <-> ev n.
+Proof.
+  intros n.
+  split.
+  - intros H. induction H.
+    + apply ev_0.
+    + apply ev_SS. apply ev_0.
+    + apply ev_sum. apply IHev'1. apply IHev'2.
+  - intros H. induction H.
+    + apply ev'_0.
+    + rewrite <- plus_1_l with (S n). rewrite <- plus_n_Sm. rewrite <- plus_1_l.
+      rewrite add_assoc. apply ev'_sum.
+      * apply ev'_2.
+      * apply IHev.
+Qed.
+
+
+
+Theorem ev_ev__ev : forall n m,
+  ev (n+m) -> ev n -> ev m.
+  
+Proof.
+  intros n m.
+  intros E1 E2.
+  induction E2.
+  - apply E1.
+  - simpl in E1. inversion E1 as [| sum E3 H]. apply (IHE2 E3).
+Qed.
+
+
+
+
+Theorem ev_plus_plus : forall n m p,
+  ev (n+m) -> ev (n+p) -> ev (m+p).
+Proof.
+  intros n m p Enm Enp.
+  apply ev_ev__ev with (n + n).
+  - assert (ev ((n + m) + (n + p))) as H.
+      { apply ev_sum. apply Enm. apply Enp. }
+    rewrite add_comm with n m in H.
+    rewrite <- add_assoc with m n (n + p) in H.
+    rewrite add_assoc with n n p in H.
+    rewrite add_comm with (n + n) p in H.
+    rewrite add_assoc with m p (n + n) in H.
+    rewrite add_comm with (m + p) (n + n) in H.
+    apply H.
+  - rewrite <- double_plus. apply ev_double.
+Qed.
+
+
+
+
+
+
+
+Module Playground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)                : le n n
+  | le_S (n m : nat) (H : le n m) : le n (S m).
+
+Notation "n <= m" := (le n m).
+
+
+
+
+
+
+
+Theorem test_le1 :
+  3 <= 3.
+Proof.
+  
+  apply le_n.  Qed.
+
+Theorem test_le2 :
+  3 <= 6.
+Proof.
+  
+  apply le_S. apply le_S. apply le_S. apply le_n.  Qed.
+
+Theorem test_le3 :
+  (2 <= 1) -> 2 + 2 = 5.
+Proof.
+  
+  intros H. inversion H. inversion H2.  Qed.
+
+
+
+Definition lt (n m : nat) := le (S n) m.
+
+Notation "m < n" := (lt m n).
+
+End Playground.
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_is_total : forall n m, total_relation n m.
+  Proof.
+  intros n m. apply (total_rel n m). Qed.
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_is_empty : forall n m, ~ empty_relation n m.
+  Proof.
+  intros n m H.
+  inversion H.
+Qed.
+
+
+
+
+
+
+
+Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
+Proof.
+  intros m n o Emn Eno.
+  induction Eno as [|o Eno IH].
+  - apply Emn.
+  - apply (le_S m o IH).
+Qed.
+
+Theorem O_le_n : forall n,
+  0 <= n.
+Proof.
+  intros n.
+  induction n.
+  - apply le_n.
+  - apply (le_S 0 n IHn).
+Qed.
+
+Theorem n_le_m__Sn_le_Sm : forall n m,
+  n <= m -> S n <= S m.
+Proof.
+  intros n m H.
+  induction H as [|m H IH].
+  - apply le_n.
+  - apply (le_S (S n) (S m) IH).
+Qed.
+
+Theorem Sn_le_Sm__n_le_m : forall n m,
+  S n <= S m -> n <= m.
+Proof.
+  intros n m H.
+  induction m.
+  - inversion H as [H0 | zero H1 H2]. apply le_n. inversion H1.
+  - inversion H as [H0 | Sm H1 H2]. apply le_n. apply (le_S n m (IHm H1)).
+Qed.
+
+Theorem lt_ge_cases : forall n m,
+  n < m \/ n >= m.
+Proof.
+  intros n m.
+  destruct m.
+  - right. apply O_le_n.
+  - induction n.
+    + left. apply n_le_m__Sn_le_Sm. apply O_le_n.
+    + destruct IHn.
+      * destruct H.
+        right. apply le_n.
+        left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply le_S. apply H.
+Qed.
+
+Theorem le_plus_l : forall a b,
+  a <= a + b.
+Proof.
+  intros a b.
+  induction b.
+  - rewrite add_0_r. apply le_n.
+  - rewrite <- plus_n_Sm. apply (le_S a (a + b) IHb).
+Qed.
+
+Theorem plus_le : forall n1 n2 m,
+  n1 + n2 <= m ->
+  n1 <= m /\ n2 <= m.
+Proof.
+  intros n1 n2 m H.
+  induction H.
+  - split.
+    + apply le_plus_l.
+    + rewrite add_comm. apply le_plus_l.
+  - destruct IHle as [H1 H2].
+    split.
+    + apply (le_S n1 m H1).
+    + apply (le_S n2 m H2).
+Qed.
+
+Theorem add_le_cases : forall n m p q,
+  n + m <= p + q -> n <= p \/ m <= q.
+  
+Proof.
+  induction n.
+  - left. apply O_le_n.
+  - intros. destruct p.
+    + right. apply plus_le in H.
+      destruct H as [H1 H2].
+      rewrite plus_O_n in H1.
+      apply H2.
+    + simpl in H.
+      rewrite plus_n_Sm with n m in H.
+      rewrite plus_n_Sm with p q in H.
+      apply IHn in H. destruct H.
+      * left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply Sn_le_Sm__n_le_m. apply H.
+Qed.
+
+Theorem plus_le_compat_l : forall n m p,
+  n <= m ->
+  p + n <= p + m.
+Proof.
+  intros n m p.
+  induction p.
+  - intros. rewrite plus_O_n. rewrite plus_O_n. apply H.
+  - intros. simpl. apply n_le_m__Sn_le_Sm. apply (IHp H).
+Qed.
+
+Theorem plus_le_compat_r : forall n m p,
+  n <= m ->
+  n + p <= m + p.
+Proof.
+  intros n m p H.
+  rewrite add_comm with n p.
+  rewrite add_comm with m p.
+  apply plus_le_compat_l.
+  apply H.
+Qed.
+
+Theorem le_plus_trans : forall n m p,
+  n <= m ->
+  n <= m + p.
+Proof.
+  intros n m p.
+  generalize dependent n.
+  generalize dependent m.
+  induction p.
+  - intros. rewrite add_comm. rewrite plus_O_n. apply H.
+  - intros. destruct H.
+    + apply le_plus_l.
+    + simpl.
+      apply IHp in H.
+      apply le_S in H. rewrite plus_n_Sm in H.
+      apply (le_S n (m + S p) H).
+Qed.
+
+Theorem n_lt_m__n_le_m : forall n m,
+  n < m ->
+  n <= m.
+Proof.
+  intros n m H.
+  apply le_S in H.
+  apply Sn_le_Sm__n_le_m in H.
+  apply H.
+Qed.
+
+Theorem plus_lt : forall n1 n2 m,
+  n1 + n2 < m ->
+  n1 < m /\ n2 < m.
+Proof.
+  intros n1 n2 m H.
+  inversion H as [H12 | n H12 Hm].
+  - split.
+    + apply n_le_m__Sn_le_Sm. apply le_plus_l.
+    + apply n_le_m__Sn_le_Sm. rewrite add_comm. apply le_plus_l.
+  - rewrite <- Hm in H. apply Sn_le_Sm__n_le_m in H.
+    apply plus_le in H. destruct H as [H1 H2].
+    split.
+    + apply n_le_m__Sn_le_Sm. apply H1.
+    + apply n_le_m__Sn_le_Sm. apply H2.
+Qed.
+
+
+
+Theorem leb_complete : forall n m,
+  n <=? m = true -> n <= m.
+Proof.
+  intros n m.
+  generalize dependent m.
+  induction n.
+  - intros. apply O_le_n.
+  - intros. destruct m.
+    + discriminate.
+    + simpl in H. apply IHn in H. apply n_le_m__Sn_le_Sm. apply H.
+Qed.
+
+Theorem leb_correct : forall n m,
+  n <= m ->
+  n <=? m = true.
+  
+Proof.
+  intros n m.
+  generalize dependent n.
+  induction m.
+  - intros. inversion H. reflexivity.
+  - destruct n.
+    + reflexivity.
+    + intros. apply Sn_le_Sm__n_le_m in H. apply (IHm n H).
+Qed.
+
+
+
+Theorem leb_iff : forall n m,
+  n <=? m = true <-> n <= m.
+Proof.
+  intros n m.
+  split.
+  - apply leb_complete.
+  - apply leb_correct.
+Qed.
+
+Theorem leb_true_trans : forall n m o,
+  n <=? m = true -> m <=? o = true -> n <=? o = true.
+Proof.
+  intros n m o Hnm Hmo.
+  apply leb_complete in Hnm.
+  apply leb_complete in Hmo.
+  apply leb_correct.
+  apply le_trans with m.
+  apply Hnm. apply Hmo.
+Qed.
+
+
+Module R.
+
+
+
+Inductive R : nat -> nat -> nat -> Prop :=
+  | c1                                     : R 0     0     0
+  | c2 m n o (H : R m     n     o        ) : R (S m) n     (S o)
+  | c3 m n o (H : R m     n     o        ) : R m     (S n) (S o)
+  | c4 m n o (H : R (S m) (S n) (S (S o))) : R m     n     o
+  | c5 m n o (H : R m     n     o        ) : R n     m     o
+.
+
+
+
+
+
+
+Definition manual_grade_for_R_provability : option (nat*string) := None.
+
+
+
+
+Definition fR : nat -> nat -> nat
+  := plus.
+
+Theorem R_equiv_fR : forall m n o, R m n o <-> fR m n = o.
+Proof.
+  split.
+  - intros. induction H.
+    + reflexivity.
+    + simpl. f_equal. apply IHR.
+    + rewrite <- plus_n_Sm. f_equal. apply IHR.
+    + simpl in IHR.
+      apply S_injective in IHR. rewrite <- plus_n_Sm in IHR.
+      apply S_injective in IHR.
+      apply IHR.
+    + rewrite add_comm in IHR. apply IHR.
+  - intros.
+    rewrite <- H.
+    destruct H.
+    induction m.
+      + induction n. apply c1. apply c3. apply IHn.
+      + simpl. apply c2. apply IHm.
+Qed.
+
+
+End R.
+
+
+
+Inductive subseq : list nat -> list nat -> Prop :=
+  | subseq0 l : subseq [] l
+  | subseq1 x l1 l2 (H : subseq l1 l2) : subseq (x :: l1) (x :: l2)
+  | subseq2 x l1 l2 (H : subseq l1 l2) : subseq l1 (x :: l2)
+.
+
+Theorem subseq_refl : forall (l : list nat), subseq l l.
+Proof.
+  induction l as [| x l IH].
+  - apply subseq0.
+  - apply (subseq1 x l l IH).
+Qed.
+
+Theorem subseq_app : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l1 (l2 ++ l3).
+Proof.
+  intros.
+  induction H as [| x l1 l2 H IH | x l1 l2 H IH].
+  - apply subseq0.
+  - simpl. apply (subseq1 x l1 (l2 ++ l3) IH).
+  - simpl. apply (subseq2 x l1 (l2 ++ l3) IH).
+Qed.
+
+Theorem subseq_trans : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l2 l3 ->
+  subseq l1 l3.
+Proof.
+  
+  intros l1 l2 l3 H12 H23.
+  generalize dependent l1.
+  induction H23 as [| x l2 l3 H23 IH | x l2 l3 H23 IH].
+  - intros.
+    assert (l1 = []) as Hl1. inversion H12. reflexivity.
+    rewrite Hl1. apply subseq0.
+  - intros. inversion H12 as [| x' l1' l2' H12' | x' l1' l2' H12'].
+    + apply subseq0.
+    + apply (subseq1 x l1' l3 (IH l1' H12')).
+    + apply (subseq2 x l1 l3 (IH l1 H12')).
+  - intros. apply (subseq2 x l1 l3 (IH l1 H12)).
+Qed.
+
+
+
+
+
+
+
+
+
+
+Module bin1.
+Inductive bin : Type :=
+  | Z
+  | B0 (n : bin)
+  | B1 (n : bin).
+End bin1.
+
+
+
+
+Module bin2.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 (n : bin) : bin
+  | B1 (n : bin) : bin.
+End bin2.
+
+
+
+Module bin3.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 : bin -> bin
+  | B1 : bin -> bin.
+End bin3.
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive reg_exp (T : Type) : Type :=
+  | EmptySet
+  | EmptyStr
+  | Char (t : T)
+  | App (r1 r2 : reg_exp T)
+  | Union (r1 r2 : reg_exp T)
+  | Star (r : reg_exp T).
+
+Arguments EmptySet {T}.
+Arguments EmptyStr {T}.
+Arguments Char {T} _.
+Arguments App {T} _ _.
+Arguments Union {T} _ _.
+Arguments Star {T} _.
+
+
+
+
+
+
+
+Reserved Notation "s =~ re" (at level 80).
+
+Inductive exp_match {T} : list T -> reg_exp T -> Prop :=
+  | MEmpty : [] =~ EmptyStr
+  | MChar x : [x] =~ (Char x)
+  | MApp s1 re1 s2 re2
+             (H1 : s1 =~ re1)
+             (H2 : s2 =~ re2)
+           : (s1 ++ s2) =~ (App re1 re2)
+  | MUnionL s1 re1 re2
+                (H1 : s1 =~ re1)
+              : s1 =~ (Union re1 re2)
+  | MUnionR re1 s2 re2
+                (H2 : s2 =~ re2)
+              : s2 =~ (Union re1 re2)
+  | MStar0 re : [] =~ (Star re)
+  | MStarApp s1 s2 re
+                 (H1 : s1 =~ re)
+                 (H2 : s2 =~ (Star re))
+               : (s1 ++ s2) =~ (Star re)
+
+  where "s =~ re" := (exp_match s re).
+
+
+
+Example reg_exp_ex1 : [1] =~ Char 1.
+Proof.
+  apply MChar.
+Qed.
+
+Example reg_exp_ex2 : [1; 2] =~ App (Char 1) (Char 2).
+Proof.
+  apply (MApp [1]).
+  - apply MChar.
+  - apply MChar.
+Qed.
+
+
+
+Example reg_exp_ex3 : ~ ([1; 2] =~ Char 1).
+Proof.
+  intros H. inversion H.
+Qed.
+
+
+
+Fixpoint reg_exp_of_list {T} (l : list T) :=
+  match l with
+  | [] => EmptyStr
+  | x :: l' => App (Char x) (reg_exp_of_list l')
+  end.
+
+Example reg_exp_ex4 : [1; 2; 3] =~ reg_exp_of_list [1; 2; 3].
+Proof.
+  simpl. apply (MApp [1]).
+  { apply MChar. }
+  apply (MApp [2]).
+  { apply MChar. }
+  apply (MApp [3]).
+  { apply MChar. }
+  apply MEmpty.
+Qed.
+
+
+
+Lemma MStar1 :
+  forall T s (re : reg_exp T) ,
+    s =~ re ->
+    s =~ Star re.
+Proof.
+  intros T s re H.
+  rewrite <- (app_nil_r _ s).
+  apply MStarApp.
+  - apply H.
+  - apply MStar0.
+Qed.
+
+
+
+
+
+Lemma empty_is_empty : forall T (s : list T),
+  ~ (s =~ EmptySet).
+Proof.
+  unfold not. intros. inversion H.
+Qed.
+
+Lemma MUnion' : forall T (s : list T) (re1 re2 : reg_exp T),
+  s =~ re1 \/ s =~ re2 ->
+  s =~ Union re1 re2.
+Proof.
+  intros.
+  destruct H.
+  - apply MUnionL. apply H.
+  - apply MUnionR. apply H.
+Qed.
+
+
+
+
+
+Lemma reg_exp_empty_string_match_1 : forall T : Type, forall re : reg_exp T, forall H : forall s : list T, In s [ ] -> s =~ re, forall s : list T, forall H2 : In s [ ], s =~ re.
+
+Proof.
+(*
+    We will proceed by induction on the structure of the regular expression re.
+The base case will be when re is EmptySet, EmptyStr, Char, or Star.
+In each of these cases, we will show that if s is empty, then s matches re.
+The inductive case will be when re is App or Union.
+In this case, we will use the induction hypothesis to show that if s matches re1 or re2, then s matches re.
+*)
+  intros T re H s H2.
+generalize dependent s.
+induction re as [|re1 re2].
+- (* EmptySet *)
+    intros s H2.
+inversion H2.
+- (* EmptyStr *)
+    intros s H2.
+inversion H2.
+- (* Char *)
+    intros s H2.
+inversion H2.
+- (* Star *)
+    intros s H2.
+inversion H2.
+- (* App *)
+    intros s H2.
+apply H in H2.
+destruct H2 as [s' H2' | H2'].
+- apply H2.
+apply H2'.
+- apply H2.
+apply H2'.
+- (* Union *)
+    intros s H2.
+apply H in H2.
+destruct H2 as [s' H2' | H2'].
+- apply H2.
+apply H2'.
+- apply H2.
+apply H2'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1442)
+Error in step "induction re as [|re1 re2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: forall s : list T, In s [ ] -> s =~ re.
+
+
+TRYING TO PROVE LEMMA
+Lemma reg_exp_empty_string_match_2 : forall T : Type, forall re : reg_exp T, forall H : forall s : list T, In s [ ] -> s =~ re, forall s : list T, In s [ ] -> s =~ re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+Theorem ev_double : forall n,
+  ev (double n).
+Proof.
+  induction n.
+  - apply ev_0.
+  - simpl. apply ev_SS. apply IHn.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem ev_inversion : forall (n : nat),
+    ev n ->
+    (n = 0) \/ (exists n', n = S (S n') /\ ev n').
+Proof.
+  intros n E.  destruct E as [ | n' E'] eqn:EE.
+  - 
+    left. reflexivity.
+  - 
+    right. exists n'. split. reflexivity. apply E'.
+Qed.
+
+
+
+
+
+Theorem evSS_ev : forall n, ev (S (S n)) -> ev n.
+Proof.
+  intros n H. apply ev_inversion in H.  destruct H as [H0|H1].
+  - discriminate.
+  - destruct H1 as [n' [Hnm Hev]]. injection Hnm as Heq.
+    rewrite Heq. apply Hev.
+Qed.
+
+
+
+Theorem evSS_ev' : forall n,
+  ev (S (S n)) -> ev n.
+Proof.
+  intros n E.  inversion E as [| n' E' Heq].
+  
+  apply E'.
+Qed.
+
+
+
+Theorem one_not_even : ~ ev 1.
+Proof.
+  intros H. apply ev_inversion in H.  destruct H as [ | [m [Hm _]]].
+  - discriminate.
+  - discriminate.
+Qed.
+
+Theorem one_not_even' : ~ ev 1.
+Proof.
+  intros H. inversion H. Qed.
+
+
+
+Theorem SSSSev__even : forall n,
+  ev (S (S (S (S n)))) -> ev n.
+Proof.
+  intros n H. inversion H as [| n0 H0 Heq0]. inversion H0 as [| n1 H1 Heq1].
+  apply H1.
+Qed.
+
+
+
+
+Theorem ev5_nonsense :
+  ev 5 -> 2 + 2 = 9.
+Proof.
+  intros H.
+  inversion H as [| n0 H0 Heq0].
+  inversion H0 as [| n1 H1 Heq1].
+  inversion H1.
+Qed.
+
+
+
+
+Theorem inversion_ex1 : forall (n m o : nat),
+  [n; m] = [o; o] -> [n] = [m].
+Proof.
+  intros n m o H. inversion H. reflexivity. Qed.
+
+Theorem inversion_ex2 : forall (n : nat),
+  S n = O -> 2 + 2 = 5.
+Proof.
+  intros n contra. inversion contra. Qed.
+
+
+
+
+
+Lemma ev_Even_firsttry : forall n,
+  ev n -> Even n.
+Proof.
+   unfold Even.
+
+
+
+  intros n E. inversion E as [EQ' | n' E' EQ'].
+  -  exists 0. reflexivity.
+  - 
+    assert (H: (exists k', n' = double k')
+               -> (exists n0, S (S n') = double n0)).
+        { intros [k' EQ'']. exists (S k'). simpl.
+          rewrite <- EQ''. reflexivity. }
+    apply H.
+
+    
+
+    generalize dependent E'.
+
+    
+Abort.
+
+
+
+
+
+
+
+
+
+
+Lemma ev_Even : forall n,
+  ev n -> Even n.
+Proof.
+  intros n E.
+  induction E as [|n' E' IH].
+  - 
+    unfold Even. exists 0. reflexivity.
+  - 
+    unfold Even in IH.
+    destruct IH as [k Hk].
+    rewrite Hk.
+    unfold Even. exists (S k). simpl. reflexivity.
+Qed.
+
+
+
+
+
+Theorem ev_Even_iff : forall n,
+  ev n <-> Even n.
+Proof.
+  intros n. split.
+  -  apply ev_Even.
+  -  unfold Even. intros [k Hk]. rewrite Hk. apply ev_double.
+Qed.
+
+
+
+
+
+
+Theorem ev_sum : forall n m, ev n -> ev m -> ev (n + m).
+Proof.
+  intros n m En Em.
+  induction En.
+  - apply Em.
+  - simpl. apply ev_SS. apply IHEn.
+Qed.
+
+
+
+
+Inductive ev' : nat -> Prop :=
+  | ev'_0 : ev' 0
+  | ev'_2 : ev' 2
+  | ev'_sum n m (Hn : ev' n) (Hm : ev' m) : ev' (n + m).
+
+
+
+Theorem ev'_ev : forall n, ev' n <-> ev n.
+Proof.
+  intros n.
+  split.
+  - intros H. induction H.
+    + apply ev_0.
+    + apply ev_SS. apply ev_0.
+    + apply ev_sum. apply IHev'1. apply IHev'2.
+  - intros H. induction H.
+    + apply ev'_0.
+    + rewrite <- plus_1_l with (S n). rewrite <- plus_n_Sm. rewrite <- plus_1_l.
+      rewrite add_assoc. apply ev'_sum.
+      * apply ev'_2.
+      * apply IHev.
+Qed.
+
+
+
+Theorem ev_ev__ev : forall n m,
+  ev (n+m) -> ev n -> ev m.
+  
+Proof.
+  intros n m.
+  intros E1 E2.
+  induction E2.
+  - apply E1.
+  - simpl in E1. inversion E1 as [| sum E3 H]. apply (IHE2 E3).
+Qed.
+
+
+
+
+Theorem ev_plus_plus : forall n m p,
+  ev (n+m) -> ev (n+p) -> ev (m+p).
+Proof.
+  intros n m p Enm Enp.
+  apply ev_ev__ev with (n + n).
+  - assert (ev ((n + m) + (n + p))) as H.
+      { apply ev_sum. apply Enm. apply Enp. }
+    rewrite add_comm with n m in H.
+    rewrite <- add_assoc with m n (n + p) in H.
+    rewrite add_assoc with n n p in H.
+    rewrite add_comm with (n + n) p in H.
+    rewrite add_assoc with m p (n + n) in H.
+    rewrite add_comm with (m + p) (n + n) in H.
+    apply H.
+  - rewrite <- double_plus. apply ev_double.
+Qed.
+
+
+
+
+
+
+
+Module Playground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)                : le n n
+  | le_S (n m : nat) (H : le n m) : le n (S m).
+
+Notation "n <= m" := (le n m).
+
+
+
+
+
+
+
+Theorem test_le1 :
+  3 <= 3.
+Proof.
+  
+  apply le_n.  Qed.
+
+Theorem test_le2 :
+  3 <= 6.
+Proof.
+  
+  apply le_S. apply le_S. apply le_S. apply le_n.  Qed.
+
+Theorem test_le3 :
+  (2 <= 1) -> 2 + 2 = 5.
+Proof.
+  
+  intros H. inversion H. inversion H2.  Qed.
+
+
+
+Definition lt (n m : nat) := le (S n) m.
+
+Notation "m < n" := (lt m n).
+
+End Playground.
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_is_total : forall n m, total_relation n m.
+  Proof.
+  intros n m. apply (total_rel n m). Qed.
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_is_empty : forall n m, ~ empty_relation n m.
+  Proof.
+  intros n m H.
+  inversion H.
+Qed.
+
+
+
+
+
+
+
+Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
+Proof.
+  intros m n o Emn Eno.
+  induction Eno as [|o Eno IH].
+  - apply Emn.
+  - apply (le_S m o IH).
+Qed.
+
+Theorem O_le_n : forall n,
+  0 <= n.
+Proof.
+  intros n.
+  induction n.
+  - apply le_n.
+  - apply (le_S 0 n IHn).
+Qed.
+
+Theorem n_le_m__Sn_le_Sm : forall n m,
+  n <= m -> S n <= S m.
+Proof.
+  intros n m H.
+  induction H as [|m H IH].
+  - apply le_n.
+  - apply (le_S (S n) (S m) IH).
+Qed.
+
+Theorem Sn_le_Sm__n_le_m : forall n m,
+  S n <= S m -> n <= m.
+Proof.
+  intros n m H.
+  induction m.
+  - inversion H as [H0 | zero H1 H2]. apply le_n. inversion H1.
+  - inversion H as [H0 | Sm H1 H2]. apply le_n. apply (le_S n m (IHm H1)).
+Qed.
+
+Theorem lt_ge_cases : forall n m,
+  n < m \/ n >= m.
+Proof.
+  intros n m.
+  destruct m.
+  - right. apply O_le_n.
+  - induction n.
+    + left. apply n_le_m__Sn_le_Sm. apply O_le_n.
+    + destruct IHn.
+      * destruct H.
+        right. apply le_n.
+        left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply le_S. apply H.
+Qed.
+
+Theorem le_plus_l : forall a b,
+  a <= a + b.
+Proof.
+  intros a b.
+  induction b.
+  - rewrite add_0_r. apply le_n.
+  - rewrite <- plus_n_Sm. apply (le_S a (a + b) IHb).
+Qed.
+
+Theorem plus_le : forall n1 n2 m,
+  n1 + n2 <= m ->
+  n1 <= m /\ n2 <= m.
+Proof.
+  intros n1 n2 m H.
+  induction H.
+  - split.
+    + apply le_plus_l.
+    + rewrite add_comm. apply le_plus_l.
+  - destruct IHle as [H1 H2].
+    split.
+    + apply (le_S n1 m H1).
+    + apply (le_S n2 m H2).
+Qed.
+
+Theorem add_le_cases : forall n m p q,
+  n + m <= p + q -> n <= p \/ m <= q.
+  
+Proof.
+  induction n.
+  - left. apply O_le_n.
+  - intros. destruct p.
+    + right. apply plus_le in H.
+      destruct H as [H1 H2].
+      rewrite plus_O_n in H1.
+      apply H2.
+    + simpl in H.
+      rewrite plus_n_Sm with n m in H.
+      rewrite plus_n_Sm with p q in H.
+      apply IHn in H. destruct H.
+      * left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply Sn_le_Sm__n_le_m. apply H.
+Qed.
+
+Theorem plus_le_compat_l : forall n m p,
+  n <= m ->
+  p + n <= p + m.
+Proof.
+  intros n m p.
+  induction p.
+  - intros. rewrite plus_O_n. rewrite plus_O_n. apply H.
+  - intros. simpl. apply n_le_m__Sn_le_Sm. apply (IHp H).
+Qed.
+
+Theorem plus_le_compat_r : forall n m p,
+  n <= m ->
+  n + p <= m + p.
+Proof.
+  intros n m p H.
+  rewrite add_comm with n p.
+  rewrite add_comm with m p.
+  apply plus_le_compat_l.
+  apply H.
+Qed.
+
+Theorem le_plus_trans : forall n m p,
+  n <= m ->
+  n <= m + p.
+Proof.
+  intros n m p.
+  generalize dependent n.
+  generalize dependent m.
+  induction p.
+  - intros. rewrite add_comm. rewrite plus_O_n. apply H.
+  - intros. destruct H.
+    + apply le_plus_l.
+    + simpl.
+      apply IHp in H.
+      apply le_S in H. rewrite plus_n_Sm in H.
+      apply (le_S n (m + S p) H).
+Qed.
+
+Theorem n_lt_m__n_le_m : forall n m,
+  n < m ->
+  n <= m.
+Proof.
+  intros n m H.
+  apply le_S in H.
+  apply Sn_le_Sm__n_le_m in H.
+  apply H.
+Qed.
+
+Theorem plus_lt : forall n1 n2 m,
+  n1 + n2 < m ->
+  n1 < m /\ n2 < m.
+Proof.
+  intros n1 n2 m H.
+  inversion H as [H12 | n H12 Hm].
+  - split.
+    + apply n_le_m__Sn_le_Sm. apply le_plus_l.
+    + apply n_le_m__Sn_le_Sm. rewrite add_comm. apply le_plus_l.
+  - rewrite <- Hm in H. apply Sn_le_Sm__n_le_m in H.
+    apply plus_le in H. destruct H as [H1 H2].
+    split.
+    + apply n_le_m__Sn_le_Sm. apply H1.
+    + apply n_le_m__Sn_le_Sm. apply H2.
+Qed.
+
+
+
+Theorem leb_complete : forall n m,
+  n <=? m = true -> n <= m.
+Proof.
+  intros n m.
+  generalize dependent m.
+  induction n.
+  - intros. apply O_le_n.
+  - intros. destruct m.
+    + discriminate.
+    + simpl in H. apply IHn in H. apply n_le_m__Sn_le_Sm. apply H.
+Qed.
+
+Theorem leb_correct : forall n m,
+  n <= m ->
+  n <=? m = true.
+  
+Proof.
+  intros n m.
+  generalize dependent n.
+  induction m.
+  - intros. inversion H. reflexivity.
+  - destruct n.
+    + reflexivity.
+    + intros. apply Sn_le_Sm__n_le_m in H. apply (IHm n H).
+Qed.
+
+
+
+Theorem leb_iff : forall n m,
+  n <=? m = true <-> n <= m.
+Proof.
+  intros n m.
+  split.
+  - apply leb_complete.
+  - apply leb_correct.
+Qed.
+
+Theorem leb_true_trans : forall n m o,
+  n <=? m = true -> m <=? o = true -> n <=? o = true.
+Proof.
+  intros n m o Hnm Hmo.
+  apply leb_complete in Hnm.
+  apply leb_complete in Hmo.
+  apply leb_correct.
+  apply le_trans with m.
+  apply Hnm. apply Hmo.
+Qed.
+
+
+Module R.
+
+
+
+Inductive R : nat -> nat -> nat -> Prop :=
+  | c1                                     : R 0     0     0
+  | c2 m n o (H : R m     n     o        ) : R (S m) n     (S o)
+  | c3 m n o (H : R m     n     o        ) : R m     (S n) (S o)
+  | c4 m n o (H : R (S m) (S n) (S (S o))) : R m     n     o
+  | c5 m n o (H : R m     n     o        ) : R n     m     o
+.
+
+
+
+
+
+
+Definition manual_grade_for_R_provability : option (nat*string) := None.
+
+
+
+
+Definition fR : nat -> nat -> nat
+  := plus.
+
+Theorem R_equiv_fR : forall m n o, R m n o <-> fR m n = o.
+Proof.
+  split.
+  - intros. induction H.
+    + reflexivity.
+    + simpl. f_equal. apply IHR.
+    + rewrite <- plus_n_Sm. f_equal. apply IHR.
+    + simpl in IHR.
+      apply S_injective in IHR. rewrite <- plus_n_Sm in IHR.
+      apply S_injective in IHR.
+      apply IHR.
+    + rewrite add_comm in IHR. apply IHR.
+  - intros.
+    rewrite <- H.
+    destruct H.
+    induction m.
+      + induction n. apply c1. apply c3. apply IHn.
+      + simpl. apply c2. apply IHm.
+Qed.
+
+
+End R.
+
+
+
+Inductive subseq : list nat -> list nat -> Prop :=
+  | subseq0 l : subseq [] l
+  | subseq1 x l1 l2 (H : subseq l1 l2) : subseq (x :: l1) (x :: l2)
+  | subseq2 x l1 l2 (H : subseq l1 l2) : subseq l1 (x :: l2)
+.
+
+Theorem subseq_refl : forall (l : list nat), subseq l l.
+Proof.
+  induction l as [| x l IH].
+  - apply subseq0.
+  - apply (subseq1 x l l IH).
+Qed.
+
+Theorem subseq_app : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l1 (l2 ++ l3).
+Proof.
+  intros.
+  induction H as [| x l1 l2 H IH | x l1 l2 H IH].
+  - apply subseq0.
+  - simpl. apply (subseq1 x l1 (l2 ++ l3) IH).
+  - simpl. apply (subseq2 x l1 (l2 ++ l3) IH).
+Qed.
+
+Theorem subseq_trans : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l2 l3 ->
+  subseq l1 l3.
+Proof.
+  
+  intros l1 l2 l3 H12 H23.
+  generalize dependent l1.
+  induction H23 as [| x l2 l3 H23 IH | x l2 l3 H23 IH].
+  - intros.
+    assert (l1 = []) as Hl1. inversion H12. reflexivity.
+    rewrite Hl1. apply subseq0.
+  - intros. inversion H12 as [| x' l1' l2' H12' | x' l1' l2' H12'].
+    + apply subseq0.
+    + apply (subseq1 x l1' l3 (IH l1' H12')).
+    + apply (subseq2 x l1 l3 (IH l1 H12')).
+  - intros. apply (subseq2 x l1 l3 (IH l1 H12)).
+Qed.
+
+
+
+
+
+
+
+
+
+
+Module bin1.
+Inductive bin : Type :=
+  | Z
+  | B0 (n : bin)
+  | B1 (n : bin).
+End bin1.
+
+
+
+
+Module bin2.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 (n : bin) : bin
+  | B1 (n : bin) : bin.
+End bin2.
+
+
+
+Module bin3.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 : bin -> bin
+  | B1 : bin -> bin.
+End bin3.
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive reg_exp (T : Type) : Type :=
+  | EmptySet
+  | EmptyStr
+  | Char (t : T)
+  | App (r1 r2 : reg_exp T)
+  | Union (r1 r2 : reg_exp T)
+  | Star (r : reg_exp T).
+
+Arguments EmptySet {T}.
+Arguments EmptyStr {T}.
+Arguments Char {T} _.
+Arguments App {T} _ _.
+Arguments Union {T} _ _.
+Arguments Star {T} _.
+
+
+
+
+
+
+
+Reserved Notation "s =~ re" (at level 80).
+
+Inductive exp_match {T} : list T -> reg_exp T -> Prop :=
+  | MEmpty : [] =~ EmptyStr
+  | MChar x : [x] =~ (Char x)
+  | MApp s1 re1 s2 re2
+             (H1 : s1 =~ re1)
+             (H2 : s2 =~ re2)
+           : (s1 ++ s2) =~ (App re1 re2)
+  | MUnionL s1 re1 re2
+                (H1 : s1 =~ re1)
+              : s1 =~ (Union re1 re2)
+  | MUnionR re1 s2 re2
+                (H2 : s2 =~ re2)
+              : s2 =~ (Union re1 re2)
+  | MStar0 re : [] =~ (Star re)
+  | MStarApp s1 s2 re
+                 (H1 : s1 =~ re)
+                 (H2 : s2 =~ (Star re))
+               : (s1 ++ s2) =~ (Star re)
+
+  where "s =~ re" := (exp_match s re).
+
+
+
+Example reg_exp_ex1 : [1] =~ Char 1.
+Proof.
+  apply MChar.
+Qed.
+
+Example reg_exp_ex2 : [1; 2] =~ App (Char 1) (Char 2).
+Proof.
+  apply (MApp [1]).
+  - apply MChar.
+  - apply MChar.
+Qed.
+
+
+
+Example reg_exp_ex3 : ~ ([1; 2] =~ Char 1).
+Proof.
+  intros H. inversion H.
+Qed.
+
+
+
+Fixpoint reg_exp_of_list {T} (l : list T) :=
+  match l with
+  | [] => EmptyStr
+  | x :: l' => App (Char x) (reg_exp_of_list l')
+  end.
+
+Example reg_exp_ex4 : [1; 2; 3] =~ reg_exp_of_list [1; 2; 3].
+Proof.
+  simpl. apply (MApp [1]).
+  { apply MChar. }
+  apply (MApp [2]).
+  { apply MChar. }
+  apply (MApp [3]).
+  { apply MChar. }
+  apply MEmpty.
+Qed.
+
+
+
+Lemma MStar1 :
+  forall T s (re : reg_exp T) ,
+    s =~ re ->
+    s =~ Star re.
+Proof.
+  intros T s re H.
+  rewrite <- (app_nil_r _ s).
+  apply MStarApp.
+  - apply H.
+  - apply MStar0.
+Qed.
+
+
+
+
+
+Lemma empty_is_empty : forall T (s : list T),
+  ~ (s =~ EmptySet).
+Proof.
+  unfold not. intros. inversion H.
+Qed.
+
+Lemma MUnion' : forall T (s : list T) (re1 re2 : reg_exp T),
+  s =~ re1 \/ s =~ re2 ->
+  s =~ Union re1 re2.
+Proof.
+  intros.
+  destruct H.
+  - apply MUnionL. apply H.
+  - apply MUnionR. apply H.
+Qed.
+
+
+
+
+
+Lemma reg_exp_empty_string_match_2 : forall T : Type, forall re : reg_exp T, forall H : forall s : list T, In s [ ] -> s =~ re, forall s : list T, In s [ ] -> s =~ re.
+
+Proof.
+(*
+    The goal is to prove that for any type T and any regular expression re over T,
+    if for all s in list T, s is in the empty list [] implies that s matches re,
+    then the same holds for all s in list T.
+We will proceed by induction on the structure of s.
+*)
+  intros T re H s Hs.
+(*
+    We first consider the base case where s is the empty list.
+By the definition of In, we have In s [] when s is the empty list.
+Therefore, we can apply our hypothesis H to obtain the desired result.
+*)
+  induction s as [|x s' IHs'].
+- (* s = [] *)
+    apply H.
+- (* s = x :: s' *)
+    (*
+      In this case, we know that In (x :: s') [] is false,
+      because the head of the list x is not in the empty list [].
+Therefore, we can apply the induction hypothesis IHs' to obtain the result.
+*)
+    apply IHs'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #1446)
+Error in step "-".
+Message: [Focus]
+Wrong bullet -: Current bullet - is not finished..
+Goal: In [ ] [ ].
+
+
+TRYING TO PROVE LEMMA
+Lemma empty_string_matches_all_regular_expressions_3 : forall T : Type, forall re : reg_exp T, forall H : forall s : list T, In s [ ] -> s =~ re, forall Hs : In [ ] [ ], In [ ] [ ].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+Theorem ev_double : forall n,
+  ev (double n).
+Proof.
+  induction n.
+  - apply ev_0.
+  - simpl. apply ev_SS. apply IHn.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem ev_inversion : forall (n : nat),
+    ev n ->
+    (n = 0) \/ (exists n', n = S (S n') /\ ev n').
+Proof.
+  intros n E.  destruct E as [ | n' E'] eqn:EE.
+  - 
+    left. reflexivity.
+  - 
+    right. exists n'. split. reflexivity. apply E'.
+Qed.
+
+
+
+
+
+Theorem evSS_ev : forall n, ev (S (S n)) -> ev n.
+Proof.
+  intros n H. apply ev_inversion in H.  destruct H as [H0|H1].
+  - discriminate.
+  - destruct H1 as [n' [Hnm Hev]]. injection Hnm as Heq.
+    rewrite Heq. apply Hev.
+Qed.
+
+
+
+Theorem evSS_ev' : forall n,
+  ev (S (S n)) -> ev n.
+Proof.
+  intros n E.  inversion E as [| n' E' Heq].
+  
+  apply E'.
+Qed.
+
+
+
+Theorem one_not_even : ~ ev 1.
+Proof.
+  intros H. apply ev_inversion in H.  destruct H as [ | [m [Hm _]]].
+  - discriminate.
+  - discriminate.
+Qed.
+
+Theorem one_not_even' : ~ ev 1.
+Proof.
+  intros H. inversion H. Qed.
+
+
+
+Theorem SSSSev__even : forall n,
+  ev (S (S (S (S n)))) -> ev n.
+Proof.
+  intros n H. inversion H as [| n0 H0 Heq0]. inversion H0 as [| n1 H1 Heq1].
+  apply H1.
+Qed.
+
+
+
+
+Theorem ev5_nonsense :
+  ev 5 -> 2 + 2 = 9.
+Proof.
+  intros H.
+  inversion H as [| n0 H0 Heq0].
+  inversion H0 as [| n1 H1 Heq1].
+  inversion H1.
+Qed.
+
+
+
+
+Theorem inversion_ex1 : forall (n m o : nat),
+  [n; m] = [o; o] -> [n] = [m].
+Proof.
+  intros n m o H. inversion H. reflexivity. Qed.
+
+Theorem inversion_ex2 : forall (n : nat),
+  S n = O -> 2 + 2 = 5.
+Proof.
+  intros n contra. inversion contra. Qed.
+
+
+
+
+
+Lemma ev_Even_firsttry : forall n,
+  ev n -> Even n.
+Proof.
+   unfold Even.
+
+
+
+  intros n E. inversion E as [EQ' | n' E' EQ'].
+  -  exists 0. reflexivity.
+  - 
+    assert (H: (exists k', n' = double k')
+               -> (exists n0, S (S n') = double n0)).
+        { intros [k' EQ'']. exists (S k'). simpl.
+          rewrite <- EQ''. reflexivity. }
+    apply H.
+
+    
+
+    generalize dependent E'.
+
+    
+Abort.
+
+
+
+
+
+
+
+
+
+
+Lemma ev_Even : forall n,
+  ev n -> Even n.
+Proof.
+  intros n E.
+  induction E as [|n' E' IH].
+  - 
+    unfold Even. exists 0. reflexivity.
+  - 
+    unfold Even in IH.
+    destruct IH as [k Hk].
+    rewrite Hk.
+    unfold Even. exists (S k). simpl. reflexivity.
+Qed.
+
+
+
+
+
+Theorem ev_Even_iff : forall n,
+  ev n <-> Even n.
+Proof.
+  intros n. split.
+  -  apply ev_Even.
+  -  unfold Even. intros [k Hk]. rewrite Hk. apply ev_double.
+Qed.
+
+
+
+
+
+
+Theorem ev_sum : forall n m, ev n -> ev m -> ev (n + m).
+Proof.
+  intros n m En Em.
+  induction En.
+  - apply Em.
+  - simpl. apply ev_SS. apply IHEn.
+Qed.
+
+
+
+
+Inductive ev' : nat -> Prop :=
+  | ev'_0 : ev' 0
+  | ev'_2 : ev' 2
+  | ev'_sum n m (Hn : ev' n) (Hm : ev' m) : ev' (n + m).
+
+
+
+Theorem ev'_ev : forall n, ev' n <-> ev n.
+Proof.
+  intros n.
+  split.
+  - intros H. induction H.
+    + apply ev_0.
+    + apply ev_SS. apply ev_0.
+    + apply ev_sum. apply IHev'1. apply IHev'2.
+  - intros H. induction H.
+    + apply ev'_0.
+    + rewrite <- plus_1_l with (S n). rewrite <- plus_n_Sm. rewrite <- plus_1_l.
+      rewrite add_assoc. apply ev'_sum.
+      * apply ev'_2.
+      * apply IHev.
+Qed.
+
+
+
+Theorem ev_ev__ev : forall n m,
+  ev (n+m) -> ev n -> ev m.
+  
+Proof.
+  intros n m.
+  intros E1 E2.
+  induction E2.
+  - apply E1.
+  - simpl in E1. inversion E1 as [| sum E3 H]. apply (IHE2 E3).
+Qed.
+
+
+
+
+Theorem ev_plus_plus : forall n m p,
+  ev (n+m) -> ev (n+p) -> ev (m+p).
+Proof.
+  intros n m p Enm Enp.
+  apply ev_ev__ev with (n + n).
+  - assert (ev ((n + m) + (n + p))) as H.
+      { apply ev_sum. apply Enm. apply Enp. }
+    rewrite add_comm with n m in H.
+    rewrite <- add_assoc with m n (n + p) in H.
+    rewrite add_assoc with n n p in H.
+    rewrite add_comm with (n + n) p in H.
+    rewrite add_assoc with m p (n + n) in H.
+    rewrite add_comm with (m + p) (n + n) in H.
+    apply H.
+  - rewrite <- double_plus. apply ev_double.
+Qed.
+
+
+
+
+
+
+
+Module Playground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)                : le n n
+  | le_S (n m : nat) (H : le n m) : le n (S m).
+
+Notation "n <= m" := (le n m).
+
+
+
+
+
+
+
+Theorem test_le1 :
+  3 <= 3.
+Proof.
+  
+  apply le_n.  Qed.
+
+Theorem test_le2 :
+  3 <= 6.
+Proof.
+  
+  apply le_S. apply le_S. apply le_S. apply le_n.  Qed.
+
+Theorem test_le3 :
+  (2 <= 1) -> 2 + 2 = 5.
+Proof.
+  
+  intros H. inversion H. inversion H2.  Qed.
+
+
+
+Definition lt (n m : nat) := le (S n) m.
+
+Notation "m < n" := (lt m n).
+
+End Playground.
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_is_total : forall n m, total_relation n m.
+  Proof.
+  intros n m. apply (total_rel n m). Qed.
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_is_empty : forall n m, ~ empty_relation n m.
+  Proof.
+  intros n m H.
+  inversion H.
+Qed.
+
+
+
+
+
+
+
+Lemma le_trans : forall m n o, m <= n -> n <= o -> m <= o.
+Proof.
+  intros m n o Emn Eno.
+  induction Eno as [|o Eno IH].
+  - apply Emn.
+  - apply (le_S m o IH).
+Qed.
+
+Theorem O_le_n : forall n,
+  0 <= n.
+Proof.
+  intros n.
+  induction n.
+  - apply le_n.
+  - apply (le_S 0 n IHn).
+Qed.
+
+Theorem n_le_m__Sn_le_Sm : forall n m,
+  n <= m -> S n <= S m.
+Proof.
+  intros n m H.
+  induction H as [|m H IH].
+  - apply le_n.
+  - apply (le_S (S n) (S m) IH).
+Qed.
+
+Theorem Sn_le_Sm__n_le_m : forall n m,
+  S n <= S m -> n <= m.
+Proof.
+  intros n m H.
+  induction m.
+  - inversion H as [H0 | zero H1 H2]. apply le_n. inversion H1.
+  - inversion H as [H0 | Sm H1 H2]. apply le_n. apply (le_S n m (IHm H1)).
+Qed.
+
+Theorem lt_ge_cases : forall n m,
+  n < m \/ n >= m.
+Proof.
+  intros n m.
+  destruct m.
+  - right. apply O_le_n.
+  - induction n.
+    + left. apply n_le_m__Sn_le_Sm. apply O_le_n.
+    + destruct IHn.
+      * destruct H.
+        right. apply le_n.
+        left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply le_S. apply H.
+Qed.
+
+Theorem le_plus_l : forall a b,
+  a <= a + b.
+Proof.
+  intros a b.
+  induction b.
+  - rewrite add_0_r. apply le_n.
+  - rewrite <- plus_n_Sm. apply (le_S a (a + b) IHb).
+Qed.
+
+Theorem plus_le : forall n1 n2 m,
+  n1 + n2 <= m ->
+  n1 <= m /\ n2 <= m.
+Proof.
+  intros n1 n2 m H.
+  induction H.
+  - split.
+    + apply le_plus_l.
+    + rewrite add_comm. apply le_plus_l.
+  - destruct IHle as [H1 H2].
+    split.
+    + apply (le_S n1 m H1).
+    + apply (le_S n2 m H2).
+Qed.
+
+Theorem add_le_cases : forall n m p q,
+  n + m <= p + q -> n <= p \/ m <= q.
+  
+Proof.
+  induction n.
+  - left. apply O_le_n.
+  - intros. destruct p.
+    + right. apply plus_le in H.
+      destruct H as [H1 H2].
+      rewrite plus_O_n in H1.
+      apply H2.
+    + simpl in H.
+      rewrite plus_n_Sm with n m in H.
+      rewrite plus_n_Sm with p q in H.
+      apply IHn in H. destruct H.
+      * left. apply n_le_m__Sn_le_Sm. apply H.
+      * right. apply Sn_le_Sm__n_le_m. apply H.
+Qed.
+
+Theorem plus_le_compat_l : forall n m p,
+  n <= m ->
+  p + n <= p + m.
+Proof.
+  intros n m p.
+  induction p.
+  - intros. rewrite plus_O_n. rewrite plus_O_n. apply H.
+  - intros. simpl. apply n_le_m__Sn_le_Sm. apply (IHp H).
+Qed.
+
+Theorem plus_le_compat_r : forall n m p,
+  n <= m ->
+  n + p <= m + p.
+Proof.
+  intros n m p H.
+  rewrite add_comm with n p.
+  rewrite add_comm with m p.
+  apply plus_le_compat_l.
+  apply H.
+Qed.
+
+Theorem le_plus_trans : forall n m p,
+  n <= m ->
+  n <= m + p.
+Proof.
+  intros n m p.
+  generalize dependent n.
+  generalize dependent m.
+  induction p.
+  - intros. rewrite add_comm. rewrite plus_O_n. apply H.
+  - intros. destruct H.
+    + apply le_plus_l.
+    + simpl.
+      apply IHp in H.
+      apply le_S in H. rewrite plus_n_Sm in H.
+      apply (le_S n (m + S p) H).
+Qed.
+
+Theorem n_lt_m__n_le_m : forall n m,
+  n < m ->
+  n <= m.
+Proof.
+  intros n m H.
+  apply le_S in H.
+  apply Sn_le_Sm__n_le_m in H.
+  apply H.
+Qed.
+
+Theorem plus_lt : forall n1 n2 m,
+  n1 + n2 < m ->
+  n1 < m /\ n2 < m.
+Proof.
+  intros n1 n2 m H.
+  inversion H as [H12 | n H12 Hm].
+  - split.
+    + apply n_le_m__Sn_le_Sm. apply le_plus_l.
+    + apply n_le_m__Sn_le_Sm. rewrite add_comm. apply le_plus_l.
+  - rewrite <- Hm in H. apply Sn_le_Sm__n_le_m in H.
+    apply plus_le in H. destruct H as [H1 H2].
+    split.
+    + apply n_le_m__Sn_le_Sm. apply H1.
+    + apply n_le_m__Sn_le_Sm. apply H2.
+Qed.
+
+
+
+Theorem leb_complete : forall n m,
+  n <=? m = true -> n <= m.
+Proof.
+  intros n m.
+  generalize dependent m.
+  induction n.
+  - intros. apply O_le_n.
+  - intros. destruct m.
+    + discriminate.
+    + simpl in H. apply IHn in H. apply n_le_m__Sn_le_Sm. apply H.
+Qed.
+
+Theorem leb_correct : forall n m,
+  n <= m ->
+  n <=? m = true.
+  
+Proof.
+  intros n m.
+  generalize dependent n.
+  induction m.
+  - intros. inversion H. reflexivity.
+  - destruct n.
+    + reflexivity.
+    + intros. apply Sn_le_Sm__n_le_m in H. apply (IHm n H).
+Qed.
+
+
+
+Theorem leb_iff : forall n m,
+  n <=? m = true <-> n <= m.
+Proof.
+  intros n m.
+  split.
+  - apply leb_complete.
+  - apply leb_correct.
+Qed.
+
+Theorem leb_true_trans : forall n m o,
+  n <=? m = true -> m <=? o = true -> n <=? o = true.
+Proof.
+  intros n m o Hnm Hmo.
+  apply leb_complete in Hnm.
+  apply leb_complete in Hmo.
+  apply leb_correct.
+  apply le_trans with m.
+  apply Hnm. apply Hmo.
+Qed.
+
+
+Module R.
+
+
+
+Inductive R : nat -> nat -> nat -> Prop :=
+  | c1                                     : R 0     0     0
+  | c2 m n o (H : R m     n     o        ) : R (S m) n     (S o)
+  | c3 m n o (H : R m     n     o        ) : R m     (S n) (S o)
+  | c4 m n o (H : R (S m) (S n) (S (S o))) : R m     n     o
+  | c5 m n o (H : R m     n     o        ) : R n     m     o
+.
+
+
+
+
+
+
+Definition manual_grade_for_R_provability : option (nat*string) := None.
+
+
+
+
+Definition fR : nat -> nat -> nat
+  := plus.
+
+Theorem R_equiv_fR : forall m n o, R m n o <-> fR m n = o.
+Proof.
+  split.
+  - intros. induction H.
+    + reflexivity.
+    + simpl. f_equal. apply IHR.
+    + rewrite <- plus_n_Sm. f_equal. apply IHR.
+    + simpl in IHR.
+      apply S_injective in IHR. rewrite <- plus_n_Sm in IHR.
+      apply S_injective in IHR.
+      apply IHR.
+    + rewrite add_comm in IHR. apply IHR.
+  - intros.
+    rewrite <- H.
+    destruct H.
+    induction m.
+      + induction n. apply c1. apply c3. apply IHn.
+      + simpl. apply c2. apply IHm.
+Qed.
+
+
+End R.
+
+
+
+Inductive subseq : list nat -> list nat -> Prop :=
+  | subseq0 l : subseq [] l
+  | subseq1 x l1 l2 (H : subseq l1 l2) : subseq (x :: l1) (x :: l2)
+  | subseq2 x l1 l2 (H : subseq l1 l2) : subseq l1 (x :: l2)
+.
+
+Theorem subseq_refl : forall (l : list nat), subseq l l.
+Proof.
+  induction l as [| x l IH].
+  - apply subseq0.
+  - apply (subseq1 x l l IH).
+Qed.
+
+Theorem subseq_app : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l1 (l2 ++ l3).
+Proof.
+  intros.
+  induction H as [| x l1 l2 H IH | x l1 l2 H IH].
+  - apply subseq0.
+  - simpl. apply (subseq1 x l1 (l2 ++ l3) IH).
+  - simpl. apply (subseq2 x l1 (l2 ++ l3) IH).
+Qed.
+
+Theorem subseq_trans : forall (l1 l2 l3 : list nat),
+  subseq l1 l2 ->
+  subseq l2 l3 ->
+  subseq l1 l3.
+Proof.
+  
+  intros l1 l2 l3 H12 H23.
+  generalize dependent l1.
+  induction H23 as [| x l2 l3 H23 IH | x l2 l3 H23 IH].
+  - intros.
+    assert (l1 = []) as Hl1. inversion H12. reflexivity.
+    rewrite Hl1. apply subseq0.
+  - intros. inversion H12 as [| x' l1' l2' H12' | x' l1' l2' H12'].
+    + apply subseq0.
+    + apply (subseq1 x l1' l3 (IH l1' H12')).
+    + apply (subseq2 x l1 l3 (IH l1 H12')).
+  - intros. apply (subseq2 x l1 l3 (IH l1 H12)).
+Qed.
+
+
+
+
+
+
+
+
+
+
+Module bin1.
+Inductive bin : Type :=
+  | Z
+  | B0 (n : bin)
+  | B1 (n : bin).
+End bin1.
+
+
+
+
+Module bin2.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 (n : bin) : bin
+  | B1 (n : bin) : bin.
+End bin2.
+
+
+
+Module bin3.
+Inductive bin : Type :=
+  | Z : bin
+  | B0 : bin -> bin
+  | B1 : bin -> bin.
+End bin3.
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive reg_exp (T : Type) : Type :=
+  | EmptySet
+  | EmptyStr
+  | Char (t : T)
+  | App (r1 r2 : reg_exp T)
+  | Union (r1 r2 : reg_exp T)
+  | Star (r : reg_exp T).
+
+Arguments EmptySet {T}.
+Arguments EmptyStr {T}.
+Arguments Char {T} _.
+Arguments App {T} _ _.
+Arguments Union {T} _ _.
+Arguments Star {T} _.
+
+
+
+
+
+
+
+Reserved Notation "s =~ re" (at level 80).
+
+Inductive exp_match {T} : list T -> reg_exp T -> Prop :=
+  | MEmpty : [] =~ EmptyStr
+  | MChar x : [x] =~ (Char x)
+  | MApp s1 re1 s2 re2
+             (H1 : s1 =~ re1)
+             (H2 : s2 =~ re2)
+           : (s1 ++ s2) =~ (App re1 re2)
+  | MUnionL s1 re1 re2
+                (H1 : s1 =~ re1)
+              : s1 =~ (Union re1 re2)
+  | MUnionR re1 s2 re2
+                (H2 : s2 =~ re2)
+              : s2 =~ (Union re1 re2)
+  | MStar0 re : [] =~ (Star re)
+  | MStarApp s1 s2 re
+                 (H1 : s1 =~ re)
+                 (H2 : s2 =~ (Star re))
+               : (s1 ++ s2) =~ (Star re)
+
+  where "s =~ re" := (exp_match s re).
+
+
+
+Example reg_exp_ex1 : [1] =~ Char 1.
+Proof.
+  apply MChar.
+Qed.
+
+Example reg_exp_ex2 : [1; 2] =~ App (Char 1) (Char 2).
+Proof.
+  apply (MApp [1]).
+  - apply MChar.
+  - apply MChar.
+Qed.
+
+
+
+Example reg_exp_ex3 : ~ ([1; 2] =~ Char 1).
+Proof.
+  intros H. inversion H.
+Qed.
+
+
+
+Fixpoint reg_exp_of_list {T} (l : list T) :=
+  match l with
+  | [] => EmptyStr
+  | x :: l' => App (Char x) (reg_exp_of_list l')
+  end.
+
+Example reg_exp_ex4 : [1; 2; 3] =~ reg_exp_of_list [1; 2; 3].
+Proof.
+  simpl. apply (MApp [1]).
+  { apply MChar. }
+  apply (MApp [2]).
+  { apply MChar. }
+  apply (MApp [3]).
+  { apply MChar. }
+  apply MEmpty.
+Qed.
+
+
+
+Lemma MStar1 :
+  forall T s (re : reg_exp T) ,
+    s =~ re ->
+    s =~ Star re.
+Proof.
+  intros T s re H.
+  rewrite <- (app_nil_r _ s).
+  apply MStarApp.
+  - apply H.
+  - apply MStar0.
+Qed.
+
+
+
+
+
+Lemma empty_is_empty : forall T (s : list T),
+  ~ (s =~ EmptySet).
+Proof.
+  unfold not. intros. inversion H.
+Qed.
+
+Lemma MUnion' : forall T (s : list T) (re1 re2 : reg_exp T),
+  s =~ re1 \/ s =~ re2 ->
+  s =~ Union re1 re2.
+Proof.
+  intros.
+  destruct H.
+  - apply MUnionL. apply H.
+  - apply MUnionR. apply H.
+Qed.
+
+
+
+
+
+Lemma empty_string_matches_all_regular_expressions_3 : forall T : Type, forall re : reg_exp T, forall H : forall s : list T, In s [ ] -> s =~ re, forall Hs : In [ ] [ ], In [ ] [ ].
+
+Proof.
+intros T re H Hs.
+apply H.
+apply Hs.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Error proving MStar'
+('UNEXPECTED ERROR. Possible causes include: the input files have some error, or a warning was mistaken to be an error, or the LLM output had an Admitted.', 'Error message: Cannot infer the implicit parameter X of nil whose\ntype is "Type" in\nenvironment:\nT : Type\nre : reg_exp T\nH : forall s : list T, In s [ ] -> s =~ re')

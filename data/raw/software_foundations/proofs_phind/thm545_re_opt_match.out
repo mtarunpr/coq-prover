@@ -1,0 +1,2073 @@
+PROVING re_opt_match
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+
+
+Lemma re_opt_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt re.
+
+Proof.
+(* We will proceed by induction on the structure of the regular expression re.
+*)
+  intros T re s H.
+induction re as [|re1 re2 Hre1 Hre2].
+(* Case re = Empty: *)
+  - simpl.
+(* We know that s =~ Empty is false by definition.
+*)
+    contradiction.
+(* Case re = Epsilon: *)
+  - simpl.
+(* We know that s =~ Epsilon is true by definition.
+*)
+    exact H.
+(* Case re = Char c: *)
+  - simpl.
+(* We know that s =~ Char c is true if and only if s = [c] by definition.
+*)
+    destruct s as [|s1 s2].
++ simpl.
+reflexivity.
++ simpl.
+contradiction.
+(* Case re = Star re1: *)
+  - simpl.
+(* We know that s =~ Star re1 is true if and only if s =~ re1* by definition.
+*)
+    apply H.
+(* We have s =~ re1* and we want to prove s =~ re_opt re.
+*)
+    (* By definition of re_opt, we need to prove s =~ re1* <-> s =~ re1+.
+*)
+    split.
++ (* -> *)
+      apply re_star_plus in H.
+exact H.
++ (* <- *)
+      apply re_plus_star in H.
+exact H.
+(* Case re = re1 + re2: *)
+  - simpl.
+(* We know that s =~ (re1 + re2) is true if and only if s =~ re1 or s =~ re2 by definition.
+*)
+    destruct (s =~ re1) as [Hre1 | Hre1].
++ (* s =~ re1 *)
+      left.
+apply Hre1.
+exact H.
++ (* s =~ re2 *)
+      right.
+apply Hre2.
+exact H.
+(* Case re = re1 * re2: *)
+  - simpl.
+(* We know that s =~ (re1 * re2) is true if and only if s =~ re1 and
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #394)
+Error in step "induction re as [|re1 re2 Hre1 Hre2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt re.
+
+
+TRYING TO PROVE LEMMA
+Lemma regex_optional_match_0 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+
+
+Lemma regex_optional_match_0 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+Proof.
+(* We will proceed by induction on the regular expression re.
+*)
+  intros T re s H.
+induction re as [|re1 re2 | H1 IH1 H2 IH2].
+(* Case re = 0 *)
+  - intros H.
+inversion H.
+(* Case re = 1 *)
+  - intros H.
+inversion H.
+(* Case re = re1 + re2 *)
+  - intros H.
+(* We will use the induction hypotheses IH1 and IH2.
+*)
+    apply (IH1 H).
+apply (IH2 H).
+(* Case re = re1 * re2 *)
+  - intros H.
+(* We will use the induction hypotheses IH1 and IH2.
+*)
+    apply (IH1 H).
+apply (IH2 H).
+(* Case re = re1? *)
+  - intros H.
+(* We will use the induction hypothesis IH1.
+*)
+    apply (IH1 H).
+(* Case re = re1{n} *)
+  - intros H.
+(* We will use the induction hypothesis IH1.
+*)
+    apply (IH1 H).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #394)
+Error in step "induction re as [|re1 re2 | H1 IH1 H2 IH2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt re.
+
+
+TRYING TO PROVE LEMMA
+Lemma regex_optional_match_1 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+
+
+Lemma regex_optional_match_1 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+Proof.
+(* We will proceed by induction on the regular expression re.
+*)
+  intros T re s H.
+induction re as [|re1 re2 Hre1 Hre2].
+(* Case re = EmptySet *)
+  - intros.
+inversion H.
+(* Case re = Epsilon *)
+  - intros.
+inversion H.
+(* Case re = Char c *)
+  - intros.
+inversion H.
+(* Case re = Seq re1 re2 *)
+  - intros.
+inversion H.
+(* Case re = Star re1 *)
+  - intros.
+inversion H.
+(* Case re = Or re1 re2 *)
+  - intros.
+inversion H.
+(* Case re = Opt re1 *)
+  - intros.
+inversion H.
+(* Case re = Plus re1 *)
+  - intros.
+inversion H.
+(* Case re = Range a b *)
+  - intros.
+inversion H.
+(* Case re = Not re1 *)
+  - intros.
+inversion H.
+(* Case re = Interval n m *)
+  - intros.
+inversion H.
+(* Case re = Rec x re1 *)
+  - intros.
+inversion H.
+(* Case re = RecInd x re1 *)
+  - intros.
+inversion H.
+(* Case re = Case re1 branches *)
+  - intros.
+inversion H.
+(* Case re = Bind re1 f *)
+  - intros.
+inversion H.
+(* Case re = LetIn x re1 re2 *)
+  - intros.
+inversion H.
+(* Case re = Save re1 *)
+  - intros.
+inversion H.
+(* Case re = Seq2 re1 re2 *)
+  - intros.
+inversion H.
+(* Case re = If re1 re2 re3 *)
+  - intros.
+inversion H.
+(* Case re = Let re1 re2 *)
+  - intros.
+inversion H.
+(* Case re = Match re1 re2 *)
+  - intros.
+inversion H.
+(* Case re = MatchEmpty re1 *)
+  - intros.
+inversion H.
+(* Case re = MatchNotEmpty re1
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #394)
+Error in step "induction re as [|re1 re2 Hre1 Hre2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt re.
+
+
+TRYING TO PROVE LEMMA
+Lemma regex_optional_match_2 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+
+
+Lemma regex_optional_match_2 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+Proof.
+(* We will proceed by induction on the regular expression [re] *)
+  intros T re s H.
+induction re as [|re1 re2 | Hre1 Hre2 IHre1 IHre2].
+- (* Case re = EmptySet *)
+    (* Since s =~ EmptySet is impossible, we have a contradiction *)
+    contradiction.
+- (* Case re = Epsilon *)
+    (* Since s =~ Epsilon is impossible, we have a contradiction *)
+    contradiction.
+- (* Case re = Char c *)
+    (* By definition of =~, we have to prove s = [c] *)
+    (* Since H is s =~ Char c, we have s = [c] by definition of =~ for Char *)
+    (* Then s =~ Epsilon, which is impossible *)
+    (* So we have a contradiction *)
+    contradiction.
+- (* Case re = Star re1 *)
+    (* We have to prove s =~ re1 *)
+    (* By definition of =~, we have to prove s =~ re1 or s =~ re_opt re1 *)
+    (* We know s =~ Star re1 by IHre1 *)
+    (* So we have s =~ re1 or s =~ re_opt re1 *)
+    left.
+apply H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #394)
+Error in step "induction re as [|re1 re2 | Hre1 Hre2 IHre1 IHre2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt re.
+
+
+TRYING TO PROVE LEMMA
+Lemma regex_optional_match_3 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+
+
+Lemma regex_optional_match_3 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+Proof.
+(* We will proceed by induction on the regular expression re.
+*)
+  intros T re s H.
+induction re as [|re1 re2 | H1 IH1 H2 IH2].
+(* Case re = EmptySet *)
+  - (* s =~ EmptySet is impossible by definition of =~ *)
+    contradiction.
+(* Case re = Epsilon *)
+  - (* s =~ Epsilon is impossible by definition of =~ *)
+    contradiction.
+(* Case re = Char c *)
+  - (* s =~ Char c is impossible by definition of =~ *)
+    contradiction.
+(* Case re = Star re1 *)
+  - (* s =~ Star re1 is impossible by definition of =~ *)
+    contradiction.
+(* Case re = re1 + re2 *)
+  - (* s =~ (re1 + re2) -> s =~ re1 or s =~ re2 *)
+    destruct H as [H1 | H2].
+(* s =~ re1 *)
+    - (* s =~ re_opt (re1 + re2) *)
+      apply IH1 in H1.
+(* s =~ re_opt re1 *)
+      apply H1.
+(* s =~ re_opt (re1 + re2) *)
+      apply re_opt_e_match.
+(* s =~ re2 *)
+    - (* s =~ re_opt (re1 + re2) *)
+      apply IH2 in H2.
+(* s =~ re_opt re2 *)
+      apply H2.
+(* s =~ re_opt (re1 + re2) *)
+      apply re_opt_e_match.
+(* Case re = re1 * re2 *)
+  - (* s =~ (re1 * re2) -> s =~ re1 and s =~ re2 *)
+    destruct H as [H1 H2].
+(* s =~ re_opt (re1 * re2) *)
+    apply IH1 in H1.
+(* s =~ re_opt re1 *)
+    apply H1.
+apply IH2 in H2.
+(* s =~ re_opt re2 *)
+    apply H2.
+(* s =~ re_opt (
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #394)
+Error in step "induction re as [|re1 re2 | H1 IH1 H2 IH2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt re.
+
+
+TRYING TO PROVE LEMMA
+Lemma regex_optional_match_4 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; [| simpl; rewrite IHn']; reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match'' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    try (apply MApp; [apply IH1 | apply IH2]).  
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp; [apply IH1 | apply IH2].  
+Qed.
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (try (left; reflexivity); right).
+Qed.
+
+
+
+Theorem In10' : In 10 [1;2;3;4;5;6;7;8;9;10].
+Proof.
+  repeat (left; reflexivity).
+  repeat (right; try (left; reflexivity)).
+Qed.
+
+
+
+
+
+Theorem ev100: ev 100.
+Proof. repeat (apply ev_SS). apply ev_0. Qed.
+
+
+
+
+
+
+
+
+
+Fixpoint re_opt {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App _ EmptySet => EmptySet
+  | App EmptyStr re2 => re_opt re2
+  | App re1 EmptyStr => re_opt re1
+  | App re1 re2 => App (re_opt re1) (re_opt re2)
+  | Union EmptySet re2 => re_opt re2
+  | Union re1 EmptySet => re_opt re1
+  | Union re1 re2 => Union (re_opt re1) (re_opt re2)
+  | Star EmptySet => EmptyStr
+  | Star EmptyStr => EmptyStr
+  | Star re => Star (re_opt re)
+  | EmptySet => EmptySet
+  | EmptyStr => EmptyStr
+  | Char x => Char x
+  end.
+
+
+
+
+
+Lemma regex_optional_match_4 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+Proof.
+(* We will proceed by induction on the regular expression [re] *)
+  intros T re s H.
+induction re as [|re1 re2 | IHre1 IHre2].
+(* Case for empty regular expression *)
+  - simpl.
+intros H.
+inversion H.
+(* Case for symbol regular expression *)
+  - simpl.
+intros H.
+inversion H.
+subst.
+reflexivity.
+(* Case for concatenation regular expression *)
+  - simpl.
+intros H.
+destruct H as [H1 H2].
+(* We know that s1 =~ re1 and s2 =~ re2 *)
+    (* We need to prove that s1 ++ s2 =~ re1 * re2 *)
+    (* By IHre1 and IHre2, we know that s1 =~ re1 * e and s2 =~ e * re2 *)
+    (* Hence, s1 ++ s2 =~ re1 * e * re2 *)
+    (* By the definition of regex_opt, we have re1 * e * re2 = re1 * re2 *)
+    (* Hence, s1 ++ s2 =~ re1 * re2 *)
+    apply IHre1 in H1.
+apply IHre2 in H2.
+simpl in H1 H2.
+rewrite H1, H2.
+reflexivity.
+(* Case for union regular expression *)
+  - simpl.
+intros H.
+destruct H as [H1 | H2].
+(* We know that either s =~ re1 or s =~ re2 *)
+    (* We need to prove that s =~ re1 + re2 *)
+    (* By IHre1 and IHre2, we know that s =~ e * re1 and s =~ e * re2 *)
+    (* Hence, s =~ e * (re1 + re2) *)
+    (* By the definition of regex_opt, we have e * (re1 + re2) = e * re1 + e * re2 *)
+    (* Hence, s =~ e * re1 + e * re2 *)
+    (* By the definition of regex_opt, we have e * re
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #394)
+Error in step "induction re as [|re1 re2 | IHre1 IHre2].".
+Message: Expects a disjunctive pattern with 6 branches..
+Goal: s =~ re_opt re.
+
+
+TRYING TO PROVE LEMMA
+Lemma regex_optional_match_5 : forall T : Type, forall re : reg_exp T, forall s : list T, forall H : s =~ re, s =~ re_opt re.
+
+
+Error proving re_opt_match
+MAX LEMMA DEPTH REACHED. GIVING UP.

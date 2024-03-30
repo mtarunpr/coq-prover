@@ -1,0 +1,1331 @@
+PROVING Toy_correct
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+Theorem booltree_ind_type_correct : booltree_ind_type.
+Proof. exact booltree_ind. Qed.
+
+
+
+
+
+Inductive Toy : Type :=
+  | con1 (b : bool)
+  | con2 (n : nat) (t : Toy)
+.
+
+
+
+
+
+Theorem Toy_correct : exists f g,
+  forall P : Toy -> Prop,
+    (forall b : bool, P (f b)) ->
+    (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+    forall t : Toy, P t.
+
+Proof.
+(* We will use the axiom of choice to construct the functions f and g.
+*)
+  apply (axiom_of_choice Toy).
+(* We will now define f and g.
+*)
+  let f := fun b => con1 b in
+  let g := fun n t => con2 n t in
+  (* We will now prove that the property P holds for all elements of type Toy.
+*)
+  intros P H1 H2.
+(* We will proceed by induction on the structure of Toy.
+*)
+  induction (booltree_ind_type_correct P) as [ | b | n t IH1 IH2].
+- (* Base case: P holds for bt_empty.
+*)
+    apply H1.
+- (* Leaf case: P holds for bt_leaf b.
+*)
+    intros b.
+apply H2.
+- (* Branch case: P holds for bt_branch b t1 t2.
+*)
+    intros b t1 t2 IH1 IH2.
+apply IH1.
+apply IH2.
+(* We have shown that P holds for all elements of type Toy.
+*)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #98)
+Error in step "apply (axiom_of_choice Toy).".
+Message: The variable axiom_of_choice was not found
+in the current environment..
+Goal: exists (f : bool -> Toy) (g : nat -> Toy -> Toy),
+  forall P : Toy -> Prop,
+  (forall b : bool, P (f b)) ->
+  (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+  forall t : Toy, P t.
+
+
+TRYING TO PROVE LEMMA
+Lemma exists_toy_functions_0 : exists (f : bool -> Toy) (g : nat -> Toy -> Toy),
+  forall P : Toy -> Prop,
+  (forall b : bool, P (f b)) ->
+  (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+  forall t : Toy, P t.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+Theorem booltree_ind_type_correct : booltree_ind_type.
+Proof. exact booltree_ind. Qed.
+
+
+
+
+
+Inductive Toy : Type :=
+  | con1 (b : bool)
+  | con2 (n : nat) (t : Toy)
+.
+
+
+
+
+
+Lemma exists_toy_functions_0 : exists (f : bool -> Toy) (g : nat -> Toy -> Toy),
+  forall P : Toy -> Prop,
+  (forall b : bool, P (f b)) ->
+  (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+  forall t : Toy, P t.
+
+Proof.
+(* We will use the induction principle for the booltree type to prove the lemma.
+*)
+  apply booltree_ind_type_correct.
+(* We will now define the functions f and g.
+*)
+  (* Base case: f is defined as f b = con1 b and g is defined as g n t = con2 n t.
+*)
+  intros P Hbase Hleaf Hbranch.
+(* Inductive case: We will use the induction principle for the booltree type.
+*)
+  intros b t Ht.
+(* We will now prove the lemma for the base case.
+*)
+  apply Hbase.
+(* We will now prove the lemma for the leaf case.
+*)
+  intros n t Ht.
+apply Hleaf.
+(* We will now prove the lemma for the branch case.
+*)
+  intros b t1 t2 Ht1 Ht2.
+apply Hbranch.
+(* We will now prove the lemma for the inductive case.
+*)
+  intros b t Ht.
+apply Ht.
+(* The lemma has been proven.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #100)
+Error in step "intros P Hbase Hleaf Hbranch.".
+Message: No product even after head-reduction..
+Goal: base_case
+  (fun _ : booltree =>
+   exists (f : bool -> Toy) (g : nat -> Toy -> Toy),
+     forall P : Toy -> Prop,
+     (forall b : bool, P (f b)) ->
+     (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+     forall t : Toy, P t).
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_base_case_exists_1 : base_case
+  (fun _ : booltree =>
+   exists (f : bool -> Toy) (g : nat -> Toy -> Toy),
+     forall P : Toy -> Prop,
+     (forall b : bool, P (f b)) ->
+     (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+     forall t : Toy, P t).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+Theorem booltree_ind_type_correct : booltree_ind_type.
+Proof. exact booltree_ind. Qed.
+
+
+
+
+
+Inductive Toy : Type :=
+  | con1 (b : bool)
+  | con2 (n : nat) (t : Toy)
+.
+
+
+
+
+
+Lemma booltree_base_case_exists_1 : base_case
+  (fun _ : booltree =>
+   exists (f : bool -> Toy) (g : nat -> Toy -> Toy),
+     forall P : Toy -> Prop,
+     (forall b : bool, P (f b)) ->
+     (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+     forall t : Toy, P t).
+
+Proof.
+(* We will prove the lemma by induction on the structure of booltree.
+*)
+  intros.
+(* We will use the induction principle booltree_ind_type.
+*)
+  apply booltree_ind_type_correct.
+(* We will now prove the base case.
+*)
+  - intros.
+(* We will define f and g.
+*)
+    define f := (fun b => con1 b).
+define g := (fun n t => con2 n t).
+(* We will prove the universal quantification.
+*)
+    intros P H1 H2.
+(* We will prove the existential quantification.
+*)
+    exists f, g.
+(* We will prove the implication.
+*)
+    intros t.
+(* We will prove the case analysis on t.
+*)
+    induction t as [ | n t' IHt'].
+- (* Case t = con1 b.
+*)
+      apply H1.
+exact b.
+- (* Case t = con2 n t'.
+*)
+      apply H2.
+exact n.
+exact t'.
+exact IHt'.
+(* We will now prove the leaf case.
+*)
+  - intros P H1 H2.
+(* We will define f and g.
+*)
+    define f := (fun b => con1 b).
+define g := (fun n t => con2 n t).
+(* We will prove the universal quantification.
+*)
+    intros H3.
+(* We will prove the implication.
+*)
+    intros t.
+(* We will prove the case analysis on t.
+*)
+    induction t as [ | n t' IHt'].
+- (* Case t = con1 b.
+*)
+      apply H1.
+exact b.
+- (* Case t = con2 n t'.
+*)
+      apply H2.
+exact n.
+exact t'.
+exact IHt'.
+(* We will now prove the branch case.
+*)
+  - intros P H1 H2 H3.
+(* We will define f and g.
+*)
+    define f := (fun b => con1 b).
+define g := (fun n t => con2 n t).
+(* We
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #106)
+Error after step "intros.".
+Message: There are still unproven goals.
+Goal: base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      exists
+        (f : bool -> Toy) (g : nat -> Toy -> Toy),
+        forall P : Toy -> Prop,
+        (forall b : bool, P (f b)) ->
+        (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+        forall t : Toy, P t)).
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_base_case_exists_2 : base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      exists
+        (f : bool -> Toy) (g : nat -> Toy -> Toy),
+        forall P : Toy -> Prop,
+        (forall b : bool, P (f b)) ->
+        (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+        forall t : Toy, P t)).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+Theorem booltree_ind_type_correct : booltree_ind_type.
+Proof. exact booltree_ind. Qed.
+
+
+
+
+
+Inductive Toy : Type :=
+  | con1 (b : bool)
+  | con2 (n : nat) (t : Toy)
+.
+
+
+
+
+
+Lemma booltree_base_case_exists_2 : base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      exists
+        (f : bool -> Toy) (g : nat -> Toy -> Toy),
+        forall P : Toy -> Prop,
+        (forall b : bool, P (f b)) ->
+        (forall (n : nat) (t : Toy), P t -> P (g n t)) ->
+        forall t : Toy, P t)).
+
+Proof.
+(* We will prove the lemma by induction on the structure of booltree.
+*)
+  intros.
+(* We will use the induction principle for booltree.
+*)
+  apply booltree_ind_type_correct.
+(* We will now prove the base case.
+*)
+  - intros.
+(* We will define f and g.
+*)
+    define f := (fun _ : bool => con1 _).
+define g := (fun _ : nat => con2 _).
+(* We will prove that f and g satisfy the required properties.
+*)
+    - intros.
+(* We will prove that P (f b) holds for all b.
+*)
+      apply H.
+(* We will prove that P (g n t) holds for all n and t.
+*)
+      intros.
+apply H0.
+(* We will prove that P t holds for all t.
+*)
+      intros.
+apply H1.
+(* We will prove that P (con1 b) holds for all b.
+*)
+      intros.
+apply H2.
+(* We will prove that P (con2 n t) holds for all n and t.
+*)
+      intros.
+apply H3.
+(* We will prove that P (con1 b) holds for all b.
+*)
+      intros.
+apply H4.
+(* We will prove that P (con2 n t) holds for all n and t.
+*)
+      intros.
+apply H5.
+(* We will prove that P (con1 b) holds for all b.
+*)
+      intros.
+apply H6.
+(* We will prove that P (con2 n t) holds for all n and t.
+*)
+      intros.
+apply H7.
+(* We will prove that P (con1 b) holds for all b.
+*)
+      intros.
+apply H8.
+(* We will prove that P (con2 n t) holds for all n and t.
+*)
+      intros.
+apply H9.
+(* We will prove that P (con1 b) holds for all b.
+*)
+      intros.
+apply H10.
+(* We will prove that P (con2 n t) holds for all n
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #106)
+Error after step "intros.".
+Message: There are still unproven goals.
+Goal: base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_base_case_exists_3 : base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+Theorem booltree_ind_type_correct : booltree_ind_type.
+Proof. exact booltree_ind. Qed.
+
+
+
+
+
+Inductive Toy : Type :=
+  | con1 (b : bool)
+  | con2 (n : nat) (t : Toy)
+.
+
+
+
+
+
+Lemma booltree_base_case_exists_3 : base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+Proof.
+(* We will prove the lemma by induction on the structure of booltree.
+*)
+  intros.
+(* Base case: bt_empty *)
+  apply (H0 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #100)
+Error after step "intros.".
+Message: There are still unproven goals.
+Goal: base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_base_case_exists_4 : base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export ProofObjects.
+
+
+
+
+
+
+Check nat_ind :
+  forall P : nat -> Prop,
+    P 0 ->
+    (forall n : nat, P n -> P (S n)) ->
+    forall n : nat, P n.
+
+
+
+
+
+Theorem mul_0_r' : forall n:nat,
+  n * 0 = 0.
+Proof.
+  apply nat_ind.
+  -  reflexivity.
+  -  simpl. intros n' IHn'. rewrite -> IHn'.
+    reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_one_r' : forall n:nat,
+  n + 1 = S n.
+Proof.
+  apply nat_ind.
+  - reflexivity.
+  - intros n' IHn'. simpl. rewrite IHn'. reflexivity. Qed.
+
+
+
+
+
+
+
+
+Inductive time : Type :=
+  | day
+  | night.
+
+Check time_ind :
+  forall P : time -> Prop,
+    P day ->
+    P night ->
+    forall t : time, P t.
+
+
+
+Inductive rgb : Type :=
+  | red
+  | green
+  | blue.
+Check rgb_ind :
+  forall P : rgb -> Prop,
+    P red ->
+    P green ->
+    P blue ->
+    forall x : rgb, P x.
+
+
+
+
+Inductive natlist : Type :=
+  | nnil
+  | ncons (n : nat) (l : natlist).
+
+Check natlist_ind :
+  forall P : natlist -> Prop,
+    P nnil  ->
+    (forall (n : nat) (l : natlist),
+        P l -> P (ncons n l)) ->
+    forall l : natlist, P l.
+
+
+
+
+
+Inductive natlist' : Type :=
+  | nnil'
+  | nsnoc (l : natlist') (n : nat).
+
+
+
+Check natlist'_ind :
+  forall P : natlist' -> Prop,
+    P nnil' ->
+    (forall l : natlist', P l -> forall n : nat, P (nsnoc l n)) ->
+    forall n : natlist', P n.
+
+
+
+Inductive booltree : Type :=
+  | bt_empty
+  | bt_leaf (b : bool)
+  | bt_branch (b : bool) (t1 t2 : booltree).
+
+
+
+Definition booltree_property_type : Type := booltree -> Prop.
+
+Definition base_case (P : booltree_property_type) : Prop
+  := P bt_empty.
+
+Definition leaf_case (P : booltree_property_type) : Prop
+  := forall b : bool, P (bt_leaf b).
+
+Definition branch_case (P : booltree_property_type) : Prop
+  := forall (b : bool) (t1 : booltree), P t1 -> forall (t2 : booltree), P t2 -> P (bt_branch b t1 t2).
+
+Definition booltree_ind_type :=
+  forall (P : booltree_property_type),
+    base_case P ->
+    leaf_case P ->
+    branch_case P ->
+    forall (b : booltree), P b.
+
+
+
+Theorem booltree_ind_type_correct : booltree_ind_type.
+Proof. exact booltree_ind. Qed.
+
+
+
+
+
+Inductive Toy : Type :=
+  | con1 (b : bool)
+  | con2 (n : nat) (t : Toy)
+.
+
+
+
+
+
+Lemma booltree_base_case_exists_4 : base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+Proof.
+(* We will prove the lemma by induction on the structure of booltree.
+*)
+  intros.
+(* Base case: bt_empty *)
+  apply (H0 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #100)
+Error after step "intros.".
+Message: There are still unproven goals.
+Goal: base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+
+TRYING TO PROVE LEMMA
+Lemma booltree_base_case_exists_5 : base_case
+  (fun _ : booltree =>
+   base_case
+     (fun _ : booltree =>
+      base_case
+        (fun _ : booltree =>
+         exists
+           (f : bool -> Toy) (g : nat -> Toy -> Toy),
+           forall P : Toy -> Prop,
+           (forall b : bool, P (f b)) ->
+           (forall (n : nat) (t : Toy),
+            P t -> P (g n t)) -> forall t : Toy, P t))).
+
+
+Error proving Toy_correct
+MAX LEMMA DEPTH REACHED. GIVING UP.

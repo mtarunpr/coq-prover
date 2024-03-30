@@ -1,0 +1,563 @@
+PROVING silly3
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+
+Proof.
+(* The theorem is an identity, so we can use reflexivity to prove it.
+*)
+  intros n m H.
+(* H is the hypothesis that n = m.
+We can use the equality proof to rewrite m to n *)
+  rewrite H in H.
+(* Now we have n = n, which is trivially true *)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #66)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+H : m = m
+Unable to unify "n" with "m"..
+Goal: m = n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_0 : forall n m : nat, forall H : m = m, m = n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_0 : forall n m : nat, forall H : m = m, m = n.
+
+Proof.
+intros n m H.
+(* We want to prove m = n.
+We know that m = m (from H).
+We can use the equality
+     reflexivity lemma to prove this.
+*)
+  apply eq_refl.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #64)
+Error in step "apply eq_refl.".
+Message: In environment
+n, m : nat
+H : m = m
+Unable to unify "n" with "m"..
+Goal: m = n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_1 : forall n m : nat, forall H : m = m, m = n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_1 : forall n m : nat, forall H : m = m, m = n.
+
+Proof.
+intros n m H.
+(* We want to prove m = n.
+We know that m = m (given by H).
+We also know that n = m.
+So, we can use the equality transitivity property to prove m = n.
+*)
+  transitivity H.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #64)
+Error in step "transitivity H.".
+Message: In environment
+n, m : nat
+H : m = m
+The term "H" has type "m = m"
+while it is expected to have type "nat"..
+Goal: m = n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_2 : forall n m : nat, forall H : m = m, m = n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_2 : forall n m : nat, forall H : m = m, m = n.
+
+Proof.
+intros n m H.
+(* We want to prove m = n.
+Since H : m = m is a trivial equality, we can
+     just apply it to m and n.
+This is done using the substitution tactic.
+*)
+  subst.
+(* Now we have m = m as our goal, which is trivially true.
+We can finish
+     the proof using the reflexivity tactic.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #66)
+Error in step "reflexivity.".
+Message: In environment
+n, m : nat
+H : m = m
+Unable to unify "n" with "m"..
+Goal: m = n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_3 : forall n m : nat, forall H : m = m, m = n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_3 : forall n m : nat, forall H : m = m, m = n.
+
+Proof.
+(* The goal is to prove that m = n, given the hypothesis H : m = m.
+Since m = m is a trivially true statement (reflexivity of equality),
+     we can simply apply the equality to m to obtain m = n.
+*)
+  apply H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #62)
+Error in step "apply H.".
+Message: The variable H was not found in the current
+environment..
+Goal: forall n m : nat, m = m -> m = n.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_reflexivity_4 : forall n m : nat, m = m -> m = n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+
+
+Lemma nat_equality_reflexivity_4 : forall n m : nat, m = m -> m = n.
+
+Proof.
+(* We will proceed by induction on n.
+*)
+  induction n as [|n' IHn'].
+- (* Base case: n = 0 *)
+    intros m eq_mm.
+(* We need to prove m = 0.
+*)
+    (* By the premise, m = m.
+*)
+    (* By the induction hypothesis for n', we have m = n'.
+*)
+    (* Therefore, m = 0.
+*)
+    reflexivity.
+- (* Inductive case: n = S n' *)
+    (* We will proceed by induction on m.
+*)
+    induction m as [|m' IHm'].
+- (* Base case: m = 0 *)
+      intros eq_mm.
+(* We need to prove 0 = S n'.
+*)
+      (* This is a contradiction, as we cannot have 0 = S n' for any n'.
+*)
+      (* Therefore, the goal is unreachable.
+*)
+      discriminate.
+- (* Inductive case: m = S m' *)
+      intros eq_mm.
+(* We need to prove S m' = S n'.
+*)
+      (* By the premise, m = m.
+*)
+      (* By the induction hypothesis for m', we have S m' = S n'.
+*)
+      (* Therefore, S m' = S n'.
+*)
+      exact IHm'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #68)
+Error in step "reflexivity.".
+Message: In environment
+m : nat
+eq_mm : m = m
+Unable to unify "0" with 
+"m"..
+Goal: m = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma eq_reflexivity_5 : forall m : nat, forall eq_mm : m = m, m = 0.
+
+
+Error proving silly3
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,2212 @@
+PROVING rsc_R
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+Theorem le_step : forall n m p,
+  n < m ->
+  m <= S p ->
+  n <= p.
+Proof.
+  intros n m p H1 H2.
+  assert (H3: S n <= S p). apply le_trans with m. apply H1. apply H2.
+  apply (le_S_n n p H3).
+Qed.
+
+
+
+
+
+
+
+Definition equivalence {X:Type} (R: relation X) :=
+  (reflexive R) /\ (symmetric R) /\ (transitive R).
+
+
+
+
+
+
+Definition order {X:Type} (R: relation X) :=
+  (reflexive R) /\ (antisymmetric R) /\ (transitive R).
+
+
+
+Definition preorder {X:Type} (R: relation X) :=
+  (reflexive R) /\ (transitive R).
+
+Theorem le_order :
+  order le.
+Proof.
+  unfold order. split.
+    -  apply le_reflexive.
+    - split.
+      +  apply le_antisymmetric.
+      +  apply le_trans.  Qed.
+
+
+
+
+
+
+Inductive clos_refl_trans {A: Type} (R: relation A) : relation A :=
+  | rt_step x y (H : R x y) : clos_refl_trans R x y
+  | rt_refl x : clos_refl_trans R x x
+  | rt_trans x y z
+        (Hxy : clos_refl_trans R x y)
+        (Hyz : clos_refl_trans R y z) :
+        clos_refl_trans R x z.
+
+
+
+Theorem next_nat_closure_is_le : forall n m,
+  (n <= m) <-> ((clos_refl_trans next_nat) n m).
+Proof.
+  intros n m. split.
+  - 
+    intro H. induction H.
+    +  apply rt_refl.
+    + 
+      apply rt_trans with m. apply IHle. apply rt_step.
+      apply nn.
+  - 
+    intro H. induction H.
+    +  inversion H. apply le_S. apply le_n.
+    +  apply le_n.
+    + 
+      apply le_trans with y.
+      apply IHclos_refl_trans1.
+      apply IHclos_refl_trans2. Qed.
+
+
+
+Inductive clos_refl_trans_1n {A : Type}
+                             (R : relation A) (x : A)
+                             : A -> Prop :=
+  | rt1n_refl : clos_refl_trans_1n R x x
+  | rt1n_trans (y z : A)
+      (Hxy : R x y) (Hrest : clos_refl_trans_1n R y z) :
+      clos_refl_trans_1n R x z.
+
+
+
+
+
+Lemma rsc_R : forall (X:Type) (R:relation X) (x y : X),
+  R x y -> clos_refl_trans_1n R x y.
+
+Proof.
+(* The lemma rsc_R is to be proven for any type X and a relation R over X.
+The goal is to show that if R x y holds, then the closure of R with respect
+     to the reflexive and transitive closure of R is also true for x and y.
+*)
+  intros X R x y H.
+(* H is the hypothesis that R x y holds.
+*)
+  apply clos_refl_trans_1n_reflexive.
+(* By applying the reflexive case of the closure of R under reflexive and
+     transitive closure, we now need to prove that R x y holds.
+This is already
+     given by H.
+*)
+  assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #460)
+Error in step "apply clos_refl_trans_1n_reflexive.".
+Message: The variable clos_refl_trans_1n_reflexive
+was not found in the current environment..
+Goal: clos_refl_trans_1n R x y.
+
+
+TRYING TO PROVE LEMMA
+Lemma relation_reflexivity_transitivity_lemma_0 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+Theorem le_step : forall n m p,
+  n < m ->
+  m <= S p ->
+  n <= p.
+Proof.
+  intros n m p H1 H2.
+  assert (H3: S n <= S p). apply le_trans with m. apply H1. apply H2.
+  apply (le_S_n n p H3).
+Qed.
+
+
+
+
+
+
+
+Definition equivalence {X:Type} (R: relation X) :=
+  (reflexive R) /\ (symmetric R) /\ (transitive R).
+
+
+
+
+
+
+Definition order {X:Type} (R: relation X) :=
+  (reflexive R) /\ (antisymmetric R) /\ (transitive R).
+
+
+
+Definition preorder {X:Type} (R: relation X) :=
+  (reflexive R) /\ (transitive R).
+
+Theorem le_order :
+  order le.
+Proof.
+  unfold order. split.
+    -  apply le_reflexive.
+    - split.
+      +  apply le_antisymmetric.
+      +  apply le_trans.  Qed.
+
+
+
+
+
+
+Inductive clos_refl_trans {A: Type} (R: relation A) : relation A :=
+  | rt_step x y (H : R x y) : clos_refl_trans R x y
+  | rt_refl x : clos_refl_trans R x x
+  | rt_trans x y z
+        (Hxy : clos_refl_trans R x y)
+        (Hyz : clos_refl_trans R y z) :
+        clos_refl_trans R x z.
+
+
+
+Theorem next_nat_closure_is_le : forall n m,
+  (n <= m) <-> ((clos_refl_trans next_nat) n m).
+Proof.
+  intros n m. split.
+  - 
+    intro H. induction H.
+    +  apply rt_refl.
+    + 
+      apply rt_trans with m. apply IHle. apply rt_step.
+      apply nn.
+  - 
+    intro H. induction H.
+    +  inversion H. apply le_S. apply le_n.
+    +  apply le_n.
+    + 
+      apply le_trans with y.
+      apply IHclos_refl_trans1.
+      apply IHclos_refl_trans2. Qed.
+
+
+
+Inductive clos_refl_trans_1n {A : Type}
+                             (R : relation A) (x : A)
+                             : A -> Prop :=
+  | rt1n_refl : clos_refl_trans_1n R x x
+  | rt1n_trans (y z : A)
+      (Hxy : R x y) (Hrest : clos_refl_trans_1n R y z) :
+      clos_refl_trans_1n R x z.
+
+
+
+
+
+Lemma relation_reflexivity_transitivity_lemma_0 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+Proof.
+(* We will proceed by induction on the relation R between x and y.
+*)
+  intros X R x y H.
+(* We will need to use the following lemmas: *)
+  (* - clos_refl_trans_1n is a closure of refl and trans under 1-step transitivity *)
+  (* - clos_refl_trans is a closure of refl and trans *)
+  (* - refl is reflexivity, trans is transitivity *)
+  (* We will also use the fact that R is a relation, i.e., R is a function.
+*)
+  apply (clos_refl_trans_1n_ind R x y H).
+(* There are three cases to consider: *)
+  (* - Base case: R x y is reflexive *)
+  (* - Inductive case 1: R x y is transitive, and R y z is reflexive *)
+  (* - Inductive case 2: R x y is transitive, and R y z is transitive *)
+  (* We will prove the lemma for each case.
+*)
+  - (* Base case: R x y is reflexive *)
+    apply (clos_refl_trans_1n_refl R x y H).
+- (* Inductive case 1: R x y is transitive, and R y z is reflexive *)
+    intros z H1.
+apply (clos_refl_trans_1n_trans R x y z H H1).
+- (* Inductive case 2: R x y is transitive, and R y z is transitive *)
+    intros z H1.
+apply (clos_refl_trans_1n_trans R x y z H H1).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #460)
+Error in step "apply (clos_refl_trans_1n_ind R x y H).".
+Message: In environment
+X : Type
+R : relation X
+x, y : X
+H : R x y
+The term "R" has type "relation X"
+while it is expected to have type "Type"..
+Goal: clos_refl_trans_1n R x y.
+
+
+TRYING TO PROVE LEMMA
+Lemma relation_reflexivity_transitivity_lemma_1 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+Theorem le_step : forall n m p,
+  n < m ->
+  m <= S p ->
+  n <= p.
+Proof.
+  intros n m p H1 H2.
+  assert (H3: S n <= S p). apply le_trans with m. apply H1. apply H2.
+  apply (le_S_n n p H3).
+Qed.
+
+
+
+
+
+
+
+Definition equivalence {X:Type} (R: relation X) :=
+  (reflexive R) /\ (symmetric R) /\ (transitive R).
+
+
+
+
+
+
+Definition order {X:Type} (R: relation X) :=
+  (reflexive R) /\ (antisymmetric R) /\ (transitive R).
+
+
+
+Definition preorder {X:Type} (R: relation X) :=
+  (reflexive R) /\ (transitive R).
+
+Theorem le_order :
+  order le.
+Proof.
+  unfold order. split.
+    -  apply le_reflexive.
+    - split.
+      +  apply le_antisymmetric.
+      +  apply le_trans.  Qed.
+
+
+
+
+
+
+Inductive clos_refl_trans {A: Type} (R: relation A) : relation A :=
+  | rt_step x y (H : R x y) : clos_refl_trans R x y
+  | rt_refl x : clos_refl_trans R x x
+  | rt_trans x y z
+        (Hxy : clos_refl_trans R x y)
+        (Hyz : clos_refl_trans R y z) :
+        clos_refl_trans R x z.
+
+
+
+Theorem next_nat_closure_is_le : forall n m,
+  (n <= m) <-> ((clos_refl_trans next_nat) n m).
+Proof.
+  intros n m. split.
+  - 
+    intro H. induction H.
+    +  apply rt_refl.
+    + 
+      apply rt_trans with m. apply IHle. apply rt_step.
+      apply nn.
+  - 
+    intro H. induction H.
+    +  inversion H. apply le_S. apply le_n.
+    +  apply le_n.
+    + 
+      apply le_trans with y.
+      apply IHclos_refl_trans1.
+      apply IHclos_refl_trans2. Qed.
+
+
+
+Inductive clos_refl_trans_1n {A : Type}
+                             (R : relation A) (x : A)
+                             : A -> Prop :=
+  | rt1n_refl : clos_refl_trans_1n R x x
+  | rt1n_trans (y z : A)
+      (Hxy : R x y) (Hrest : clos_refl_trans_1n R y z) :
+      clos_refl_trans_1n R x z.
+
+
+
+
+
+Lemma relation_reflexivity_transitivity_lemma_1 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+Proof.
+(* We will proceed by induction on the relation R between x and y.
+*)
+  intros X R x y H.
+(* We will need to use the following lemmas: *)
+  (* - clos_refl_trans_1n is a closure of refl and trans under 1-step transitivity *)
+  (* - clos_refl_trans is a closure of refl and trans *)
+  (* - refl is reflexivity *)
+  (* - trans is transitivity *)
+  (* - H is the hypothesis that R x y *)
+  (* The goal is to prove clos_refl_trans_1n R x y *)
+  induction H as [|x' y' Rxy' IH].
+- (* Base case: R x y is refl x *)
+    (* In this case, clos_refl_trans_1n R x y follows directly from the definition of clos_refl_trans_1n *)
+    apply clos_refl_trans_1n_refl.
+- (* Inductive case: R x y is trans x y z *)
+    (* In this case, clos_refl_trans_1n R x y follows from the inductive hypothesis IH and the definition of clos_refl_trans_1n *)
+    apply (clos_refl_trans_1n_trans Rxy').
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #460)
+Error in step "induction H as [|x' y' Rxy' IH].".
+Message: Not an inductive definition..
+Goal: clos_refl_trans_1n R x y.
+
+
+TRYING TO PROVE LEMMA
+Lemma relation_reflexivity_transitivity_lemma_2 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+Theorem le_step : forall n m p,
+  n < m ->
+  m <= S p ->
+  n <= p.
+Proof.
+  intros n m p H1 H2.
+  assert (H3: S n <= S p). apply le_trans with m. apply H1. apply H2.
+  apply (le_S_n n p H3).
+Qed.
+
+
+
+
+
+
+
+Definition equivalence {X:Type} (R: relation X) :=
+  (reflexive R) /\ (symmetric R) /\ (transitive R).
+
+
+
+
+
+
+Definition order {X:Type} (R: relation X) :=
+  (reflexive R) /\ (antisymmetric R) /\ (transitive R).
+
+
+
+Definition preorder {X:Type} (R: relation X) :=
+  (reflexive R) /\ (transitive R).
+
+Theorem le_order :
+  order le.
+Proof.
+  unfold order. split.
+    -  apply le_reflexive.
+    - split.
+      +  apply le_antisymmetric.
+      +  apply le_trans.  Qed.
+
+
+
+
+
+
+Inductive clos_refl_trans {A: Type} (R: relation A) : relation A :=
+  | rt_step x y (H : R x y) : clos_refl_trans R x y
+  | rt_refl x : clos_refl_trans R x x
+  | rt_trans x y z
+        (Hxy : clos_refl_trans R x y)
+        (Hyz : clos_refl_trans R y z) :
+        clos_refl_trans R x z.
+
+
+
+Theorem next_nat_closure_is_le : forall n m,
+  (n <= m) <-> ((clos_refl_trans next_nat) n m).
+Proof.
+  intros n m. split.
+  - 
+    intro H. induction H.
+    +  apply rt_refl.
+    + 
+      apply rt_trans with m. apply IHle. apply rt_step.
+      apply nn.
+  - 
+    intro H. induction H.
+    +  inversion H. apply le_S. apply le_n.
+    +  apply le_n.
+    + 
+      apply le_trans with y.
+      apply IHclos_refl_trans1.
+      apply IHclos_refl_trans2. Qed.
+
+
+
+Inductive clos_refl_trans_1n {A : Type}
+                             (R : relation A) (x : A)
+                             : A -> Prop :=
+  | rt1n_refl : clos_refl_trans_1n R x x
+  | rt1n_trans (y z : A)
+      (Hxy : R x y) (Hrest : clos_refl_trans_1n R y z) :
+      clos_refl_trans_1n R x z.
+
+
+
+
+
+Lemma relation_reflexivity_transitivity_lemma_2 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+Proof.
+(* We will proceed by induction on the relation R between x and y.
+*)
+  intros X R x y H.
+(* We will need to use the following lemmas: *)
+  (* - clos_refl_trans_1n is a closure of refl and trans under 1-step transitivity *)
+  (* - clos_refl_trans is a closure of refl and trans *)
+  (* - refl is reflexivity, trans is transitivity *)
+  (* We will also use the fact that R is a relation, i.e., R is a function.
+*)
+  apply (clos_refl_trans_1n_ind R x y H).
+(* There are three cases to consider: *)
+  (* - Base case: R x y is reflexive *)
+  (* - Inductive case 1: R x y is transitive, and R y z is reflexive *)
+  (* - Inductive case 2: R x y is transitive, and R y z is transitive *)
+  (* We will prove the lemma for each case.
+*)
+  - (* Base case: R x y is reflexive *)
+    apply clos_refl_trans_1n_refl.
+(* This concludes the base case.
+*)
+  - (* Inductive case 1: R x y is transitive, and R y z is reflexive *)
+    intros z H1.
+apply (clos_refl_trans_1n_trans H1).
+(* This concludes the first inductive case.
+*)
+  - (* Inductive case 2: R x y is transitive, and R y z is transitive *)
+    intros z H1.
+apply (clos_refl_trans_1n_trans H1).
+(* This concludes the second inductive case.
+*)
+  (* This concludes the proof of relation_reflexivity_transitivity_lemma_2.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #460)
+Error in step "apply (clos_refl_trans_1n_ind R x y H).".
+Message: In environment
+X : Type
+R : relation X
+x, y : X
+H : R x y
+The term "R" has type "relation X"
+while it is expected to have type "Type"..
+Goal: clos_refl_trans_1n R x y.
+
+
+TRYING TO PROVE LEMMA
+Lemma relation_reflexivity_transitivity_lemma_3 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+Theorem le_step : forall n m p,
+  n < m ->
+  m <= S p ->
+  n <= p.
+Proof.
+  intros n m p H1 H2.
+  assert (H3: S n <= S p). apply le_trans with m. apply H1. apply H2.
+  apply (le_S_n n p H3).
+Qed.
+
+
+
+
+
+
+
+Definition equivalence {X:Type} (R: relation X) :=
+  (reflexive R) /\ (symmetric R) /\ (transitive R).
+
+
+
+
+
+
+Definition order {X:Type} (R: relation X) :=
+  (reflexive R) /\ (antisymmetric R) /\ (transitive R).
+
+
+
+Definition preorder {X:Type} (R: relation X) :=
+  (reflexive R) /\ (transitive R).
+
+Theorem le_order :
+  order le.
+Proof.
+  unfold order. split.
+    -  apply le_reflexive.
+    - split.
+      +  apply le_antisymmetric.
+      +  apply le_trans.  Qed.
+
+
+
+
+
+
+Inductive clos_refl_trans {A: Type} (R: relation A) : relation A :=
+  | rt_step x y (H : R x y) : clos_refl_trans R x y
+  | rt_refl x : clos_refl_trans R x x
+  | rt_trans x y z
+        (Hxy : clos_refl_trans R x y)
+        (Hyz : clos_refl_trans R y z) :
+        clos_refl_trans R x z.
+
+
+
+Theorem next_nat_closure_is_le : forall n m,
+  (n <= m) <-> ((clos_refl_trans next_nat) n m).
+Proof.
+  intros n m. split.
+  - 
+    intro H. induction H.
+    +  apply rt_refl.
+    + 
+      apply rt_trans with m. apply IHle. apply rt_step.
+      apply nn.
+  - 
+    intro H. induction H.
+    +  inversion H. apply le_S. apply le_n.
+    +  apply le_n.
+    + 
+      apply le_trans with y.
+      apply IHclos_refl_trans1.
+      apply IHclos_refl_trans2. Qed.
+
+
+
+Inductive clos_refl_trans_1n {A : Type}
+                             (R : relation A) (x : A)
+                             : A -> Prop :=
+  | rt1n_refl : clos_refl_trans_1n R x x
+  | rt1n_trans (y z : A)
+      (Hxy : R x y) (Hrest : clos_refl_trans_1n R y z) :
+      clos_refl_trans_1n R x z.
+
+
+
+
+
+Lemma relation_reflexivity_transitivity_lemma_3 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+Proof.
+(* We will proceed by induction on the relation R between x and y.
+*)
+  intros X R x y H.
+(* We will need to use the following lemmas: *)
+  (* - clos_refl_trans_1n is a closure of refl and trans under 1-step transitivity *)
+  (* - clos_refl_trans is a closure of refl and trans *)
+  (* - refl is reflexivity, trans is transitivity *)
+  (* - H is our hypothesis that R x y *)
+  (* The goal is to prove clos_refl_trans_1n R x y *)
+  induction H as [|x' y' Rxy' IH].
+- (* Base case: R x y is reflexive *)
+    apply refl.
+- (* Inductive case: R x y is transitive, R x' y' is our new relation *)
+    (* We need to prove clos_refl_trans_1n R x' y' *)
+    apply trans.
+- (* We know R x' y' is transitive, so we need to prove clos_refl_trans R x' y' *)
+      apply (clos_refl_trans_1n_to_clos_refl_trans R x' y').
+(* We have IH: clos_refl_trans_1n R x y' *)
+      (* We need to prove clos_refl_trans R x y' *)
+      apply IH.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #460)
+Error in step "induction H as [|x' y' Rxy' IH].".
+Message: Not an inductive definition..
+Goal: clos_refl_trans_1n R x y.
+
+
+TRYING TO PROVE LEMMA
+Lemma relation_reflexivity_transitivity_lemma_4 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+Theorem le_step : forall n m p,
+  n < m ->
+  m <= S p ->
+  n <= p.
+Proof.
+  intros n m p H1 H2.
+  assert (H3: S n <= S p). apply le_trans with m. apply H1. apply H2.
+  apply (le_S_n n p H3).
+Qed.
+
+
+
+
+
+
+
+Definition equivalence {X:Type} (R: relation X) :=
+  (reflexive R) /\ (symmetric R) /\ (transitive R).
+
+
+
+
+
+
+Definition order {X:Type} (R: relation X) :=
+  (reflexive R) /\ (antisymmetric R) /\ (transitive R).
+
+
+
+Definition preorder {X:Type} (R: relation X) :=
+  (reflexive R) /\ (transitive R).
+
+Theorem le_order :
+  order le.
+Proof.
+  unfold order. split.
+    -  apply le_reflexive.
+    - split.
+      +  apply le_antisymmetric.
+      +  apply le_trans.  Qed.
+
+
+
+
+
+
+Inductive clos_refl_trans {A: Type} (R: relation A) : relation A :=
+  | rt_step x y (H : R x y) : clos_refl_trans R x y
+  | rt_refl x : clos_refl_trans R x x
+  | rt_trans x y z
+        (Hxy : clos_refl_trans R x y)
+        (Hyz : clos_refl_trans R y z) :
+        clos_refl_trans R x z.
+
+
+
+Theorem next_nat_closure_is_le : forall n m,
+  (n <= m) <-> ((clos_refl_trans next_nat) n m).
+Proof.
+  intros n m. split.
+  - 
+    intro H. induction H.
+    +  apply rt_refl.
+    + 
+      apply rt_trans with m. apply IHle. apply rt_step.
+      apply nn.
+  - 
+    intro H. induction H.
+    +  inversion H. apply le_S. apply le_n.
+    +  apply le_n.
+    + 
+      apply le_trans with y.
+      apply IHclos_refl_trans1.
+      apply IHclos_refl_trans2. Qed.
+
+
+
+Inductive clos_refl_trans_1n {A : Type}
+                             (R : relation A) (x : A)
+                             : A -> Prop :=
+  | rt1n_refl : clos_refl_trans_1n R x x
+  | rt1n_trans (y z : A)
+      (Hxy : R x y) (Hrest : clos_refl_trans_1n R y z) :
+      clos_refl_trans_1n R x z.
+
+
+
+
+
+Lemma relation_reflexivity_transitivity_lemma_4 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+Proof.
+(* We will proceed by induction on the relation R between x and y.
+*)
+  intros X R x y H.
+(* We will need to use the following lemmas: *)
+  (* - clos_refl_trans_1n is a closure of refl and trans under 1-step transitivity *)
+  (* - clos_refl_trans is a closure of refl and trans *)
+  (* - refl is reflexivity, trans is transitivity *)
+  (* - H is our hypothesis that R x y *)
+  (* The goal is to prove clos_refl_trans_1n R x y *)
+  induction H as [|x' y' Rxy' IH].
+- (* Base case: R x y is reflexive *)
+    apply refl.
+- (* Inductive case: R x y is transitive, R x' y' is our new relation *)
+    (* We need to prove clos_refl_trans_1n R x' y' *)
+    apply trans.
+- (* We know R x' y' is transitive, so we need to prove clos_refl_trans R x' y' *)
+      apply (clos_refl_trans_1n_trans R x' y').
+(* We have IH: clos_refl_trans_1n R x y' *)
+      (* And we need to prove clos_refl_trans R x y' *)
+      apply IH.
+- (* We have Rxy' as our new hypothesis, and we need to prove R x' y' *)
+      assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #460)
+Error in step "induction H as [|x' y' Rxy' IH].".
+Message: Not an inductive definition..
+Goal: clos_refl_trans_1n R x y.
+
+
+TRYING TO PROVE LEMMA
+Lemma relation_reflexivity_transitivity_lemma_5 : forall X : Type, forall R : relation X, forall x y : X, forall H : R x y, clos_refl_trans_1n R x y.
+
+
+Error proving rsc_R
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,517 @@
+PROVING ev_4'
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+
+
+Theorem ev_4' : ev 4.
+
+Proof.
+(* We will use the induction principle for ev to prove ev_4'.
+*)
+  induction 4 as [ | n' IHn'].
+- (* Base case: n = 0 *)
+    (* We need to prove ev 0.
+This is an axiom of our definition of ev, so we can just apply it.
+*)
+    apply ev_0.
+- (* Inductive case: n = S (S n') *)
+    (* We need to prove ev (S (S n')).
+We will use the induction hypothesis IHn' for this.
+*)
+    apply ev_SS.
+- (* We need to prove ev n'.
+This is where the induction hypothesis comes in.
+*)
+      apply IHn'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #34)
+Error in step "induction 4 as [ | n' IHn'].".
+Message: No 4th non dependent hypothesis in current goal even
+after head-reduction..
+Goal: ev 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_0 : ev 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+
+
+Lemma helper_lemma_0 : ev 4.
+
+Proof.
+(* We will use the induction principle for ev to prove this lemma.
+*)
+  induction 4 as [ | n IHn].
+(* Base case: n = 0 *)
+  - (* We know that ev 0 is true by ev_0.
+*)
+    apply ev_0.
+(* Inductive case: n = S (S n') *)
+  - (* We know that IHn : ev (S (S n')).
+We need to prove ev (S (S 4)).
+*)
+    (* We can use the induction hypothesis to rewrite IHn as ev (S (S 4)).
+*)
+    rewrite IHn in H.
+(* Now we can apply ev_SS to both sides of the equality.
+*)
+    apply (ev_SS 4 H).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #34)
+Error in step "induction 4 as [ | n IHn].".
+Message: No 4th non dependent hypothesis in current goal even
+after head-reduction..
+Goal: ev 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_1 : ev 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+
+
+Lemma helper_lemma_1 : ev 4.
+
+Proof.
+(* We will use the induction principle for ev to prove this lemma.
+*)
+  induction 4 as [ | n IHn].
+- (* Base case: n = 0 *)
+    (* We need to prove ev 0.
+This is the ev_0 constructor of the ev inductive type.
+*)
+    apply ev_0.
+- (* Inductive case: n = S (S n') *)
+    (* We need to prove ev (S (S n')).
+This is the ev_SS constructor of the ev inductive type.
+*)
+    (* We also need to use the induction hypothesis IHn, which states that ev n' holds.
+*)
+    apply (ev_SS (S n') IHn).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #34)
+Error in step "induction 4 as [ | n IHn].".
+Message: No 4th non dependent hypothesis in current goal even
+after head-reduction..
+Goal: ev 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_2 : ev 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+
+
+Lemma helper_lemma_2 : ev 4.
+
+Proof.
+(* We will use the induction principle for ev to prove this lemma.
+*)
+  induction 4 as [ | n IHn].
+- (* Base case: n = 0 *)
+    (* We need to prove ev 0.
+This is the ev_0 constructor of the ev inductive type.
+*)
+    apply ev_0.
+- (* Inductive case: n = S (S n') *)
+    (* We need to prove ev (S (S n')).
+This is the ev_SS constructor of the ev inductive type.
+*)
+    (* We also need to use the induction hypothesis IHn, which states that ev n' holds.
+*)
+    apply (ev_SS (S n') IHn).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #34)
+Error in step "induction 4 as [ | n IHn].".
+Message: No 4th non dependent hypothesis in current goal even
+after head-reduction..
+Goal: ev 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_3 : ev 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+
+
+Lemma helper_lemma_3 : ev 4.
+
+Proof.
+(* We will use the induction principle for ev to prove this lemma.
+*)
+  induction 4 as [ | n IHn].
+- (* Base case: n = 0 *)
+    (* We need to prove ev 0.
+This is the ev_0 constructor of the ev inductive type.
+*)
+    apply ev_0.
+- (* Inductive case: n = S (S n') *)
+    (* We need to prove ev (S (S n')).
+This is the ev_SS constructor of the ev inductive type.
+*)
+    (* We also need to use the induction hypothesis IHn, which states that ev n' holds.
+*)
+    apply (ev_SS (S n') IHn).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #34)
+Error in step "induction 4 as [ | n IHn].".
+Message: No 4th non dependent hypothesis in current goal even
+after head-reduction..
+Goal: ev 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_4 : ev 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+
+
+Lemma helper_lemma_4 : ev 4.
+
+Proof.
+(* We will use the induction principle for ev to prove this lemma.
+*)
+  induction 4 as [ | n IHn].
+- (* Base case: n = 0 *)
+    (* We need to prove ev 0.
+This is the ev_0 constructor of the ev inductive type.
+*)
+    apply ev_0.
+- (* Inductive case: n = S (S n') *)
+    (* We need to prove ev (S (S n')).
+We have an induction hypothesis IHn that ev n' holds.
+*)
+    (* We will use the ev_SS constructor of the ev inductive type, which takes two arguments: n' and a proof that ev n' holds.
+*)
+    apply (ev_SS (S n') IHn).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #34)
+Error in step "induction 4 as [ | n IHn].".
+Message: No 4th non dependent hypothesis in current goal even
+after head-reduction..
+Goal: ev 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_5 : ev 4.
+
+
+Error proving ev_4'
+MAX LEMMA DEPTH REACHED. GIVING UP.

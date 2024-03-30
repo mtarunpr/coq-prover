@@ -1,0 +1,1376 @@
+PROVING ev_double
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+
+
+Theorem ev_double : forall n,
+  ev (double n).
+
+Proof.
+(* We will proceed by induction on n.
+*)
+  intros n.
+(* We will need to use the definition of double.
+*)
+  unfold double.
+(* Now we will proceed by induction on n.
+*)
+  induction n as [|n' IHn'].
+(* The base case is when n is 0.
+In this case, double 0 is 0, and we need to prove ev 0.
+*)
+  - simpl.
+apply ev_0.
+(* The inductive case is when n is S n'.
+In this case, double (S n') is S (S (double n')).
+*)
+  - simpl.
+(* We will need to use the induction hypothesis on n'.
+*)
+    apply IHn'.
+(* We also need to prove that ev (S (S (double n'))).
+*)
+    apply ev_SS.
+(* This is where we use the induction hypothesis.
+*)
+    assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #96)
+Error in step "apply IHn'.".
+Message: In environment
+n' : nat
+IHn' : ev
+         ((fix double (n : nat) : nat :=
+             match n with
+             | 0 => 0
+             | S n' => S (S (double n'))
+             end) n')
+Unable to unify
+ "ev
+    ((fix double (n : nat) : nat :=
+        match n with
+        | 0 => 0
+        | S n' => S (S (double n'))
+        end) n')"
+with
+ "ev
+    (S
+       (S
+          ((fix double (n : nat) : nat :=
+              match n with
+              | 0 => 0
+              | S n' => S (S (double n'))
+              end) n')))"..
+Goal: ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))).
+
+
+TRYING TO PROVE LEMMA
+Lemma double_is_increasing_0 : forall n' : nat, forall IHn' : ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n'), ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+
+
+Lemma double_is_increasing_0 : forall n' : nat, forall IHn' : ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n'), ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))).
+
+Proof.
+(* We will proceed by induction on n'.
+*)
+  intros n' IHn'.
+(* We will need to prove that ev (double (S (S n'))) holds.
+*)
+  (* We will do this by computing double (S (S n')) and then applying the induction hypothesis.
+*)
+  (* The computation of double (S (S n')) is straightforward: it is S (S (S (S (double n')))) *)
+  (* by the definition of double.
+*)
+  simpl.
+reflexivity.
+(* Now we have ev (S (S (S (S (double n'))))).
+*)
+  (* By the induction hypothesis IHn', we have ev (S (S (double n'))).
+*)
+  (* Thus, we have ev (S (S (S (S (double n'))))) and ev (S (S (double n'))).
+*)
+  (* Therefore, we have ev (S (S (S (S (double n'))))) by the definition of ev_SS.
+*)
+  apply (ev_SS _ IHn').
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #84)
+Error in step "reflexivity.".
+Message: Cannot find a relation to rewrite..
+Goal: ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))).
+
+
+TRYING TO PROVE LEMMA
+Lemma double_is_increasing_1 : forall n' : nat, forall IHn' : ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n'), ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+
+
+Lemma double_is_increasing_1 : forall n' : nat, forall IHn' : ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n'), ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))).
+
+Proof.
+(* We will proceed by induction on n'.
+*)
+  intros n' IHn'.
+induction n' as [|n' IHn''].
+- (* Base case: n' = 0 *)
+    (* We need to show that ev (S (S (double 0))).
+*)
+    (* Since double 0 = 0, this is the same as ev (S (S 0)).
+*)
+    (* This is true by ev_SS.
+*)
+    apply ev_SS.
+apply ev_0.
+- (* Inductive case: n' = S n' *)
+    (* We need to show that ev (S (S ((fix double (n : nat) : nat := match n with | 0 => 0 | S n' => S (S (double n')) end) n'))).
+*)
+    (* By the induction hypothesis, we know that ev (double n').
+*)
+    (* We will now show that ev (S (S (double n'))).
+*)
+    apply ev_SS.
+(* We know that ev (double n') implies ev (S (S (double n'))).
+*)
+    apply IHn''.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #96)
+Error in step "Qed.".
+Message:  (in proof double_is_increasing_1): Attempt to save an incomplete proof.
+Goal: ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n').
+
+
+TRYING TO PROVE LEMMA
+Lemma double_ev_S_S_n'_implies_ev_double_n'_2 : forall n' : nat, forall IHn' : ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))), forall IHn'' : ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n') ->
+ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))), ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+
+
+Lemma double_ev_S_S_n'_implies_ev_double_n'_2 : forall n' : nat, forall IHn' : ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))), forall IHn'' : ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n') ->
+ev
+  (S
+     (S
+        ((fix double (n : nat) : nat :=
+            match n with
+            | 0 => 0
+            | S n' => S (S (double n'))
+            end) n'))), ev
+  ((fix double (n : nat) : nat :=
+      match n with
+      | 0 => 0
+      | S n' => S (S (double n'))
+      end) n').
+
+Proof.
+(* We will proceed by induction on n'.
+*)
+  intros n' IHn' IHn''.
+generalize (S (S (double n'))).
+generalize (S (S (double n'))).
+induction n' as [|n' IHn'''].
+- (* Base case: n' = 0 *)
+    (* We need to prove ev (S (S (double 0))).
+*)
+    (* Since double 0 = 0, this is the same as proving ev (S (S 0)).
+*)
+    (* But ev 0 is the base case of ev, so this holds.
+*)
+    apply ev_SS.
+apply ev_0.
+- (* Inductive case: n' = S n' *)
+    (* We need to prove ev (S (S (double (S n')))).
+*)
+    (* By the IH, we know that ev (S (S (double n'))).
+*)
+    (* We also know that ev ((fix double (n : nat) : nat := match n with | 0 =>
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #90)
+Error in step "apply ev_SS.".
+Message: In environment
+IHn' : ev 2
+IHn'' : ev 0 -> ev 2
+Unable to unify "forall n : nat, ev n -> ev (S (S n))"
+with "nat -> nat -> ev 0"..
+Goal: nat -> nat -> ev 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma ev_2_and_ev_0_implies_ev_0_3 : forall IHn' : ev 2, forall IHn'' : ev 0 -> ev 2, nat -> nat -> ev 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+
+
+Lemma ev_2_and_ev_0_implies_ev_0_3 : forall IHn' : ev 2, forall IHn'' : ev 0 -> ev 2, nat -> nat -> ev 0.
+
+Proof.
+intros IHn' IHn'' n m.
+(* We want to prove that ev (2 + 3 * n) holds.
+We can do this by induction on n.
+*)
+  induction n as [|n' IHn'].
+- (* Base case: n = 0 *)
+    (* We need to prove ev 0.
+This is already given by IHn''.
+*)
+    exact (IHn'' 0).
+- (* Inductive case: n = S n' *)
+    (* We need to prove ev (2 + 3 * (S n')).
+We can rewrite this as ev (3 * n' + 5).
+*)
+    (* Now, we can use the induction hypothesis IHn' to prove ev (3 * n' + 5).
+*)
+    exact (IHn' (3 * n' + 5)).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #82)
+Error in step "induction n as [|n' IHn'].".
+Message: IHn' is already used..
+Goal: ev 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma ev_2_and_ev_0_implies_ev_2_for_all_n_and_m_4 : forall IHn' : ev 2, forall IHn'' : ev 0 -> ev 2, forall n m : nat, ev 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Logic.
+From Coq Require Import Lia.
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint div2 (n : nat) :=
+  match n with
+    0 => 0
+  | 1 => 0
+  | S (S n) => S (div2 n)
+  end.
+
+Definition f (n : nat) :=
+  if even n then div2 n
+  else (3 * n) + 1.
+
+
+
+
+
+Fail Fixpoint reaches_1_in (n : nat) :=
+  if n =? 1 then 0
+  else 1 + reaches_1_in (f n).
+
+
+
+
+
+Inductive reaches_1 : nat -> Prop :=
+  | term_done : reaches_1 1
+  | term_more (n : nat) : reaches_1 (f n) -> reaches_1 n.
+
+
+
+
+
+Conjecture collatz : forall n, reaches_1 n.
+
+
+
+
+
+
+
+
+
+
+Module LePlayground.
+
+
+
+Inductive le : nat -> nat -> Prop :=
+  | le_n (n : nat)   : le n n
+  | le_S (n m : nat) : le n m -> le n (S m).
+
+End LePlayground.
+
+
+
+Inductive clos_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step (x y : X) :
+      R x y ->
+      clos_trans R x y
+  | t_trans (x y z : X) :
+      clos_trans R x y ->
+      clos_trans R y z ->
+      clos_trans R x z.
+
+
+
+Inductive clos_refl_trans {X: Type} (R: X->X->Prop) : X->X->Prop :=
+  | t_step' (x y : X) :
+      R x y ->
+      clos_refl_trans R x y
+  | t_refl (x : X) :
+      clos_refl_trans R x x
+  | t_symm (x y : X):
+      clos_refl_trans R x y ->
+      clos_refl_trans R y x
+  | t_trans' (x y z : X) :
+      clos_refl_trans R x y ->
+      clos_refl_trans R y z ->
+      clos_refl_trans R x z.
+
+
+
+
+
+
+
+Inductive Perm3 {X : Type} : list X -> list X -> Prop :=
+  | perm3_swap12 (a b c : X) :
+      Perm3 [a;b;c] [b;a;c]
+  | perm3_swap23 (a b c : X) :
+      Perm3 [a;b;c] [a;c;b]
+  | perm3_trans (l1 l2 l3 : list X) :
+      Perm3 l1 l2 -> Perm3 l2 l3 -> Perm3 l1 l3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+Fail Inductive wrong_ev (n : nat) : Prop :=
+  | wrong_ev_0 : wrong_ev 0
+  | wrong_ev_SS (H: wrong_ev n) : wrong_ev (S (S n)).
+
+
+
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof. apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Theorem ev_4' : ev 4.
+Proof. apply (ev_SS 2 (ev_SS 0 ev_0)). Qed.
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n. simpl. intros Hn.  apply ev_SS. apply ev_SS. apply Hn.
+Qed.
+
+
+
+
+Lemma ev_2_and_ev_0_implies_ev_2_for_all_n_and_m_4 : forall IHn' : ev 2, forall IHn'' : ev 0 -> ev 2, forall n m : nat, ev 0.
+
+Proof.
+intros IHn' IHn'' n m.
+(* We want to prove that ev 0 holds for all n and m.
+Since we have the hypothesis IHn'' that ev 0 implies ev 2, we can use this to prove ev 2 for all n and m.
+*)
+  apply IHn''.
+(* Now we have ev 2 for all n and m.
+But we want to prove ev 0, not ev 2.
+So, we need to prove that if ev 2 holds, then ev 0 holds.
+*)
+  intros H2.
+(* We know that ev 2 holds.
+We want to prove that ev 0 holds.
+We can do this by induction on n.
+*)
+  induction n as [|n' IHn'].
+- (* Base case: n = 0 *)
+    apply ev_0.
+- (* Inductive case: n = S n' *)
+    (* We know that ev (S n') holds by the induction hypothesis IHn'.
+We want to prove that ev 0 holds.
+*)
+    (* We can use the hypothesis IHn'' that ev 0 implies ev 2 to prove this.
+*)
+    apply IHn''.
+(* Now we have ev 2 for n' and m.
+But we want to prove ev 0 for n' and m.
+So, we need to prove that if ev 2 holds, then ev 0 holds.
+*)
+    intros H2'.
+(* We know that ev 2 holds.
+We want to prove that ev 0 holds.
+We can do this by induction on m.
+*)
+    induction m as [|m' IHm'].
+- (* Base case: m = 0 *)
+      apply ev_0.
+- (* Inductive case: m = S m' *)
+      (* We know that ev (S m') holds by the induction hypothesis IHm'.
+We want to prove that ev 0 holds.
+*)
+      (* We can use the hypothesis IHn'' that ev 0 implies ev 2 to prove this.
+*)
+      apply IHn''.
+(* Now we have ev 2 for n' and m'.
+But we want to prove ev 0 for n'
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #82)
+Error in step "apply IHn''.".
+Message: In environment
+IHn' : ev 2
+IHn'' : ev 0 -> ev 2
+n, m : nat
+Unable to unify "ev 2" with 
+"ev 0"..
+Goal: ev 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma ev_2_and_ev_0_implies_ev_2_for_all_n_and_m_5 : forall IHn' : ev 2, forall IHn'' : ev 0 -> ev 2, forall n m : nat, ev 0.
+
+
+Error proving ev_double
+MAX LEMMA DEPTH REACHED. GIVING UP.

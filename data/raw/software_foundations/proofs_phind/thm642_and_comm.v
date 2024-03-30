@@ -1,0 +1,251 @@
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+Theorem ev_4': ev 4.
+Proof.
+  apply (ev_SS 2 (ev_SS 0 ev_0)).
+Qed.
+
+
+
+
+
+
+Theorem ev_4'' : ev 4.
+Proof.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_0.
+  Show Proof.
+Qed.
+
+
+
+
+
+Definition ev_4''' : ev 4 :=
+  ev_SS 2 (ev_SS 0 ev_0).
+
+
+
+Print ev_4.
+
+Print ev_4'.
+
+Print ev_4''.
+
+Print ev_4'''.
+
+
+
+
+Theorem ev_8 : ev 8.
+Proof.
+  apply ev_SS.
+  apply ev_SS.
+  apply ev_SS.
+  apply ev_SS.
+  apply ev_0.
+Qed.
+
+Definition ev_8' : ev 8
+  := ev_SS 6 (ev_SS 4 (ev_SS 2 (ev_SS 0 ev_0))).
+
+
+
+
+
+
+
+
+
+Theorem ev_plus4 : forall n, ev n -> ev (4 + n).
+Proof.
+  intros n H. simpl.
+  apply ev_SS.
+  apply ev_SS.
+  apply H.
+Qed.
+
+
+
+Definition ev_plus4' : forall n, ev n -> ev (4 + n) :=
+  fun (n : nat) => fun (H : ev n) =>
+    ev_SS (S (S n)) (ev_SS n H).
+
+
+
+Definition ev_plus4'' (n : nat) (H : ev n)
+                    : ev (4 + n) :=
+  ev_SS (S (S n)) (ev_SS n H).
+
+Check ev_plus4''
+  : forall n : nat,
+    ev n ->
+    ev (4 + n).
+
+
+
+
+
+
+
+Definition ev_plus2 : Prop :=
+  forall n, forall (E : ev n), ev (n + 2).
+
+
+
+Definition ev_plus2' : Prop :=
+  forall n, forall (_ : ev n), ev (n + 2).
+
+
+
+Definition ev_plus2'' : Prop :=
+  forall n, ev n -> ev (n + 2).
+
+
+
+
+
+
+
+
+Definition add1 : nat -> nat.
+intro n.
+Show Proof.
+apply S.
+Show Proof.
+apply n. Defined.
+
+Print add1.
+
+
+Compute add1 2.
+
+
+
+
+
+
+
+
+
+Module Props.
+
+
+
+
+
+
+Module And.
+
+Inductive and (P Q : Prop) : Prop :=
+  | conj : P -> Q -> and P Q.
+
+Arguments conj [P] [Q].
+
+Notation "P /\ Q" := (and P Q) : type_scope.
+
+
+
+Print prod.
+
+
+
+
+Theorem proj1' : forall P Q,
+  P /\ Q -> P.
+Proof.
+  intros P Q HPQ. destruct HPQ as [HP HQ]. apply HP.
+  Show Proof.
+Qed.
+
+
+
+
+
+Lemma lemma_implication_intro_1 : forall P Q : Prop, forall H1 : Q, forall H2 : P, P.
+
+Proof.
+intros P Q H1 H2.
+apply H2.
+Qed.
+
+Lemma lemma_implication_intro_2 : forall P Q : Prop, forall H1 : Q, forall H2 : P, Q.
+
+Proof.
+intros P Q H1 H2.
+apply (conj H2 H1).
+Qed.
+
+Lemma commutativity_of_and_0 : forall P : Prop, forall Q : Prop, P /\ Q <-> Q /\ P.
+
+Proof.
+intros P Q.
+split.
+- intros [H1 H2].
+constructor.
+apply H2.
+apply H1.
+- intros [H1 H2].
+constructor.
+apply (@lemma_implication_intro_1 P Q H1 H2).
+apply (@lemma_implication_intro_2 P Q H1 H2).
+Qed.
+
+Lemma and_comm : forall P Q : Prop, P /\ Q <-> Q /\ P.
+
+Proof.
+intros P.
+apply (@commutativity_of_and_0 P).
+Qed.

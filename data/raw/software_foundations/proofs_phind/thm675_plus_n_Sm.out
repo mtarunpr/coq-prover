@@ -1,0 +1,802 @@
+PROVING plus_n_Sm
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+
+Proof.
+(*
+   * We will proceed by induction on n.
+*
+   * Base case: n = 0.
+*   We have S (0 + m) = S m by definition of addition.
+*   We also have 0 + (S m) = S m by add_0_r_firsttry.
+*   Therefore, S (0 + m) = 0 + (S m).
+*
+   * Inductive step: n = S n'.
+*   We have S (S n' + m) = S (n' + (S m)) by induction hypothesis.
+*   We also have S n' + (S m) = n' + (S (S m)) by definition of addition.
+*   Therefore, S (S n' + m) = n' + (S (S m)).
+*)
+  intros n m.
+induction n as [|n' IHn'].
+- (* Base case: n = 0 *)
+    simpl.
+apply add_0_r_firsttry.
+- (* Inductive step: n = S n' *)
+    simpl.
+rewrite IHn'.
+apply add_0_r_firsttry.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #114)
+Error in step "apply add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: S m = S m.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_succ_inj_0 : forall m : nat, S m = S m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_succ_inj_0 : forall m : nat, S m = S m.
+
+Proof.
+(* The goal is to prove that S m = S m, which is trivially true because S m is the
+     successor of m, and S m is the canonical way to denote the successor of m.
+*)
+  intros m.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_succ_inj_0 : forall m : nat, S m = S m.
+
+Proof.
+(* The goal is to prove that S m = S m, which is trivially true because S m is the
+     successor of m, and S m is the canonical way to denote the successor of m.
+*)
+  intros m.
+reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+
+Proof.
+(*
+   * We will proceed by induction on n.
+*
+   * Base case: n = 0.
+*   We have S (0 + m) = S m by definition of addition.
+*   We also have 0 + (S m) = S m by add_0_r_firsttry.
+*   Therefore, S (0 + m) = 0 + (S m).
+*
+   * Inductive step: n = S n'.
+*   We have S (S n' + m) = S (n' + (S m)) by induction hypothesis.
+*   We also have S n' + (S m) = n' + (S (S m)) by definition of addition.
+*   Therefore, S (S n' + m) = n' + (S (S m)).
+*)
+  intros n m.
+induction n as [|n' IHn'].
+- (* Base case: n = 0 *)
+    simpl.
+apply (@nat_succ_inj_0 m).
+- (* Inductive step: n = S n' *)
+    simpl.
+rewrite IHn'.
+apply add_0_r_firsttry.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #132)
+Error in step "apply add_0_r_firsttry.".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: S (n' + S m) = S (n' + S m).
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_add_commutativity_1 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_succ_inj_0 : forall m : nat, S m = S m.
+
+Proof.
+(* The goal is to prove that S m = S m, which is trivially true because S m is the
+     successor of m, and S m is the canonical way to denote the successor of m.
+*)
+  intros m.
+reflexivity.
+Qed.
+
+Lemma succ_add_commutativity_1 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+Proof.
+(* We will use induction on n' *)
+  intros n' m IHn'.
+induction n' as [|n' IHn'].
+- (* Base case: n' = 0 *)
+    (* By definition of addition, we have 0 + m = m *)
+    simpl.
+(* By definition of successor, we have S (0 + m) = S m *)
+    reflexivity.
+- (* Inductive case: n' = S n *)
+    (* We want to prove S (S n + m) = S (S n + S m) *)
+    (* By IHn', we know S (n + m) = n + S m *)
+    simpl in IHn'.
+(* By definition of addition, we have S n + m = S (n + m) *)
+    simpl.
+(* By definition of successor, we have S (S n + m) = S (S n + S m) *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #118)
+Error in step "induction n' as [|n' IHn'].".
+Message: IHn' is already used..
+Goal: S (n' + S m) = S (n' + S m).
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_add_commutativity_2 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_succ_inj_0 : forall m : nat, S m = S m.
+
+Proof.
+(* The goal is to prove that S m = S m, which is trivially true because S m is the
+     successor of m, and S m is the canonical way to denote the successor of m.
+*)
+  intros m.
+reflexivity.
+Qed.
+
+Lemma succ_add_commutativity_2 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+Proof.
+(* We will use induction on n' *)
+  intros n' m IHn'.
+induction n' as [|n' IHn'].
+- (* Base case: n' = 0 *)
+    (* By definition of addition, we have 0 + m = m *)
+    simpl.
+(* By the IHn', we have S (0 + m) = S (0 + S m) *)
+    rewrite IHn'.
+(* By the definition of addition, we have S (0 + S m) = S (S m) *)
+    reflexivity.
+- (* Inductive case: n' = S n *)
+    (* By the induction hypothesis, we have S (S n + m) = S (S n + S m) *)
+    simpl.
+(* By the IHn', we have S (S n + S m) = S (S n + S m) *)
+    rewrite IHn'.
+(* By reflexivity, we have S (S n + S m) = S (S n + S m) *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #118)
+Error in step "induction n' as [|n' IHn'].".
+Message: IHn' is already used..
+Goal: S (n' + S m) = S (n' + S m).
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_add_commutativity_3 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_succ_inj_0 : forall m : nat, S m = S m.
+
+Proof.
+(* The goal is to prove that S m = S m, which is trivially true because S m is the
+     successor of m, and S m is the canonical way to denote the successor of m.
+*)
+  intros m.
+reflexivity.
+Qed.
+
+Lemma succ_add_commutativity_3 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+Proof.
+(* We will use induction on n' *)
+  intros n' m IHn'.
+induction n' as [|n' IHn'].
+- (* Base case: n' = 0 *)
+    (* By definition of addition, we have 0 + m = m *)
+    simpl.
+(* By the IHn', we have S (0 + m) = S (0 + S m) *)
+    rewrite IHn'.
+(* By the definition of addition, we have S (0 + S m) = S (S m) *)
+    reflexivity.
+- (* Inductive case: n' = S n *)
+    (* By the induction hypothesis, we have S (S n + m) = S (S n + S m) *)
+    simpl.
+(* By the IHn', we have S (S n + S m) = S (S n + S m) *)
+    rewrite IHn'.
+(* By reflexivity, we have S (S n + S m) = S (S n + S m) *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #118)
+Error in step "induction n' as [|n' IHn'].".
+Message: IHn' is already used..
+Goal: S (n' + S m) = S (n' + S m).
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_add_commutativity_4 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+Lemma nat_succ_inj_0 : forall m : nat, S m = S m.
+
+Proof.
+(* The goal is to prove that S m = S m, which is trivially true because S m is the
+     successor of m, and S m is the canonical way to denote the successor of m.
+*)
+  intros m.
+reflexivity.
+Qed.
+
+Lemma succ_add_commutativity_4 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+Proof.
+(* We will use induction on n' *)
+  intros n' m IHn'.
+induction n' as [|n' IHn'].
+- (* Base case: n' = 0 *)
+    (* By definition of addition, we have 0 + m = m *)
+    simpl.
+(* By the IHn', we have S (0 + m) = S (0 + S m) *)
+    rewrite IHn'.
+(* By the definition of addition, we have S (0 + S m) = S (S m) *)
+    reflexivity.
+- (* Inductive case: n' = S n *)
+    (* By the induction hypothesis, we have S (S n + m) = S (S n + S m) *)
+    simpl.
+(* By the IHn', we have S (S n + S m) = S (S n + S m) *)
+    rewrite IHn'.
+(* By reflexivity, we have S (S n + S m) = S (S n + S m) *)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #118)
+Error in step "induction n' as [|n' IHn'].".
+Message: IHn' is already used..
+Goal: S (n' + S m) = S (n' + S m).
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_add_commutativity_5 : forall n' m : nat, forall IHn' : S (n' + m) = n' + S m, S (n' + S m) = S (n' + S m).
+
+
+Error proving plus_n_Sm
+MAX LEMMA DEPTH REACHED. GIVING UP.

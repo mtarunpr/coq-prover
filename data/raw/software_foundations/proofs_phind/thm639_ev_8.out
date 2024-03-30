@@ -1,0 +1,725 @@
+PROVING ev_8
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+Theorem ev_4': ev 4.
+Proof.
+  apply (ev_SS 2 (ev_SS 0 ev_0)).
+Qed.
+
+
+
+
+
+
+Theorem ev_4'' : ev 4.
+Proof.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_0.
+  Show Proof.
+Qed.
+
+
+
+
+
+Definition ev_4''' : ev 4 :=
+  ev_SS 2 (ev_SS 0 ev_0).
+
+
+
+Print ev_4.
+
+Print ev_4'.
+
+Print ev_4''.
+
+Print ev_4'''.
+
+
+
+
+
+
+Theorem ev_8 : ev 8.
+
+Proof.
+(* We will use the definition of ev_4''' to prove ev_8.
+*)
+  apply ev_4'''.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #72)
+Error in step "apply ev_4'''.".
+Message: Unable to unify "ev 4" with "ev 8"..
+Goal: ev 8.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_add_8_0 : ev 8.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+Theorem ev_4': ev 4.
+Proof.
+  apply (ev_SS 2 (ev_SS 0 ev_0)).
+Qed.
+
+
+
+
+
+
+Theorem ev_4'' : ev 4.
+Proof.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_0.
+  Show Proof.
+Qed.
+
+
+
+
+
+Definition ev_4''' : ev 4 :=
+  ev_SS 2 (ev_SS 0 ev_0).
+
+
+
+Print ev_4.
+
+Print ev_4'.
+
+Print ev_4''.
+
+Print ev_4'''.
+
+
+
+
+
+
+Lemma even_add_8_0 : ev 8.
+
+Proof.
+(* We will use the definition of ev_4''' to prove even_add_8_0.
+ev_4''' is defined as ev_SS 2 (ev_SS 0 ev_0), which means 4 is even.
+We will use this fact to prove that 8 is also even.
+*)
+  apply ev_4'''.
+(* We have proved that 8 is even.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #72)
+Error in step "apply ev_4'''.".
+Message: Unable to unify "ev 4" with "ev 8"..
+Goal: ev 8.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_add_8_1 : ev 8.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+Theorem ev_4': ev 4.
+Proof.
+  apply (ev_SS 2 (ev_SS 0 ev_0)).
+Qed.
+
+
+
+
+
+
+Theorem ev_4'' : ev 4.
+Proof.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_0.
+  Show Proof.
+Qed.
+
+
+
+
+
+Definition ev_4''' : ev 4 :=
+  ev_SS 2 (ev_SS 0 ev_0).
+
+
+
+Print ev_4.
+
+Print ev_4'.
+
+Print ev_4''.
+
+Print ev_4'''.
+
+
+
+
+
+
+Lemma even_add_8_1 : ev 8.
+
+Proof.
+(* We will use the definition of ev_4''' to prove even_add_8_1.
+ev_4''' is defined as ev_SS 2 (ev_SS 0 ev_0), which means 4 is even.
+We will use this fact to prove that 8 is also even.
+*)
+  apply ev_4'''.
+(* We have proved that 8 is even.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #72)
+Error in step "apply ev_4'''.".
+Message: Unable to unify "ev 4" with "ev 8"..
+Goal: ev 8.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_add_8_2 : ev 8.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+Theorem ev_4': ev 4.
+Proof.
+  apply (ev_SS 2 (ev_SS 0 ev_0)).
+Qed.
+
+
+
+
+
+
+Theorem ev_4'' : ev 4.
+Proof.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_0.
+  Show Proof.
+Qed.
+
+
+
+
+
+Definition ev_4''' : ev 4 :=
+  ev_SS 2 (ev_SS 0 ev_0).
+
+
+
+Print ev_4.
+
+Print ev_4'.
+
+Print ev_4''.
+
+Print ev_4'''.
+
+
+
+
+
+
+Lemma even_add_8_2 : ev 8.
+
+Proof.
+(* We will use the definition of ev_4''' to prove even_add_8_2.
+ev_4''' is defined as ev_SS 2 (ev_SS 0 ev_0), which means 4 is even.
+We will use this fact to prove that 8 is also even.
+*)
+  apply ev_4'''.
+(* We now have ev (S (S 2)), which is the same as ev 4.
+We can rewrite this as ev (S (S (S (S 0)))) to show that 8 is even.
+*)
+  rewrite -> IHn.
+(* We have now proved that 8 is even.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #72)
+Error in step "apply ev_4'''.".
+Message: Unable to unify "ev 4" with "ev 8"..
+Goal: ev 8.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_add_8_3 : ev 8.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+Theorem ev_4': ev 4.
+Proof.
+  apply (ev_SS 2 (ev_SS 0 ev_0)).
+Qed.
+
+
+
+
+
+
+Theorem ev_4'' : ev 4.
+Proof.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_0.
+  Show Proof.
+Qed.
+
+
+
+
+
+Definition ev_4''' : ev 4 :=
+  ev_SS 2 (ev_SS 0 ev_0).
+
+
+
+Print ev_4.
+
+Print ev_4'.
+
+Print ev_4''.
+
+Print ev_4'''.
+
+
+
+
+
+
+Lemma even_add_8_3 : ev 8.
+
+Proof.
+(* We will use the definition of ev_4''' to prove even_add_8_3.
+ev_4''' is defined as ev_SS 2 (ev_SS 0 ev_0), which means 4 is even.
+We will use this fact to prove that 8 is even.
+*)
+
+  (* We will use the induction principle for the ev predicate.
+The induction principle states that if we can prove a property P holds for 0 and for all n, then it holds for all natural numbers.
+*)
+
+  (* Base case: ev 0.
+*)
+  intros.
+(* We know that 4 is even, so we can use the definition of ev_4''' to prove that 8 is even.
+*)
+  apply (ev_4''').
+(* This concludes the proof.
+*)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #74)
+Error in step "apply (ev_4''').".
+Message: Unable to unify "ev 4" with "ev 8"..
+Goal: ev 8.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_add_8_4 : ev 8.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+
+
+
+Inductive ev : nat -> Prop :=
+  | ev_0                       : ev 0
+  | ev_SS (n : nat) (H : ev n) : ev (S (S n)).
+
+
+
+
+
+
+
+Check ev_SS
+  : forall n,
+    ev n ->
+    ev (S (S n)).
+
+
+
+
+
+Theorem ev_4 : ev 4.
+Proof.
+  apply ev_SS. apply ev_SS. apply ev_0. Qed.
+
+
+
+Print ev_4.
+
+
+
+
+Check (ev_SS 2 (ev_SS 0 ev_0))
+  : ev 4.
+
+
+
+
+
+Theorem ev_4': ev 4.
+Proof.
+  apply (ev_SS 2 (ev_SS 0 ev_0)).
+Qed.
+
+
+
+
+
+
+Theorem ev_4'' : ev 4.
+Proof.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_SS.
+  Show Proof.
+  apply ev_0.
+  Show Proof.
+Qed.
+
+
+
+
+
+Definition ev_4''' : ev 4 :=
+  ev_SS 2 (ev_SS 0 ev_0).
+
+
+
+Print ev_4.
+
+Print ev_4'.
+
+Print ev_4''.
+
+Print ev_4'''.
+
+
+
+
+
+
+Lemma even_add_8_4 : ev 8.
+
+Proof.
+(* We will use the definition of ev_4''' to prove even_add_8_4.
+ev_4''' is defined as ev_SS 2 (ev_SS 0 ev_0), which means 4 is even.
+We will use this fact to prove that 8 is also even.
+*)
+  apply ev_4'''.
+(* We now need to prove that ev (S (S (S (S 0)))) is true.
+We can do this by applying ev_SS twice, first with n = 2 and H = ev_4''',
+     and then with n = 2 and H = ev (S (S 2)).
+*)
+  apply (ev_SS 2 _).
+- apply ev_4''.
+- apply (ev_SS 2 _).
+- apply ev_0.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #72)
+Error in step "apply ev_4'''.".
+Message: Unable to unify "ev 4" with "ev 8"..
+Goal: ev 8.
+
+
+TRYING TO PROVE LEMMA
+Lemma even_add_8_5 : ev 8.
+
+
+Error proving ev_8
+MAX LEMMA DEPTH REACHED. GIVING UP.

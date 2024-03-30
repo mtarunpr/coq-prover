@@ -1,0 +1,1370 @@
+PROVING auto_example_2
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+
+Proof.
+(* We will proceed by induction on the constructors of the implications.
+*)
+  intros P Q R S T U H1 H2 H3 H4 H5 H6 H7.
+(* H1 : P -> Q, H2 : P -> R, H3 : T -> R, H4 : S -> T -> U, H5 : (P -> Q) -> (P -> S), H6 : T, H7 : P *)
+  (* First, we will use H5 to derive H8 : P -> S *)
+  apply H5 in H7.
+(* Now, we have H8 : P -> S and H7 : P, so we can derive H9 : S *)
+  apply H7 in H8.
+(* Now, we will use H4 to derive H10 : T -> U *)
+  apply H4 in H9.
+(* Now, we have H10 : T -> U and H6 : T, so we can derive H11 : U *)
+  apply H6 in H10.
+(* Now, we will use H1 and H7 to derive H12 : Q *)
+  apply H1 in H7.
+(* Now, we will use H2 and H7 to derive H13 : R *)
+  apply H2 in H7.
+(* Now, we will use H3 and H6 to derive H14 : R *)
+  apply H3 in H6.
+(* Now, we have H12 : Q, H13 : R, and H14 : R, so we can use the transitivity of implication to derive H15 : Q -> R *)
+  apply Imp_trans in H12.
+(* Now, we have H15 : Q -> R and H13 : R, so we can derive H16 : Q *)
+  apply H15 in H13.
+(* Now, we have H16 : Q and H14 : R, so we can use the transitivity of implication to derive H17 : Q -> R *)
+  apply Imp_trans in H16.
+(* Now, we have H17 : Q -> R and H14 : R, so
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #116)
+Error in step "apply H7 in H8.".
+Message: No such hypothesis: H8.
+Goal: U.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_on_implications_and_conjunctions_0 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma helper_lemma_on_implications_and_conjunctions_0 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+Proof.
+(*
+    We will proceed by induction on H7.
+Base case: H7 is P -> S.
+Inductive case: H7 is S.
+*)
+  intros.
+induction H7 as [| H7_S].
+- (* Base case: H7 is P -> S *)
+    (* We will apply H5 with H7_S and H1 to prove H7_S P.
+*)
+    specialize (H5 H1 H7_S).
+(* Now we have H7_S P.
+We will apply H4 with H6 and H7_S P to prove U.
+*)
+    specialize (H4 H6 H7_S).
+(* We have proved U.
+*)
+    exact U.
+- (* Inductive case: H7 is S *)
+    (* We will apply H4 with H6 and H7_S to prove U.
+*)
+    specialize (H4 H6 H7_S).
+(* We have proved U.
+*)
+    exact U.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #114)
+Error in step "induction H7 as [| H7_S].".
+Message: Not an inductive definition..
+Goal: U.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_on_implications_and_conjunctions_1 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma helper_lemma_on_implications_and_conjunctions_1 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+Proof.
+(*
+    We will proceed by induction on H7.
+The base case will be when H7 is of the form S.
+In this case, we will apply H4 to H6 to get U.
+Then, we will apply H5 to H1 and H7 to get S.
+Since S = U, we can conclude that P -> Q.
+*)
+  intros P Q R S T U H1 H2 H3 H4 H5 H6 H7.
+induction H7 as [|S H7_ih].
+- (* Base case: H7 is of the form S *)
+    specialize (H4 H6).
+specialize (H5 H1 H7).
+(*
+      We now have H4 : T -> U and H5 : P -> S.
+We want to show P -> Q.
+We can do this by applying H5 to H1.
+*)
+    specialize (H5 H1).
+(*
+      We now have H5 : P -> S and H1 : P -> Q.
+We want to show P -> Q.
+We can do this by applying H5 to H1.
+*)
+    exact H5.
+- (* Inductive case: H7 is of the form S -> H7_ih *)
+    (*
+      We want to show P -> Q.
+We can do this by applying H1 to H7_ih.
+*)
+    exact (H1 H7_ih).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #114)
+Error in step "induction H7 as [|S H7_ih].".
+Message: Not an inductive definition..
+Goal: U.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_on_implications_and_conjunctions_2 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma helper_lemma_on_implications_and_conjunctions_2 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+Proof.
+(*
+    We will proceed by induction on H7.
+The base case will be when H7 is of the form S.
+In this case, we will apply H4 to H6 to get U.
+Then, we will apply H5 to H1 and H7 to get S.
+Since S = U, we can conclude that P -> Q.
+*)
+  intros P Q R S T U H1 H2 H3 H4 H5 H6 H7.
+induction H7 as [|S H7_ih].
+- (* Base case: H7 is of the form S *)
+    specialize (H4 H6).
+specialize (H5 H1 H7).
+(*
+      We now have H4 : T -> U and H5 : P -> S.
+We want to show P -> Q.
+We can do this by applying H5 to H1.
+*)
+    specialize (H5 H1).
+(*
+      We now have H5 : P -> S and H1 : P -> Q.
+We want to show P -> Q.
+We can do this by applying H5 to H1.
+*)
+    exact H5.
+- (* Inductive case: H7 is of the form S -> H7_ih *)
+    (*
+      We want to show P -> Q.
+We can do this by applying H5 to H1 and H7_ih.
+*)
+    specialize (H5 H1 H7_ih).
+exact H5.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #114)
+Error in step "induction H7 as [|S H7_ih].".
+Message: Not an inductive definition..
+Goal: U.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_on_implications_and_conjunctions_3 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma helper_lemma_on_implications_and_conjunctions_3 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, U.
+
+Proof.
+(*
+    We are asked to prove U, which is a free variable.
+We have the following hypotheses:
+    - H1 : P -> Q
+    - H2 : P -> R
+    - H3 : T -> R
+    - H4 : S -> T -> U
+    - H5 : (P -> Q) -> P -> S
+    - H6 : T
+    - H7 : S
+
+    We can use H4 to rewrite U as H4 H6 H7.
+Then, we can use H5 to rewrite H4 H6 H7 as H5 H1 H7.
+Finally, we can use H2 to rewrite H5 H1 H7 as H2 H7.
+*)
+  intros.
+apply H4.
+apply H5.
+apply H2.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #118)
+Error in step "apply H2.".
+Message: In environment
+P, Q, R, S, T, U : Prop
+H1 : P -> Q
+H2 : P -> R
+H3 : T -> R
+H4 : S -> T -> U
+H5 : (P -> Q) -> P -> S
+H6 : T
+H7 : S
+Unable to unify "P -> R" with "P -> Q"..
+Goal: P -> Q.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_on_implications_and_conjunctions_4 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, P -> Q.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma helper_lemma_on_implications_and_conjunctions_4 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, P -> Q.
+
+Proof.
+(*
+    The goal is to prove P -> Q.
+We have the following hypotheses:
+    - H1 : P -> Q
+    - H2 : P -> R
+    - H3 : T -> R
+    - H4 : S -> T -> U
+    - H5 : (P -> Q) -> P -> S
+    - H6 : T
+    - H7 : S
+    - P -> Q (from H1)
+
+    We can use H1 and H2 to prove P -> R.
+We can use H3 and H6 to prove T -> R.
+We can use H4 and H7 to prove S -> U.
+We can use H5 and H1 to prove P -> S.
+From these, we can prove P -> U.
+Then, we can use H1 to prove P -> Q.
+*)
+
+  (* Prove P -> R *)
+  intros.
+apply H1.
+apply H2.
+assumption.
+(* Prove T -> R *)
+  intros.
+apply H3.
+assumption.
+(* Prove S -> U *)
+  intros.
+apply H4.
+assumption.
+(* Prove P -> S *)
+  intros.
+apply H5.
+apply H1.
+assumption.
+(* Prove P -> U *)
+  intros.
+apply H1.
+apply H2.
+apply H3.
+apply H4.
+assumption.
+(* Prove P -> Q *)
+  intros.
+apply H1.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #116)
+Error in step "apply H2.".
+Message: In environment
+P, Q, R, S, T, U : Prop
+H1 : P -> Q
+H2 : P -> R
+H3 : T -> R
+H4 : S -> T -> U
+H5 : (P -> Q) -> P -> S
+H6 : T
+H7 : S
+H : P
+Unable to unify "R" with "P"..
+Goal: P.
+
+
+TRYING TO PROVE LEMMA
+Lemma helper_lemma_on_implications_and_conjunctions_5 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, forall H : P, P.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 6)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma helper_lemma_on_implications_and_conjunctions_5 : forall P Q R S T U : Prop, forall H1 : P -> Q, forall H2 : P -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (P -> Q) -> P -> S, forall H6 : T, forall H7 : S, forall H : P, P.
+
+Proof.
+(* The goal is to prove P.
+We are given various hypotheses (H1, H2, H3, H4, H5, H6, H7, H).
+Since H is of type P, we can simply apply it to conclude that P holds.
+*)
+  apply H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #112)
+Error in step "apply H.".
+Message: The variable H was not found in the current
+environment..
+Goal: forall P Q R S T U : Prop,
+(P -> Q) ->
+(P -> R) ->
+(T -> R) ->
+(S -> T -> U) ->
+((P -> Q) -> P -> S) -> T -> S -> P -> P.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_on_implications_and_conjunctions_6 : forall P Q R S T U : Prop,
+(P -> Q) ->
+(P -> R) ->
+(T -> R) ->
+(S -> T -> U) ->
+((P -> Q) -> P -> S) -> T -> S -> P -> P.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 7)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma lemma_on_implications_and_conjunctions_6 : forall P Q R S T U : Prop,
+(P -> Q) ->
+(P -> R) ->
+(T -> R) ->
+(S -> T -> U) ->
+((P -> Q) -> P -> S) -> T -> S -> P -> P.
+
+Proof.
+(* We will proceed by induction on the natural numbers.
+*)
+  intros n.
+(* We will need to use the IHn for the induction step.
+*)
+  induction n as [|n' IHn'].
+- (* Base case: n = 0 *)
+    (* In this case, we have P -> Q and P -> S, so we can apply P to get Q and S.
+*)
+    apply (H0 P).
+apply (H1 P).
+(* We now have Q and S, so we can apply S to get U.
+*)
+    apply (H3 Q S).
+(* We now have U, so we can apply T to get S.
+*)
+    apply (H2 T).
+(* We now have S, so we can apply P to get S.
+*)
+    apply (H4 H0 H1).
+- (* Inductive step: n = S n' *)
+    (* We will need to use the IHn' for the induction step.
+*)
+    apply IHn'.
+(* We now have P -> Q and P -> S, so we can apply P to get Q and S.
+*)
+    apply (H0 P).
+apply (H1 P).
+(* We now have Q and S, so we can apply S to get U.
+*)
+    apply (H3 Q S).
+(* We now have U, so we can apply T to get S.
+*)
+    apply (H2 T).
+(* We now have S, so we can apply P to get S.
+*)
+    apply (H4 H0 H1).
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #114)
+Error in step "induction n as [|n' IHn'].".
+Message: Not an inductive definition..
+Goal: forall Q R S T U : Prop,
+(n -> Q) ->
+(n -> R) ->
+(T -> R) ->
+(S -> T -> U) ->
+((n -> Q) -> n -> S) -> T -> S -> n -> n.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_on_propositions_and_functions_7 : forall n : Prop, forall Q R S T U : Prop,
+(n -> Q) ->
+(n -> R) ->
+(T -> R) ->
+(S -> T -> U) ->
+((n -> Q) -> n -> S) -> T -> S -> n -> n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 8)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma lemma_on_propositions_and_functions_7 : forall n : Prop, forall Q R S T U : Prop,
+(n -> Q) ->
+(n -> R) ->
+(T -> R) ->
+(S -> T -> U) ->
+((n -> Q) -> n -> S) -> T -> S -> n -> n.
+
+Proof.
+(*
+     We will proceed by induction on the constructors of the natural numbers.
+The base case will be n = O, and the inductive case will be n = S m.
+*)
+  intros n Q R S T U H1 H2 H3 H4 H5 H6 H7.
+induction n as [|n IHn].
+(*
+     Base case: n = O
+     We have to prove:
+     H1 : O -> Q
+     H2 : O -> R
+     H3 : T -> R
+     H4 : S -> T -> U
+     H5 : (O -> Q) -> O -> S
+     H6 : T -> S
+     H7 : O -> O
+     We can see that H1 and H2 already imply that O = Q and O = R, so we can
+     rewrite H7 as O = O, which is trivially true.
+*)
+  - simpl.
+(*
+       Inductive case: n = S m
+       We have to prove:
+       IHn : (m -> Q) -> (m -> R) -> (T -> R) -> (S -> T -> U) -> ((m -> Q) -> m -> S) -> T -> S -> m -> m
+       H1 : S n -> Q
+       H2 : S n -> R
+       H3 : T -> R
+       H4 : S -> T -> U
+       H5 : (S n -> Q) -> S n -> S
+       H6 : T -> S
+       H7 : S n -> S m
+       We will apply the induction hypothesis IHn to H1, H2, H3, H4, and H5,
+       and then use H6 and H7 to rewrite the result.
+*)
+    apply IHn in H1.
+apply IHn in H2.
+apply IHn in H3.
+apply IHn in H4.
+apply IHn in H5.
+(*
+       Now we have:
+       H1 : m -> Q
+       H2 : m -> R
+       H3 : T -> R
+       H4 : S -> T -> U
+       H5 : (
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #114)
+Error in step "induction n as [|n IHn].".
+Message: Not an inductive definition..
+Goal: n -> n.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_on_propositions_and_functions_8 : forall n Q R S T U : Prop, forall H1 : n -> Q, forall H2 : n -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (n -> Q) -> n -> S, forall H6 : T, forall H7 : S, n -> n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 9)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma lemma_on_propositions_and_functions_8 : forall n Q R S T U : Prop, forall H1 : n -> Q, forall H2 : n -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (n -> Q) -> n -> S, forall H6 : T, forall H7 : S, n -> n.
+
+Proof.
+(* This lemma is a bit complex and it's hard to provide a proof without more context or information about the relationships between the different terms.
+However, I can provide a general structure of a proof that you can follow and adapt to your specific problem.
+*)
+
+  (* Introduce all the necessary variables and hypotheses *)
+  intros n Q R S T U H1 H2 H3 H4 H5 H6 H7.
+(* Here, you should start by applying the hypotheses and lemmas that you have to simplify the goal.
+For example, you could apply H1, H2, H3, H4, H5, H6, and H7 to the goal.
+*)
+
+  (* Apply the hypotheses *)
+  apply H1.
+apply H2.
+apply H3.
+apply H4.
+apply H5.
+apply H6.
+apply H7.
+(* Now, you should start manipulating the goal using the basic logical reasoning rules, such as and_intro, and_elim, etc.
+You should also use the axioms and theorems that you have proven previously.
+*)
+
+  (* For example, you could use the and_intro tactic to introduce conjunctions in the goal *)
+  and_intro.
+(* Or you could use the and_elim tactic to eliminate conjunctions from the goal *)
+  and_elim.
+(* You should also use the exfalso tactic to derive a contradiction from the goal, if possible *)
+  exfalso.
+(* Finally, you should end the proof with the Qed tactic *)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #114)
+Error in step "apply H1.".
+Message: In environment
+n, Q, R, S, T, U : Prop
+H1 : n -> Q
+H2 : n -> R
+H3 : T -> R
+H4 : S -> T -> U
+H5 : (n -> Q) -> n -> S
+H6 : T
+H7 : S
+Unable to unify "n -> Q" with "n -> n"..
+Goal: n -> n.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_on_propositions_and_functions_9 : forall n Q R S T U : Prop, forall H1 : n -> Q, forall H2 : n -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (n -> Q) -> n -> S, forall H6 : T, forall H7 : S, n -> n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 10)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+Lemma lemma_on_propositions_and_functions_9 : forall n Q R S T U : Prop, forall H1 : n -> Q, forall H2 : n -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (n -> Q) -> n -> S, forall H6 : T, forall H7 : S, n -> n.
+
+Proof.
+(* This lemma is a bit complex and it's hard to provide a proof without more context or information about the relationships between the different variables and hypotheses.
+However, I can provide a general structure of a proof that you can follow and adapt to your specific problem.
+*)
+
+  (* Introduce all the variables and hypotheses *)
+  intros n Q R S T U H1 H2 H3 H4 H5 H6 H7.
+(* Here, you should start applying the hypotheses and theorems you have to prove the statement of the lemma.
+For example, you could start by applying H5 to H1: *)
+
+  apply (H5 H1).
+(* Then, you should continue applying the other hypotheses and theorems, and possibly use tactics like "rewrite", "apply", "intros", "destruct", etc.
+Remember to always reason about what each tactic does and why it is being used.
+*)
+
+  (* Once you have proven the statement of the lemma, you can end the proof with "
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #114)
+Error in step "apply (H5 H1).".
+Message: In environment
+n, Q, R, S, T, U : Prop
+H1 : n -> Q
+H2 : n -> R
+H3 : T -> R
+H4 : S -> T -> U
+H5 : (n -> Q) -> n -> S
+H6 : T
+H7 : S
+Unable to unify "n -> S" with "n -> n"..
+Goal: n -> n.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_on_propositions_and_functions_10 : forall n Q R S T U : Prop, forall H1 : n -> Q, forall H2 : n -> R, forall H3 : T -> R, forall H4 : S -> T -> U, forall H5 : (n -> Q) -> n -> S, forall H6 : T, forall H7 : S, n -> n.
+
+
+Error proving auto_example_2
+MAX LEMMA DEPTH REACHED. GIVING UP.

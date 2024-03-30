@@ -1,0 +1,1035 @@
+PROVING succ_inj
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma succ_inj : injective S.
+
+Proof.
+(* We will prove that the successor function is injective by proving that
+     if S n1 = S n2, then n1 = n2.
+*)
+  intros n1 n2.
+(* We will use the induction principle for the natural numbers.
+*)
+  induction n2 as [|n2' IHn2'].
+- (* Base case: n2 = 0.
+*)
+    (* We know that S n1 = S 0.
+*)
+    (* Since n1 = 0, S n1 = S 0.
+*)
+    (* Therefore, n1 = 0.
+*)
+    reflexivity.
+- (* Inductive case: n2 = S n2'.
+*)
+    (* We know that S n1 = S (S n2').
+*)
+    (* By the induction hypothesis, we have IHn2' : S n1 = S n2' -> n1 = n2'.
+*)
+    (* We want to prove that n1 = S n2'.
+*)
+    (* We have S n1 = S (S n2').
+*)
+    (* By the injectivity of S, we have n1 = S n2'.
+*)
+    apply IHn2' in H.
+(* Now we have S n1 = S n2' by the injectivity of S.
+*)
+    (* Therefore, n1 = S n2'.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #56)
+Error in step "reflexivity.".
+Message: In environment
+n1 : nat
+H : S n1 = 1
+Unable to unify "0" with 
+"n1"..
+Goal: S n1 = 1 -> n1 = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+Proof.
+(*
+    We will prove the lemma by induction on n1.
+The base case will be when n1 = 0.
+The inductive case will be when n1 = S n2 for some n2.
+*)
+  intros n1 H.
+induction n1 as [| n2 IHn2].
+(*
+    Base case: n1 = 0
+    We know that S 0 = 1, so H is 1 = 0, which is false.
+Therefore, we can't have n1 = 0.
+*)
+  - contradiction.
+(*
+    Inductive case: n1 = S n2
+    We know that S n2 = 1 from H.
+By the induction hypothesis, we have n2 = 0.
+Therefore, n1 = S n2 = S 0 = 1, which is false.
+*)
+  - discriminate H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #56)
+Error in step "contradiction.".
+Message: No such contradiction.
+Goal: 0 = 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+Proof.
+(* The goal is to prove 0 = 0.
+Since this is a trivially true statement, we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+Proof.
+(* The goal is to prove 0 = 0.
+Since this is a trivially true statement, we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+Proof.
+(*
+    We will prove the lemma by induction on n1.
+The base case will be when n1 = 0.
+The inductive case will be when n1 = S n2 for some n2.
+*)
+  intros n1 H.
+induction n1 as [| n2 IHn2].
+(*
+    Base case: n1 = 0
+    We know that S 0 = 1, so H is 1 = 0, which is false.
+Therefore, we can't have n1 = 0.
+*)
+  - apply (@one_equals_one_implies_zero_equals_zero_1 H).
+- discriminate H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+Proof.
+(* The goal is to prove 0 = 0.
+Since this is a trivially true statement, we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+Proof.
+(*
+    We will prove the lemma by induction on n1.
+The base case will be when n1 = 0.
+The inductive case will be when n1 = S n2 for some n2.
+*)
+  intros n1 H.
+induction n1 as [| n2 IHn2].
+(*
+    Base case: n1 = 0
+    We know that S 0 = 1, so H is 1 = 0, which is false.
+Therefore, we can't have n1 = 0.
+*)
+  - apply (@one_equals_one_implies_zero_equals_zero_1 H).
+- discriminate H.
+Qed.
+
+Lemma succ_inj : injective S.
+
+Proof.
+(* We will prove that the successor function is injective by proving that
+     if S n1 = S n2, then n1 = n2.
+*)
+  intros n1 n2.
+(* We will use the induction principle for the natural numbers.
+*)
+  induction n2 as [|n2' IHn2'].
+- (* Base case: n2 = 0.
+*)
+    (* We know that S n1 = S 0.
+*)
+    (* Since n1 = 0, S n1 = S 0.
+*)
+    (* Therefore, n1 = 0.
+*)
+    apply (@nat_successor_injective_0 n1).
+- (* Inductive case: n2 = S n2'.
+*)
+    (* We know that S n1 = S (S n2').
+*)
+    (* By the induction hypothesis, we have IHn2' : S n1 = S n2' -> n1 = n2'.
+*)
+    (* We want to prove that n1 = S n2'.
+*)
+    (* We have S n1 = S (S n2').
+*)
+    (* By the injectivity of S, we have n1 = S n2'.
+*)
+    apply IHn2' in H.
+(* Now we have S n1 = S n2' by the injectivity of S.
+*)
+    (* Therefore, n1 = S n2'.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #86)
+Error in step "apply IHn2' in H.".
+Message: No such hypothesis: H.
+Goal: S n1 = S (S n2') -> n1 = S n2'.
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_injective_1 : forall n1 n2' : nat, forall IHn2' : S n1 = S n2' -> n1 = n2', S n1 = S (S n2') -> n1 = S n2'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+Proof.
+(* The goal is to prove 0 = 0.
+Since this is a trivially true statement, we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+Proof.
+(*
+    We will prove the lemma by induction on n1.
+The base case will be when n1 = 0.
+The inductive case will be when n1 = S n2 for some n2.
+*)
+  intros n1 H.
+induction n1 as [| n2 IHn2].
+(*
+    Base case: n1 = 0
+    We know that S 0 = 1, so H is 1 = 0, which is false.
+Therefore, we can't have n1 = 0.
+*)
+  - apply (@one_equals_one_implies_zero_equals_zero_1 H).
+- discriminate H.
+Qed.
+
+Lemma succ_injective_1 : forall n1 n2' : nat, forall IHn2' : S n1 = S n2' -> n1 = n2', S n1 = S (S n2') -> n1 = S n2'.
+
+Proof.
+(* We will proceed by induction on n1.
+*)
+  intros n1 n2' IHn2' H.
+(* We will need to use the injectivity of the successor function.
+*)
+  apply (nat_successor_injective_0 n1).
+(* We will need to use the induction hypothesis.
+*)
+  apply IHn2' in H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H in H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using the equality we have.
+*)
+  rewrite H.
+(* We will need to rewrite the goal using
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #78)
+Error in step "apply (nat_successor_injective_0 n1).".
+Message: In environment
+n1, n2' : nat
+IHn2' : S n1 = S n2' -> n1 = n2'
+H : S n1 = S (S n2')
+Unable to unify "n1 = 0" with 
+"n1 = S n2'"..
+Goal: n1 = S n2'.
+
+
+TRYING TO PROVE LEMMA
+Lemma succ_injective_2 : forall n1 n2' : nat, forall IHn2' : S n1 = S n2' -> n1 = n2', forall H : S n1 = S (S n2'), n1 = S n2'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+Proof.
+(* The goal is to prove 0 = 0.
+Since this is a trivially true statement, we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+Proof.
+(*
+    We will prove the lemma by induction on n1.
+The base case will be when n1 = 0.
+The inductive case will be when n1 = S n2 for some n2.
+*)
+  intros n1 H.
+induction n1 as [| n2 IHn2].
+(*
+    Base case: n1 = 0
+    We know that S 0 = 1, so H is 1 = 0, which is false.
+Therefore, we can't have n1 = 0.
+*)
+  - apply (@one_equals_one_implies_zero_equals_zero_1 H).
+- discriminate H.
+Qed.
+
+Lemma succ_injective_2 : forall n1 n2' : nat, forall IHn2' : S n1 = S n2' -> n1 = n2', forall H : S n1 = S (S n2'), n1 = S n2'.
+
+Proof.
+(*
+    We will proceed by induction on n1.
+Base case: n1 = 0.
+In this case, we have S n1 = S 0 = 1 and S (S n2') = S 1 = 2.
+Since S n1 = S (S n2'), we have n1 = n2' by the injectivity of successor.
+Inductive case: n1 = S n1'.
+We have S n1 = S (S n1') = S (S n2') = 2.
+By the induction hypothesis, we have S n1' = S n2'.
+Therefore, n1 = S n2' by the injectivity of successor.
+*)
+  intros n1 n2' IHn2' H.
+destruct n1 as [|n1'].
+- (* n1 = 0 *)
+    simpl in H.
+apply IHn2'.
+- (* n1 = S n1' *)
+    simpl in H.
+apply IHn2' in H.
+apply IHn2' in H.
+apply IHn2'.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #84)
+Error in step "apply IHn2'.".
+Message: In environment
+n2' : nat
+IHn2' : 1 = S n2' -> 0 = n2'
+H : 1 = S (S n2')
+Unable to unify "0 = n2'" with 
+"0 = S n2'"..
+Goal: 0 = S n2'.
+
+
+TRYING TO PROVE LEMMA
+Lemma one_plus_n_is_not_zero_3 : forall n2' : nat, forall IHn2' : 1 = S n2' -> 0 = n2', forall H : 1 = S (S n2'), 0 = S n2'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+Proof.
+(* The goal is to prove 0 = 0.
+Since this is a trivially true statement, we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+Proof.
+(*
+    We will prove the lemma by induction on n1.
+The base case will be when n1 = 0.
+The inductive case will be when n1 = S n2 for some n2.
+*)
+  intros n1 H.
+induction n1 as [| n2 IHn2].
+(*
+    Base case: n1 = 0
+    We know that S 0 = 1, so H is 1 = 0, which is false.
+Therefore, we can't have n1 = 0.
+*)
+  - apply (@one_equals_one_implies_zero_equals_zero_1 H).
+- discriminate H.
+Qed.
+
+Lemma one_plus_n_is_not_zero_3 : forall n2' : nat, forall IHn2' : 1 = S n2' -> 0 = n2', forall H : 1 = S (S n2'), 0 = S n2'.
+
+Proof.
+(* We will prove the lemma by induction on n2'.
+*)
+  induction n2' as [| n2' IHn2']; intros IHn2' H.
+- (* Base case: n2' = 0 *)
+    (* We know H : 1 = S 0, and we want to prove 0 = 0.
+*)
+    (* We can rewrite H using the definition of the successor function.
+*)
+    rewrite <- plus_n_O_S in H.
+(* Now H is 1 = 0 + 1, which is a contradiction.
+*)
+    (* So, we can apply the contradiction tactic to derive the goal.
+*)
+    contradiction.
+- (* Inductive case: n2' = S n2 *)
+    (* We have IHn2' : 1 = S n2' -> 0 = n2' and H : 1 = S (S n2').
+*)
+    (* We want to prove 0 = S n2'.
+*)
+    (* We can rewrite H using the definition of the successor function.
+*)
+    rewrite <- plus_n_O_S in H.
+(* Now H is 1 = S (S n2') = S (S n2), which is the same as S n2' = S n2.
+*)
+    (* We can now apply the induction hypothesis IHn2' to this equality.
+*)
+    apply IHn2' in H.
+(* Now H is 0 = n2'.
+*)
+    (* We can rewrite H using the definition of the successor function.
+*)
+    rewrite <- plus_n_O_S in H.
+(* Now H is 0 = S n2, which is the same as 0 = S n2'.
+*)
+    (* So, we have proved the goal.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #76)
+Error in step "induction n2' as [| n2' IHn2']; intros IHn2' H.".
+Message: IHn2' is already used..
+Goal: forall n2' : nat,
+(1 = S n2' -> 0 = n2') -> 1 = S (S n2') -> 0 = S n2'.
+
+
+TRYING TO PROVE LEMMA
+Lemma one_is_not_successor_of_S_n2_4 : forall n2' : nat,
+(1 = S n2' -> 0 = n2') -> 1 = S (S n2') -> 0 = S n2'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Tactics.
+
+
+
+Check (3 = 3) : Prop.
+
+Check (forall n m : nat, n + m = m + n) : Prop.
+
+
+
+Check 2 = 2 : Prop.
+
+Check 3 = 2 : Prop.
+
+Check forall n : nat, n = 2 : Prop.
+
+
+
+
+
+Theorem plus_2_2_is_4 :
+  2 + 2 = 4.
+Proof. reflexivity.  Qed.
+
+
+
+Definition plus_claim : Prop := 2 + 2 = 4.
+Check plus_claim : Prop.
+
+
+
+Theorem plus_claim_is_true :
+  plus_claim.
+Proof. reflexivity.  Qed.
+
+
+
+
+
+Definition is_three (n : nat) : Prop :=
+  n = 3.
+Check is_three : nat -> Prop.
+
+
+
+Definition injective {A B} (f : A -> B) :=
+  forall x y : A, f x = f y -> x = y.
+
+
+
+Lemma one_equals_one_implies_zero_equals_zero_1 : forall H : 1 = 1, 0 = 0.
+
+Proof.
+(* The goal is to prove 0 = 0.
+Since this is a trivially true statement, we can use the axiom of reflexivity to prove it.
+*)
+  reflexivity.
+Qed.
+
+Lemma nat_successor_injective_0 : forall n1 : nat, S n1 = 1 -> n1 = 0.
+
+Proof.
+(*
+    We will prove the lemma by induction on n1.
+The base case will be when n1 = 0.
+The inductive case will be when n1 = S n2 for some n2.
+*)
+  intros n1 H.
+induction n1 as [| n2 IHn2].
+(*
+    Base case: n1 = 0
+    We know that S 0 = 1, so H is 1 = 0, which is false.
+Therefore, we can't have n1 = 0.
+*)
+  - apply (@one_equals_one_implies_zero_equals_zero_1 H).
+- discriminate H.
+Qed.
+
+Lemma one_is_not_successor_of_S_n2_4 : forall n2' : nat,
+(1 = S n2' -> 0 = n2') -> 1 = S (S n2') -> 0 = S n2'.
+
+Proof.
+(*
+    We will proceed by contradiction.
+Assume the negation of the statement we want to prove,
+    i.e., assume 1 = S n2' and 0 = S n2' are false.
+*)
+  intros n2' H1 H2.
+(*
+    We know that 1 = S n2' is false, so n2' must be 0.
+This is because the only way 1 = S n for some n is if n is 0.
+*)
+  apply nat_successor_injective_0 in H1.
+(*
+    Now we have n2' = 0.
+We also know that 0 = S n2' is false, so S n2' must be 0.
+This is a contradiction, because we have just shown that n2' = 0.
+*)
+  apply H2 in H1.
+(*
+    We now have H1 : 0 = 0, which is true by reflexivity.
+We also have H2 : 0 = S n2', which is false.
+This contradiction shows that our initial assumption (1 = S n2' -> 0 = n2') must be false.
+*)
+  contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #78)
+Error in step "apply nat_successor_injective_0 in H1.".
+Message: Unable to apply lemma of type
+ "forall n1 : nat, S n1 = 1 -> n1 = 0"
+on hypothesis of type "1 = S n2' -> 0 = n2'"..
+Goal: 0 = S n2'.
+
+
+TRYING TO PROVE LEMMA
+Lemma one_is_not_successor_of_S_n2_5 : forall n2' : nat, forall H1 : 1 = S n2' -> 0 = n2', forall H2 : 1 = S (S n2'), 0 = S n2'.
+
+
+Error proving succ_inj
+MAX LEMMA DEPTH REACHED. GIVING UP.

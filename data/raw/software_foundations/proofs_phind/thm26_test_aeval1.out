@@ -1,0 +1,608 @@
+PROVING test_aeval1
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+
+
+Example test_aeval1 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+Proof.
+(* We will use the induction principle for aexp to prove the theorem.
+*)
+  induction (APlus (ANum 2) (ANum 2)) as [|a1 a2 a1' a2' IH1 IH2].
+(* Base case: ANum *)
+  - simpl.
+reflexivity.
+(* Inductive case: APlus *)
+  - simpl.
+rewrite IH1, IH2.
+reflexivity.
+(* Inductive case: AMinus *)
+  - simpl.
+rewrite IH1, IH2.
+reflexivity.
+(* Inductive case: AMult *)
+  - simpl.
+rewrite IH1, IH2.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #40)
+Error in step "induction (APlus (ANum 2) (ANum 2)) as [|a1 a2 a1' a2' IH1 IH2].".
+Message: Expects a disjunctive pattern with 4 branches..
+Goal: aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma aeval_APlus_ANum_2_ANum_2_0 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+
+
+Lemma aeval_APlus_ANum_2_ANum_2_0 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+Proof.
+(* We will use the induction principle for aexp.
+*)
+  induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].
+(* The base case for ANum is straightforward.
+*)
+  - reflexivity.
+(* For APlus, we need to prove that aeval (APlus a1 a2) = aeval a1 + aeval a2.
+*)
+  - simpl.
+(* We have aeval (APlus (ANum 2) (ANum 2)) = aeval (ANum 2) + aeval (ANum 2).
+*)
+    (* By the definition of aeval, this is 2 + 2.
+*)
+    - rewrite -> Nat.add_comm.
+(* Now we have aeval (APlus (ANum 2) (ANum 2)) = 2 + 2.
+*)
+      (* By the definition of addition, this is 4.
+*)
+      - reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #40)
+Error in step "induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].".
+Message: Expects a disjunctive pattern with 4 branches..
+Goal: aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma aeval_APlus_ANum_2_ANum_2_1 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+
+
+Lemma aeval_APlus_ANum_2_ANum_2_1 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+Proof.
+(* We will use the induction principle for aexp.
+*)
+  induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].
+(* The base case for ANum is straightforward.
+*)
+  - reflexivity.
+(* For APlus, we need to prove that aeval (APlus a1 a2) = aeval a1 + aeval a2.
+*)
+  - simpl.
+(* We have aeval (APlus (ANum 2) (ANum 2)) = aeval (ANum 2) + aeval (ANum 2).
+*)
+    (* By the definition of aeval, this is 2 + 2.
+*)
+    - rewrite -> (Nat.add_comm 2 2).
+(* Now we have aeval (APlus (ANum 2) (ANum 2)) = 4.
+*)
+      reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #40)
+Error in step "induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].".
+Message: Expects a disjunctive pattern with 4 branches..
+Goal: aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma aeval_APlus_ANum_2_ANum_2_2 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+
+
+Lemma aeval_APlus_ANum_2_ANum_2_2 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+Proof.
+(* We will use the induction principle for aexp.
+*)
+  induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].
+(* The base case for ANum is straightforward.
+*)
+  - reflexivity.
+(* For APlus, we need to prove that aeval (APlus a1 a2) = aeval a1 + aeval a2.
+*)
+  - simpl.
+(* We have aeval (APlus (ANum 2) (ANum 2)) = aeval (ANum 2) + aeval (ANum 2).
+*)
+    (* By the definition of aeval, this is 2 + 2.
+*)
+    - rewrite -> Nat.add_comm.
+(* Now we have aeval (APlus (ANum 2) (ANum 2)) = 2 + 2.
+*)
+      (* By the definition of addition, this is 4.
+*)
+      - reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #40)
+Error in step "induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].".
+Message: Expects a disjunctive pattern with 4 branches..
+Goal: aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma aeval_APlus_ANum_2_ANum_2_3 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+
+
+Lemma aeval_APlus_ANum_2_ANum_2_3 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+Proof.
+(* We will use the induction principle for aexp.
+*)
+  induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].
+(* The base case for ANum is straightforward.
+*)
+  - reflexivity.
+(* For APlus, we need to prove that the sum of the evaluation of the two subterms is equal to 4.
+*)
+  - simpl.
+(* We know that a1 = ANum 2 and a2 = ANum 2 by the induction hypothesis.
+*)
+    - rewrite -> aeval_ANum.
+(* Now we have to prove that 2 + 2 = 4.
+This is a simple arithmetic fact.
+*)
+      reflexivity.
+(* The other cases for APlus, AMinus, AMult are not relevant to this particular lemma.
+*)
+  - discriminate.
+- discriminate.
+- discriminate.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #40)
+Error in step "induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].".
+Message: Expects a disjunctive pattern with 4 branches..
+Goal: aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma aeval_APlus_ANum_2_ANum_2_4 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+
+
+Lemma aeval_APlus_ANum_2_ANum_2_4 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+Proof.
+(* We will use the induction principle for aexp to prove this lemma.
+*)
+  induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].
+(* The base case for ANum is straightforward.
+*)
+  - reflexivity.
+(* For APlus, we need to prove that aeval (APlus a1 a2) = aeval a1 + aeval a2.
+*)
+  - simpl.
+(* We have aeval (APlus (ANum 2) (ANum 2)) = aeval (ANum 2) + aeval (ANum 2).
+*)
+    (* We know from the definition of aeval that aeval (ANum n) = n.
+*)
+    - rewrite -> H.
+(* Now we have aeval (APlus (ANum 2) (ANum 2)) = 2 + 2.
+*)
+      (* We can rewrite this to aeval (APlus (ANum 2) (ANum 2)) = 4.
+*)
+      - reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #40)
+Error in step "induction (APlus (ANum 2) (ANum 2)) as [|a1 a2].".
+Message: Expects a disjunctive pattern with 4 branches..
+Goal: aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+TRYING TO PROVE LEMMA
+Lemma aeval_APlus_ANum_2_ANum_2_5 : aeval (APlus (ANum 2) (ANum 2)) = 4.
+
+
+Error proving test_aeval1
+MAX LEMMA DEPTH REACHED. GIVING UP.

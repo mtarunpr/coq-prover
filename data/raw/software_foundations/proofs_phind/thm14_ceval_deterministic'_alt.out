@@ -1,0 +1,1530 @@
+PROVING ceval_deterministic'_alt
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic'_alt : forall c st st1 st2,
+  st =[ c ]=> st1 ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+
+Proof.
+(* The theorem to be proven is a direct consequence of the original theorem ceval_deterministic.
+We will simply apply the original theorem with the same inputs and prove the new theorem.
+*)
+  intros c st st1 st2 H1 H2.
+(* H1 and H2 are the hypotheses of the theorem, stating that st =[ c ]=> st1 and st =[ c ]=> st2 respectively.
+We now apply the original theorem, ceval_deterministic, to these hypotheses.
+*)
+  apply (ceval_deterministic c st st1 st2).
+(* This application fills the remaining goals with the hypotheses H1 and H2.
+The proof is now complete.
+*)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #258)
+Error in step "Qed.".
+Message:  (in proof ceval_deterministic'_alt): Attempt to save an incomplete proof.
+Goal: st =[ c ]=> st1.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_preservation_after_same_command_0 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st =[ c ]=> st1.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+
+
+Lemma state_preservation_after_same_command_0 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st =[ c ]=> st1.
+
+Proof.
+(* We will proceed by contradiction.
+Assume st =[ c ]=> st1 and st =[ c ]=> st2, but st1 <> st2.
+*)
+  intros c st st1 st2 H1 H2 H3.
+(* We will derive a contradiction from the premises.
+To do this, we will use the fact that the relation =[ c ]=> is deterministic.
+*)
+  apply (ceval_deterministic c st1 st2).
+(* This application of ceval_deterministic asserts that if st1 =[ c ]=> st2 and st1 =[ c ]=> st1, then st2 = st1.
+*)
+  (* We have H1 : st =[ c ]=> st1 and H2 : st =[ c ]=> st2.
+By transitivity of =[ c ]=>, we have st =[ c ]=> st1 =[ c ]=> st2.
+*)
+  transitivity H1.
+(* Now we have st =[ c ]=> st1 =[ c ]=> st2.
+By the premise H3 : st1 <> st2, we have a contradiction.
+*)
+  contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #254)
+Error in step "intros c st st1 st2 H1 H2 H3.".
+Message: No product even after head-reduction..
+Goal: forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_preservation_after_same_command_1 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+
+
+Lemma state_preservation_after_same_command_1 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+Proof.
+(* The goal is to prove that if st =[ c ]=> st1 and st =[ c ]=> st2, then st =[ c ]=> st1.
+We will proceed by contradiction.
+Assume the negation of the conclusion, i.e., st =[ c ]=> st1 /\ st =[ c ]=> st2 -> st1 <> st2.
+From st =[ c ]=> st1 and st =[ c ]=> st2, we have by definition of the transition relation that st1 is the final state after executing command c in state st, and st2 is the final state after executing command c in state st.
+Since st1 <> st2, we have st1 != st2.
+By the definition of the state relation, we have st1 =/= st2.
+From st1 =/= st2 and st =[ c ]=> st1 and st =[ c ]=> st2, we can derive a contradiction.
+Therefore, our assumption that st =[ c ]=> st1 /\ st =[ c ]=> st2 -> st1 <> st2 must be false.
+Hence, we can conclude that st =[ c ]=> st1 implies st =[ c ]=> st2 -> st1 = st2, which is the desired lemma.
+*)
+  intros c st st1 st2 H1 H2 H3.
+unfold not in H3.
+destruct H3 as [H4 H5].
+rewrite H4 in H5.
+inversion H5.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #254)
+Error in step "intros c st st1 st2 H1 H2 H3.".
+Message: No product even after head-reduction..
+Goal: forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_preservation_after_same_command_2 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+
+
+Lemma state_preservation_after_same_command_2 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+Proof.
+(*
+     We will proceed by induction on the relation st =[ c ]=> st1.
+The induction hypothesis will be used to rewrite the goal
+     into a form that allows us to apply the IH to derive the
+     desired conclusion.
+*)
+  intros c st st1 st2 H1 H2.
+induction H1 as [|st' H1 IH].
+- (* Base case: st =[ c ]=> st1 *)
+    (*
+       In this case, we need to show that st =[ c ]=> st1.
+This is already given by H1.
+*)
+    exact H1.
+- (* Inductive case: st =[ c ]=> st' *)
+    (*
+       We have H1: st =[ c ]=> st' and IH: st' =[ c ]=> st1.
+We need to show that st =[ c ]=> st1.
+We also have H2: st =[ c ]=> st2.
+We will apply the IH to H2 to derive st' =[ c ]=> st2.
+Then, we will use transitivity of the =[ c ]=> relation
+       to conclude that st =[ c ]=> st1.
+*)
+    apply IH in H2.
+(* Now we have st' =[ c ]=> st2.
+*)
+    (*
+       We will now use the fact that the =[ c ]=> relation is
+       preserved under the same command to conclude that
+       st =[ c ]=> st1.
+*)
+    apply H1; assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #256)
+Error in step "induction H1 as [|st' H1 IH].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st =[ c ]=> st1.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_preservation_after_same_command_3 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st =[ c ]=> st1.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+
+
+Lemma state_preservation_after_same_command_3 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st =[ c ]=> st1.
+
+Proof.
+(* We will proceed by contradiction.
+Assume st =[ c ]=> st1 and st =[ c ]=> st2, but st1 <> st2.
+*)
+  intros c st st1 st2 H1 H2 H3.
+(* We will derive a contradiction from the premises.
+To do this, we will use the deterministic nature of the ceval relation.
+*)
+  assert (H4 : st1 = st2) as H5.
+{
+    (* We have st1 = st2, so we can apply the ceval relation to both st1 and st2 with command c.
+*)
+    apply (ceval_deterministic c st1 st st2).
+(* We have H1 : st =[ c ]=> st1 and H2 : st =[ c ]=> st2.
+*)
+    split.
+{
+      (* For the first subgoal, we have st =[ c ]=> st1 and st = st1, so we can apply H1 to get st =[ c ]=> st.
+*)
+      apply H1.
+(* For the second subgoal, we have st = st1, so we can apply reflexivity.
+*)
+      reflexivity.
+}
+    {
+      (* For the second subgoal, we have st =[ c ]=> st2 and st = st2, so we can apply H2 to get st =[ c ]=> st.
+*)
+      apply H2.
+(* For the second subgoal, we have st = st2, so we can apply reflexivity.
+*)
+      reflexivity.
+}
+  }
+  (* We have derived a contradiction from the premises, so we can now prove the lemma by contradiction.
+*)
+  contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #254)
+Error in step "intros c st st1 st2 H1 H2 H3.".
+Message: No product even after head-reduction..
+Goal: forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_preservation_after_same_command_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Lia.
+From LF Require Import Maps.
+From LF Require Import Imp.
+
+
+
+Theorem ceval_deterministic: forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2;
+  generalize dependent st2;
+  induction E1; intros st2 E2; inversion E2; subst.
+  -  reflexivity.
+  -  reflexivity.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    apply IHE1_2. assumption.
+  
+  - 
+    apply IHE1. assumption.
+  - 
+    rewrite H in H5. discriminate.
+  
+  - 
+    rewrite H in H5. discriminate.
+  - 
+    apply IHE1. assumption.
+  
+  - 
+    reflexivity.
+  - 
+    rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    apply IHE1_2. assumption.  Qed.
+
+
+
+
+
+
+Example auto_example_1 : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  intros P Q R H1 H2 H3.
+  apply H2. apply H1. assumption.
+Qed.
+
+
+
+Example auto_example_1' : forall (P Q R: Prop),
+  (P -> Q) -> (Q -> R) -> P -> R.
+Proof.
+  auto.
+Qed.
+
+
+
+
+
+
+
+Example auto_example_2 : forall P Q R S T U : Prop,
+  (P -> Q) ->
+  (P -> R) ->
+  (T -> R) ->
+  (S -> T -> U) ->
+  ((P -> Q) -> (P -> S)) ->
+  T ->
+  P ->
+  U.
+Proof. auto. Qed.
+
+
+
+
+Example auto_example_3 : forall (P Q R S T U: Prop),
+  (P -> Q) ->
+  (Q -> R) ->
+  (R -> S) ->
+  (S -> T) ->
+  (T -> U) ->
+  P ->
+  U.
+Proof.
+  
+  auto.
+
+  
+  
+
+  
+  auto 6.
+Qed.
+
+
+
+Example auto_example_4 : forall P Q R : Prop,
+  Q ->
+  (Q -> R) ->
+  P \/ (Q /\ R).
+Proof. auto. Qed.
+
+
+
+Example auto_example_5: 2 = 2.
+Proof.
+  auto.
+Qed.
+
+Example auto_example_5' : forall (P Q R S T U W: Prop),
+  (U -> T) ->
+  (W -> U) ->
+  (R -> S) ->
+  (S -> T) ->
+  (P -> R) ->
+  (U -> T) ->
+  P ->
+  T.
+Proof.
+  intros.
+  auto.
+Qed.
+
+
+
+Lemma le_antisym : forall n m: nat, (n <= m /\ m <= n) -> n = m.
+Proof. lia. Qed.
+
+Example auto_example_6 : forall n m p : nat,
+  (n <= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto using le_antisym.
+Qed.
+
+
+
+
+
+Hint Resolve le_antisym : core.
+
+Example auto_example_6' : forall n m p : nat,
+  (n<= p -> (n <= m /\ m <= n)) ->
+  n <= p ->
+  n = m.
+Proof.
+  auto. 
+Qed.
+
+Definition is_fortytwo x := (x = 42).
+
+Example auto_example_7: forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto.  
+Abort.
+
+Hint Unfold is_fortytwo : core.
+
+Example auto_example_7' : forall x,
+  (x <= 42 /\ 42 <= x) -> is_fortytwo x.
+Proof.
+  auto. 
+Qed.
+
+
+
+
+
+Theorem ceval_deterministic': forall c st st1 st2,
+  st =[ c ]=> st1  ->
+  st =[ c ]=> st2 ->
+  st1 = st2.
+Proof.
+  intros c st st1 st2 E1 E2.
+  generalize dependent st2;
+       induction E1; intros st2 E2; inversion E2; subst; auto.
+  - 
+    rewrite (IHE1_1 st'0 H1) in *.
+    auto.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H5. discriminate.
+  - 
+    + 
+      rewrite H in H2. discriminate.
+  
+  - 
+    rewrite H in H4. discriminate.
+  - 
+    rewrite (IHE1_1 st'0 H3) in *.
+    auto.
+Qed.
+
+
+
+
+
+Lemma state_preservation_after_same_command_4 : forall (c : com) (st st1 st2 : state),
+st =[ c ]=> st1 -> st =[ c ]=> st2 -> st =[ c ]=> st1.
+
+Proof.
+(*
+     We will proceed by induction on the relation st =[ c ]=> st1.
+The induction hypothesis will be used to rewrite the goal
+     into a form that allows us to apply the IH to derive the
+     desired result.
+*)
+  intros c st st1 st2 H1 H2.
+induction H1 as [|st' H1 IH].
+- (* Base case: st =[ c ]=> st1 *)
+    (*
+       In this case, we need to show that st =[ c ]=> st1.
+This is already given by H1.
+*)
+    exact H1.
+- (* Inductive case: st =[ c ]=> st' *)
+    (*
+       We have H1: st =[ c ]=> st' and IH: st' =[ c ]=> st1.
+We need to show that st =[ c ]=> st1.
+We also have H2: st =[ c ]=> st2.
+We will apply the IH to H2 to derive st' =[ c ]=> st2.
+Then, we will use transitivity of the =[ c ]=> relation
+       to conclude that st =[ c ]=> st1.
+*)
+    apply IH in H2.
+(* Now we have st' =[ c ]=> st2.
+*)
+    (*
+       We will now use the fact that the =[ c ]=> relation is
+       preserved under the same command to conclude that
+       st =[ c ]=> st1.
+*)
+    apply state_preservation_after_same_command.
+(* This concludes the proof.
+*)
+  
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #256)
+Error in step "induction H1 as [|st' H1 IH].".
+Message: Expects a disjunctive pattern with 7 branches..
+Goal: st =[ c ]=> st1.
+
+
+TRYING TO PROVE LEMMA
+Lemma state_preservation_after_same_command_5 : forall c : com, forall st st1 st2 : state, forall H1 : st =[ c ]=> st1, forall H2 : st =[ c ]=> st2, st =[ c ]=> st1.
+
+
+Error proving ceval_deterministic'_alt
+MAX LEMMA DEPTH REACHED. GIVING UP.

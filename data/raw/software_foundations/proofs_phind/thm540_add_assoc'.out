@@ -1,0 +1,1403 @@
+PROVING add_assoc'
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+
+Proof.
+(* We will proceed by induction on m.
+*)
+  intros n m p.
+(* Base case: m = 0.
+*)
+  induction m as [|m' IHm'].
+- (* m = 0 *)
+    simpl.
+reflexivity.
+- (* m = S m' *)
+    (* We will use the induction hypothesis IHm'.
+*)
+    simpl.
+rewrite IHm'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #314)
+Error in step "reflexivity.".
+Message: In environment
+n, p : nat
+Unable to unify "n + 0 + p" with 
+"n + p"..
+Goal: n + p = n + 0 + p.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_zero_0 : forall n p : nat, n + p = n + 0 + p.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+Lemma addition_of_zero_0 : forall n p : nat, n + p = n + 0 + p.
+
+Proof.
+(*
+    We will proceed by induction on p, the second argument of addition.
+The base case will be when p = 0, and the inductive case will be when p = S p'.
+*)
+  intros n p.
+induction p as [| p' IHp'].
+(*
+    Base case: n + 0 = n + 0 + 0.
+This is trivially true by the definition of addition.
+*)
+  - simpl.
+reflexivity.
+(*
+    Inductive case: n + (S p') = n + 0 + (S p').
+We will use the inductive hypothesis IHp' for this case.
+By the definition of addition, we have n + (S p') = S (n + p').
+And by the inductive hypothesis, we have n + p' = n + 0 + p'.
+So, we can substitute the latter into the former to get:
+    S (n + p') = S (n + 0 + p').
+Which simplifies to:
+    n + (S p') = n + 0 + (S p').
+Thus, we have proven the lemma by induction on p.
+*)
+  - simpl.
+rewrite IHp'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #314)
+Error in step "reflexivity.".
+Message: In environment
+n : nat
+Unable to unify "n + 0 + 0" with 
+"n + 0"..
+Goal: n + 0 = n + 0 + 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_zero_identity_1 : forall n : nat, n + 0 = n + 0 + 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+Lemma nat_add_zero_identity_1 : forall n : nat, n + 0 = n + 0 + 0.
+
+Proof.
+(* Base case: n = 0 *)
+  intros n.
+simpl.
+reflexivity.
+(* Inductive case: n = S n' *)
+  intros n.
+simpl.
+rewrite IHn.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #310)
+Error in step "reflexivity.".
+Message: In environment
+n : nat
+Unable to unify "n + 0 + 0" with "n + 0"..
+Goal: n + 0 = n + 0 + 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_zero_identity_2 : forall n : nat, n + 0 = n + 0 + 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+Lemma nat_add_zero_identity_2 : forall n : nat, n + 0 = n + 0 + 0.
+
+Proof.
+(* Base case: n = 0 *)
+  intros n.
+simpl.
+reflexivity.
+(* Inductive case: n = S n' *)
+  intros n.
+simpl.
+rewrite IHn.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #310)
+Error in step "reflexivity.".
+Message: In environment
+n : nat
+Unable to unify "n + 0 + 0" with "n + 0"..
+Goal: n + 0 = n + 0 + 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_zero_identity_3 : forall n : nat, n + 0 = n + 0 + 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+Lemma nat_add_zero_identity_3 : forall n : nat, n + 0 = n + 0 + 0.
+
+Proof.
+(* Base case: n = 0 *)
+  intros n.
+simpl.
+reflexivity.
+(* Inductive case: n = S n' *)
+  intros n.
+simpl.
+rewrite IHn.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #310)
+Error in step "reflexivity.".
+Message: In environment
+n : nat
+Unable to unify "n + 0 + 0" with "n + 0"..
+Goal: n + 0 = n + 0 + 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_zero_identity_4 : forall n : nat, n + 0 = n + 0 + 0.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Arith List.
+From LF Require Import IndProp.
+
+
+
+Fixpoint re_opt_e {T:Type} (re: reg_exp T) : reg_exp T :=
+  match re with
+  | App EmptyStr re2 => re_opt_e re2
+  | App re1 re2 => App (re_opt_e re1) (re_opt_e re2)
+  | Union re1 re2 => Union (re_opt_e re1) (re_opt_e re2)
+  | Star re => Star (re_opt_e re)
+  | _ => re
+  end.
+
+
+
+Lemma re_opt_e_match : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2].
+  -  simpl. apply MEmpty.
+  -  simpl. apply MChar.
+  -  simpl.
+    destruct re1.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + inversion Hmatch1. simpl. apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+    + apply MApp.
+      * apply IH1.
+      * apply IH2.
+  -  simpl. apply MUnionL. apply IH.
+  -  simpl. apply MUnionR. apply IH.
+  -  simpl. apply MStar0.
+  -  simpl. apply MStarApp.
+    * apply IH1.
+    * apply IH2.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall n, 1 + n = S n.
+Proof. try reflexivity.  Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  Fail reflexivity.
+  try reflexivity. 
+  apply HP.
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma simple_semi : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  destruct n eqn:E.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma simple_semi' : forall n, (n + 1 =? 0) = false.
+Proof.
+  intros n.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Lemma simple_semi'' : forall n, (n + 1 =? 0) = false.
+Proof.
+  destruct n; reflexivity.
+Qed.
+
+
+
+
+
+Theorem andb_eq_orb :
+  forall (b c : bool),
+  (andb b c = orb b c) ->
+  b = c.
+Proof. destruct b; destruct c; try reflexivity; try discriminate. Qed.
+
+Theorem add_assoc : forall n m p : nat,
+    n + (m + p) = (n + m) + p.
+Proof. intros n m p; induction n as [| n' IHn']; try (simpl; rewrite IHn'); reflexivity. Qed.
+
+Fixpoint nonzeros (lst : list nat) :=
+  match lst with
+  | [] => []
+  | 0 :: t => nonzeros t
+  | h :: t => h :: nonzeros t
+  end.
+
+Lemma nonzeros_app : forall lst1 lst2 : list nat,
+  nonzeros (lst1 ++ lst2) = (nonzeros lst1) ++ (nonzeros lst2).
+Proof. intros lst1 lst2; induction lst1 as [|h t IH]; try (destruct h; simpl; rewrite <- IH); reflexivity. Qed.
+
+
+
+
+
+Lemma re_opt_e_match' : forall T (re: reg_exp T) s,
+  s =~ re -> s =~ re_opt_e re.
+Proof.
+  intros T re s M.
+  induction M
+    as [| x'
+        | s1 re1 s2 re2 Hmatch1 IH1 Hmatch2 IH2
+        | s1 re1 re2 Hmatch IH | re1 s2 re2 Hmatch IH
+        | re | s1 s2 re Hmatch1 IH1 Hmatch2 IH2];
+    
+    simpl.
+  -  apply MEmpty.
+  -  apply MChar.
+  - 
+    destruct re1;
+    
+    try (apply MApp; try apply IH1; apply IH2).
+    
+    inversion Hmatch1. simpl. apply IH2.
+  -  apply MUnionL. apply IH.
+  -  apply MUnionR. apply IH.
+  -  apply MStar0.
+  -   apply MStarApp. apply IH1.  apply IH2.
+Qed.
+
+
+
+
+
+
+Theorem app_length : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [reflexivity | simpl; rewrite IHlst1; reflexivity].
+Qed.
+
+
+
+Theorem app_length' : forall (X : Type) (lst1 lst2 : list X),
+    length (lst1 ++ lst2) = (length lst1) + (length lst2).
+Proof.
+  intros; induction lst1;
+    [idtac | simpl; rewrite IHlst1];
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+Lemma nat_add_zero_identity_4 : forall n : nat, n + 0 = n + 0 + 0.
+
+Proof.
+(* Base case: n = 0 *)
+  intros n.
+simpl.
+reflexivity.
+(* Inductive case: n = S n' *)
+  intros n.
+simpl.
+rewrite IHn.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #310)
+Error in step "reflexivity.".
+Message: In environment
+n : nat
+Unable to unify "n + 0 + 0" with "n + 0"..
+Goal: n + 0 = n + 0 + 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_add_zero_identity_5 : forall n : nat, n + 0 = n + 0 + 0.
+
+
+Error proving add_assoc'
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,1611 @@
+PROVING In10
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem In10 : In 10 [1;2;3;4;5;6;7;8;9;10].
+
+Proof.
+(* We will use the "In_dec" function from the standard library to prove this theorem.
+In_dec is a decision procedure for the In predicate, which checks if an element is in a list.
+*)
+  apply In_dec.
+(* The goal now is to prove that 10 is in the list [1;2;3;4;5;6;7;8;9;10].
+This is trivially true, so we can use the "reflexivity" tactic to close the proof.
+*)
+  reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #244)
+Error in step "apply In_dec.".
+Message: Unable to unify
+ "{In ?M1380 ?M1381} + {~ In ?M1380 ?M1381}"
+with
+ "1 = 10 \/
+  (fix In (a : nat) (l : list nat) {struct l} :
+       Prop :=
+     match l with
+     | [] => False
+     | b :: m => b = a \/ In a m
+     end) 10 [2; 3; 4; 5; 6; 7; 8; 9; 10]"..
+Goal: In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+TRYING TO PROVE LEMMA
+Lemma one_to_ten_in_list_0 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma one_to_ten_in_list_0 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+Proof.
+(* We can prove this lemma by using the "In" relation and the "discriminate" tactic.
+*)
+  (* First, we need to import the Lists library.
+*)
+  Require Import List.
+(* Now, we can prove the lemma by using the "discriminate" tactic.
+*)
+  intros.
+discriminate.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #248)
+Error in step "discriminate.".
+Message: Tactic failure: No applicable tactic..
+Goal: In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+TRYING TO PROVE LEMMA
+Lemma one_to_ten_in_list_1 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma one_to_ten_in_list_1 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+Proof.
+(* We can prove this lemma by using the "In" relation and the "or" tactic.
+*)
+  (* First, we will use the "In" relation to prove that 10 is in the list.
+*)
+  apply In_cons.
+(* Now, we will use the "or" tactic to prove that 1 is in the list.
+*)
+  left.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #244)
+Error in step "apply In_cons.".
+Message: The variable In_cons was not found in the current
+environment..
+Goal: In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+TRYING TO PROVE LEMMA
+Lemma one_to_ten_in_list_2 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma one_to_ten_in_list_2 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+Proof.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_nil.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #244)
+Error in step "apply In_cons.".
+Message: The variable In_cons was not found in the current
+environment..
+Goal: In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+TRYING TO PROVE LEMMA
+Lemma one_to_ten_in_list_3 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma one_to_ten_in_list_3 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+Proof.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_nil.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #244)
+Error in step "apply In_cons.".
+Message: The variable In_cons was not found in the current
+environment..
+Goal: In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+TRYING TO PROVE LEMMA
+Lemma one_to_ten_in_list_4 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From Coq Require Import Bool.Bool.
+From Coq Require Import Init.Nat.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.EqNat. Import Nat.
+From Coq Require Import Lia.
+From Coq Require Import Lists.List. Import ListNotations.
+From Coq Require Import Strings.String.
+From LF Require Import Maps.
+
+
+
+
+
+
+
+
+
+Module AExp.
+
+
+
+Inductive aexp : Type :=
+  | ANum (n : nat)
+  | APlus (a1 a2 : aexp)
+  | AMinus (a1 a2 : aexp)
+  | AMult (a1 a2 : aexp).
+
+Inductive bexp : Type :=
+  | BTrue
+  | BFalse
+  | BEq (a1 a2 : aexp)
+  | BNeq (a1 a2 : aexp)
+  | BLe (a1 a2 : aexp)
+  | BGt (a1 a2 : aexp)
+  | BNot (b : bexp)
+  | BAnd (b1 b2 : bexp).
+
+
+
+
+
+
+
+
+
+
+
+
+Fixpoint aeval (a : aexp) : nat :=
+  match a with
+  | ANum n => n
+  | APlus  a1 a2 => (aeval a1) + (aeval a2)
+  | AMinus a1 a2 => (aeval a1) - (aeval a2)
+  | AMult  a1 a2 => (aeval a1) * (aeval a2)
+  end.
+
+Example test_aeval1:
+  aeval (APlus (ANum 2) (ANum 2)) = 4.
+Proof. reflexivity. Qed.
+
+
+
+Fixpoint beval (b : bexp) : bool :=
+  match b with
+  | BTrue       => true
+  | BFalse      => false
+  | BEq a1 a2   => (aeval a1) =? (aeval a2)
+  | BNeq a1 a2  => negb ((aeval a1) =? (aeval a2))
+  | BLe a1 a2   => (aeval a1) <=? (aeval a2)
+  | BGt a1 a2   => negb ((aeval a1) <=? (aeval a2))
+  | BNot b1     => negb (beval b1)
+  | BAnd b1 b2  => andb (beval b1) (beval b2)
+  end.
+
+
+
+
+
+
+Fixpoint optimize_0plus (a:aexp) : aexp :=
+  match a with
+  | ANum n => ANum n
+  | APlus (ANum 0) e2 => optimize_0plus e2
+  | APlus  e1 e2 => APlus  (optimize_0plus e1) (optimize_0plus e2)
+  | AMinus e1 e2 => AMinus (optimize_0plus e1) (optimize_0plus e2)
+  | AMult  e1 e2 => AMult  (optimize_0plus e1) (optimize_0plus e2)
+  end.
+
+
+
+Example test_optimize_0plus:
+  optimize_0plus (APlus (ANum 2)
+                        (APlus (ANum 0)
+                               (APlus (ANum 0) (ANum 1))))
+  = APlus (ANum 2) (ANum 1).
+Proof. reflexivity. Qed.
+
+
+
+Theorem optimize_0plus_sound: forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a. induction a.
+  -  reflexivity.
+  -  destruct a1 eqn:Ea1.
+    +  destruct n eqn:En.
+      *   simpl. apply IHa2.
+      *  simpl. rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+    + 
+      simpl. simpl in IHa1. rewrite IHa1.
+      rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.
+  - 
+    simpl. rewrite IHa1. rewrite IHa2. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem silly1 : forall ae, aeval ae = aeval ae.
+Proof.
+    try reflexivity. 
+Qed.
+
+Theorem silly2 : forall (P : Prop), P -> P.
+Proof.
+  intros P HP.
+  try reflexivity. 
+  apply HP. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+Lemma foo : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  destruct n.
+    
+    -  simpl. reflexivity.
+    -  simpl. reflexivity.
+Qed.
+
+
+
+Lemma foo' : forall n, 0 <=? n = true.
+Proof.
+  intros.
+  
+  destruct n;
+  
+  simpl;
+  
+  reflexivity.
+Qed.
+
+
+
+Theorem optimize_0plus_sound': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity).
+    
+  -  reflexivity.
+  - 
+    destruct a1 eqn:Ea1;
+      
+      try (simpl; simpl in IHa1; rewrite IHa1;
+           rewrite IHa2; reflexivity).
+    
+    +  destruct n eqn:En;
+      simpl; rewrite IHa2; reflexivity.   Qed.
+
+
+
+
+
+Theorem optimize_0plus_sound'': forall a,
+  aeval (optimize_0plus a) = aeval a.
+Proof.
+  intros a.
+  induction a;
+    
+    try (simpl; rewrite IHa1; rewrite IHa2; reflexivity);
+    
+    try reflexivity.
+  
+  - 
+    destruct a1; try (simpl; simpl in IHa1; rewrite IHa1;
+                      rewrite IHa2; reflexivity).
+    +  destruct n;
+      simpl; rewrite IHa2; reflexivity. Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma one_to_ten_in_list_4 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+Proof.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_cons.
+apply In_nil.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #244)
+Error in step "apply In_cons.".
+Message: The variable In_cons was not found in the current
+environment..
+Goal: In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+TRYING TO PROVE LEMMA
+Lemma one_to_ten_in_list_5 : In 10 [1; 2; 3; 4; 5; 6; 7; 8; 9; 10].
+
+
+Error proving In10
+MAX LEMMA DEPTH REACHED. GIVING UP.

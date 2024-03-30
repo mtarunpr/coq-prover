@@ -1,0 +1,860 @@
+PROVING total_relation_not_partial_function
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+
+
+Theorem total_relation_not_partial_function : ~ (partial_function total_relation).
+
+Proof.
+(* We will prove the theorem by contradiction.
+Assume total_relation is a partial function *)
+  assume H : partial_function total_relation.
+(* From the assumption, we can derive that total_relation is a total relation *)
+  have H1 : total_function total_relation by apply H.
+(* Now, we will define a function that takes a natural number n and returns the smallest number m such that total_relation n m holds *)
+  define (n : nat) (m : nat) (H2 : total_relation n m) : nat := m.
+(* We will now prove that this function is a left inverse of the successor function for natural numbers *)
+  Lemma left_inverse_S : forall n m, total_relation n m -> n = S (f n m H2).
+intros n m H2.
+induction H2 as [|n' m' H2' IH].
+- (* base case *)
+    simpl.
+reflexivity.
+- (* inductive case *)
+    simpl.
+rewrite IH.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #78)
+Error after step "Proof.".
+Message: There are still unproven goals.
+Goal: ~ partial_function total_relation.
+
+
+TRYING TO PROVE LEMMA
+Lemma partial_function_total_relation_0 : ~ partial_function total_relation.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+
+
+Lemma partial_function_total_relation_0 : ~ partial_function total_relation.
+
+Proof.
+(* We will prove the lemma by contradiction.
+Assume partial_function total_relation.
+*)
+  intros H.
+(* We know that total_relation is a relation on nat.
+*)
+  apply H in total_relation.
+(* We have a contradiction, because total_relation is a total relation.
+*)
+  apply total_relation_total.
+(* Therefore, partial_function total_relation is false.
+*)
+  exact H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #80)
+Error in step "apply H in total_relation.".
+Message: No such hypothesis: total_relation.
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma partial_function_total_relation_contradiction_1 : forall H : partial_function total_relation, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+
+
+Lemma partial_function_total_relation_contradiction_1 : forall H : partial_function total_relation, False.
+
+Proof.
+intros H.
+(* We are given that H : partial_function total_relation.
+We want to prove False.
+*)
+
+(* We know that a partial function is a function that is defined for all arguments *)
+(* in its domain.
+So, we will try to derive a contradiction from this fact.
+*)
+
+(* We will use the fact that total_relation is a relation on nat, and next_nat is a *)
+(* relation on nat that is not a partial function.
+*)
+
+(* We will use the fact that next_nat is a relation on nat that is not a partial function.
+*)
+(* This will help us show that total_relation is not a partial function.
+*)
+
+(* We will use the fact that next_nat_partial_function is a theorem stating that *)
+(* next_nat is not a partial function.
+*)
+
+(* We will use the fact that le_not_a_partial_function is a theorem stating that *)
+(* le (less than or equal) is not a partial function.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #80)
+Error after step "intros H.".
+Message: There are still unproven goals.
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma partial_function_total_relation_contradiction_2 : forall H : partial_function total_relation, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+
+
+Lemma partial_function_total_relation_contradiction_2 : forall H : partial_function total_relation, False.
+
+Proof.
+intros H.
+(* We are given that H : partial_function total_relation.
+We want to prove False.
+*)
+
+(* We know that a partial function is a function that is defined for all arguments *)
+(* in its domain.
+So, we will try to derive a contradiction from this fact.
+*)
+
+(* We will use the fact that total_relation is a relation on nat, and next_nat is a *)
+(* relation on nat that is not a partial function.
+*)
+
+(* We will use the fact that next_nat is a relation on nat that is not a partial function.
+*)
+(* This will help us show that total_relation is not a partial function.
+*)
+
+(* We will use the fact that next_nat_partial_function is a theorem stating that *)
+(* next_nat is not a partial function.
+*)
+
+(* We will use the fact that le_not_a_partial_function is a theorem stating that *)
+(* le (less than or equal) is not a partial function.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #80)
+Error after step "intros H.".
+Message: There are still unproven goals.
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma partial_function_total_relation_contradiction_3 : forall H : partial_function total_relation, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+
+
+Lemma partial_function_total_relation_contradiction_3 : forall H : partial_function total_relation, False.
+
+Proof.
+intros H.
+(* We are given that H : partial_function total_relation.
+We want to prove False.
+*)
+
+(* We know that a partial function is a function that is defined for all arguments *)
+(* in its domain.
+So, we will try to derive a contradiction from this fact.
+*)
+
+(* We will use the fact that total_relation is a relation on nat, and next_nat is a *)
+(* relation on nat that is not a partial function.
+*)
+
+(* We will use the fact that next_nat is a relation on nat that is not a partial function.
+*)
+(* This will help us show that total_relation is not a partial function.
+*)
+
+(* We will use the fact that next_nat_partial_function is a theorem stating that *)
+(* next_nat is not a partial function.
+*)
+
+(* We will use the fact that le_not_a_partial_function is a theorem stating that *)
+(* le (less than or equal) is not a partial function.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #80)
+Error after step "intros H.".
+Message: There are still unproven goals.
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma partial_function_total_relation_contradiction_4 : forall H : partial_function total_relation, False.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+
+
+Lemma partial_function_total_relation_contradiction_4 : forall H : partial_function total_relation, False.
+
+Proof.
+intros H.
+(* We are given that H : partial_function total_relation.
+We want to prove False.
+*)
+
+(* We know that a partial function is a function that is defined for all arguments *)
+(* in its domain.
+So, we will try to derive a contradiction from this fact.
+*)
+
+(* We will use the fact that total_relation is a relation on nat, and next_nat is a *)
+(* relation on nat that is not a partial function.
+*)
+
+(* We will use the fact that next_nat is a relation on nat that is not a partial function.
+*)
+(* This will help us show that total_relation is not a partial function.
+*)
+
+(* We will use the fact that next_nat_partial_function is a theorem stating that *)
+(* next_nat is not a partial function.
+*)
+
+(* We will use the fact that le_not_a_partial_function is a theorem stating that *)
+(* le (less than or equal) is not a partial function.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the fact that relation is a general type of relation.
+*)
+
+(* We will use the
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #80)
+Error after step "intros H.".
+Message: There are still unproven goals.
+Goal: False.
+
+
+TRYING TO PROVE LEMMA
+Lemma partial_function_total_relation_contradiction_5 : forall H : partial_function total_relation, False.
+
+
+Error proving total_relation_not_partial_function
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,1371 @@
+PROVING injection_ex1
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+
+
+Theorem injection_ex1 : forall (n m o : nat),
+  [n;m] = [o;o] ->
+  n = m.
+
+Proof.
+(*
+     We will proceed by induction on the list [n;m].
+The base case will be when [n;m] = [o;o] and n = m.
+The inductive case will be when [n;m] = [o;o] and n <> m.
+*)
+  intros n m o.
+induction n as [|n' IHn'].
+- (* n = 0 *)
+    intros m o.
+destruct m as [m' | m'].
++ (* m = 0 *)
+      simpl.
+intros H.
+inversion H.
++ (* m = S m' *)
+      simpl.
+intros H.
+inversion H.
+- (* n = S n' *)
+    intros m o.
+destruct m as [m' | m'].
++ (* m = 0 *)
+      simpl.
+intros H.
+inversion H.
++ (* m = S m' *)
+      simpl.
+intros H.
+inversion H.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #202)
+Error in step "intros m o.".
+Message: m is already used..
+Goal: [0; m] = [o; o] -> 0 = m.
+
+
+TRYING TO PROVE LEMMA
+Lemma zero_and_m_equal_o_o_0 : forall m o : nat, [0; m] = [o; o] -> 0 = m.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+
+
+Lemma zero_and_m_equal_o_o_0 : forall m o : nat, [0; m] = [o; o] -> 0 = m.
+
+Proof.
+(*
+     We will proceed by induction on m.
+The base case will be when m = 0, in which case we will show that [0; 0] = [o; o] implies 0 = 0.
+The inductive case will be when m = S n, in which case we will show that [0; m] = [o; o] implies 0 = S n.
+*)
+  intros m o.
+induction m as [| n IHm].
+(*
+     Base case: m = 0
+     We have [0; 0] = [o; o].
+Since 0 = 0, we can rewrite the left-hand side of the equality as [0; 0].
+Hence, o = 0.
+*)
+  - simpl.
+reflexivity.
+(*
+     Inductive case: m = S n
+     We have [0; m] = [o; o].
+By the IHm, we know that 0 = n.
+Hence, m = S n.
+We can rewrite the left-hand side of the equality as [0; S n].
+Hence, o = S n.
+*)
+  - simpl.
+rewrite IHm.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #212)
+Error in step "reflexivity.".
+Message: In environment
+n, o : nat
+IHm : [0; n] = [o; o] -> 0 = n
+H : [n; S n] = [o; o]
+Unable to unify "S n" with "n"..
+Goal: [n; S n] = [o; o] -> n = S n.
+
+
+TRYING TO PROVE LEMMA
+Lemma eq_nat_zero_S_lemma_1 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+
+
+Lemma eq_nat_zero_S_lemma_1 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+Proof.
+(*
+     We are given the premises:
+     - [0; n] = [o; o]
+     - [n; S n] = [o; o]
+     - 0 = n
+
+     We want to prove:
+     - n = S n
+
+     We will use the induction hypothesis (IHm) to rewrite the first premise as:
+     - [0; n] = [0; n]
+
+     Then, we will use the second premise to rewrite the second element of the first list as:
+     - [0; S n] = [0; S n]
+
+     Finally, we will use the fact that 0 = n to conclude that n = S n.
+*)
+
+  intros n o IHm.
+(* IHm : [0; n] = [o; o] *)
+  rewrite IHm in H.
+(* H : [0; n] = [0; n] *)
+  rewrite H in H1.
+(* H1 : [n; S n] = [0; S n] *)
+  rewrite H1 in H2.
+(* H2 : [n; S n] = [0; S n] *)
+  apply trans_eq in H2.
+(* H2 : n = S n *)
+  assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #198)
+Error in step "rewrite IHm in H.".
+Message: No such hypothesis: H.
+Goal: [n; S n] = [o; o] -> n = S n.
+
+
+TRYING TO PROVE LEMMA
+Lemma eq_nat_zero_S_lemma_2 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+
+
+Lemma eq_nat_zero_S_lemma_2 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+Proof.
+(*
+     We are given the premises:
+     - [0; n] = [o; o]
+     - [n; S n] = [o; o]
+     - 0 = n
+
+     We want to prove:
+     - n = S n
+
+     We will use the induction hypothesis (IHm) to rewrite the first premise as:
+     - [0; n] = [0; n]
+
+     Then, we will use the second premise to rewrite the second element of the first list as:
+     - [0; S n] = [o; o]
+
+     Finally, we will use the injectivity of S to conclude that n = S n.
+*)
+
+  intros n o IHm.
+rewrite IHm.
+simpl.
+rewrite <- IHm.
+apply S_injective.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #198)
+Error in step "rewrite IHm.".
+Message: Found no subterm matching "0" in the current goal..
+Goal: [n; S n] = [o; o] -> n = S n.
+
+
+TRYING TO PROVE LEMMA
+Lemma eq_nat_zero_S_lemma_3 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+
+
+Lemma eq_nat_zero_S_lemma_3 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+Proof.
+(*
+     We are given the premises:
+     - [0; n] = [o; o]
+     - [n; S n] = [o; o]
+     - 0 = n
+
+     We want to prove:
+     - n = S n
+
+     We will use the induction hypothesis (IHm) to rewrite the first premise as:
+     - [0; n] = [0; n]
+
+     Then, we will use the second premise to rewrite the second element of the first list as:
+     - [0; S n] = [o; o]
+
+     Finally, we will use the injectivity of S to conclude that n = S n.
+*)
+
+  intros n o IHm.
+rewrite IHm.
+simpl.
+rewrite <- IHm.
+apply S_injective.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #198)
+Error in step "rewrite IHm.".
+Message: Found no subterm matching "0" in the current goal..
+Goal: [n; S n] = [o; o] -> n = S n.
+
+
+TRYING TO PROVE LEMMA
+Lemma eq_nat_zero_S_lemma_4 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_injective : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H1.
+  assert (H2: n = pred (S n)). { reflexivity. }
+  rewrite H2. rewrite H1. simpl. reflexivity.
+Qed.
+
+
+
+Theorem S_injective' : forall (n m : nat),
+  S n = S m ->
+  n = m.
+Proof.
+  intros n m H.
+
+
+
+  injection H as Hnm. apply Hnm.
+Qed.
+
+
+
+
+
+Lemma eq_nat_zero_S_lemma_4 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+Proof.
+(*
+     We are given the premises:
+     - [0; n] = [o; o]
+     - [n; S n] = [o; o]
+     - 0 = n
+
+     We want to prove:
+     - n = S n
+
+     We will use the induction hypothesis (IHm) to rewrite the first premise as:
+     - [0; n] = [0; n]
+
+     Then, we will use the second premise to rewrite the second element of the first list as:
+     - [0; S n] = [o; o]
+
+     Finally, we will use the injectivity of S to conclude that n = S n.
+*)
+
+  intros n o IHm.
+rewrite IHm.
+simpl.
+rewrite <- IHm.
+apply S_injective.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #198)
+Error in step "rewrite IHm.".
+Message: Found no subterm matching "0" in the current goal..
+Goal: [n; S n] = [o; o] -> n = S n.
+
+
+TRYING TO PROVE LEMMA
+Lemma eq_nat_zero_S_lemma_5 : forall n o : nat, forall IHm : [0; n] = [o; o] -> 0 = n, [n; S n] = [o; o] -> n = S n.
+
+
+Error proving injection_ex1
+MAX LEMMA DEPTH REACHED. GIVING UP.

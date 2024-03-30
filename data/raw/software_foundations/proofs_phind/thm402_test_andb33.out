@@ -1,0 +1,632 @@
+PROVING test_andb33
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+Example test_orb5:  false || false || true = true.
+Proof. simpl. reflexivity. Qed.
+
+
+
+
+
+Definition negb' (b:bool) : bool :=
+  if b then false
+  else true.
+
+Definition andb' (b1:bool) (b2:bool) : bool :=
+  if b1 then b2
+  else false.
+
+Definition orb' (b1:bool) (b2:bool) : bool :=
+  if b1 then true
+  else b2.
+
+
+
+
+
+Definition nandb (b1:bool) (b2:bool) : bool
+  := negb (b1 && b2).
+
+Example test_nandb1:               (nandb true false) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb2:               (nandb false false) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb3:               (nandb false true) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb4:               (nandb true true) = false.
+Proof. reflexivity.  Qed.
+
+
+
+
+Definition andb3 (b1:bool) (b2:bool) (b3:bool) : bool
+  := b1 && (b2 && b3).
+
+Example test_andb31:                 (andb3 true true true) = true.
+Proof. reflexivity.  Qed.
+Example test_andb32:                 (andb3 false true true) = false.
+Proof. reflexivity.  Qed.
+
+
+Example test_andb33 : (andb3 true false true) = false.
+
+Proof.
+(* We will prove the theorem by structural induction on b1.
+*)
+  intros b1 b2 b3.
+(* We will consider two cases: when b1 is true and when b1 is false.
+*)
+  destruct b1 as [|b1_true].
+- (* Case b1 is true.
+*)
+    simpl.
+(* We know that b1 is true, so we can rewrite (b1 && (b2 && b3)) to (true && (b2 && b3)).
+*)
+    rewrite H.
+(* Now we have (true && (b2 && b3)).
+We can rewrite this to (b2 && b3) because true && b = b.
+*)
+    simpl.
+(* Now we have (b2 && b3).
+We can rewrite this to b3 because b2 && true = b2.
+*)
+    simpl.
+(* Now we have b3.
+We can rewrite this to b3 because b2 && false = false.
+*)
+    simpl.
+(* So, we have proven that (andb3 true false true) = false.
+*)
+    reflexivity.
+- (* Case b1 is false.
+*)
+    simpl.
+(* We know that b1 is false, so we can rewrite (b1 && (b2 && b3)) to (false && (b2 && b3)).
+*)
+    rewrite H.
+(* Now we have (false && (b2 && b3)).
+We can rewrite this to false because false && b = false.
+*)
+    simpl.
+(* So, we have proven that (andb3 false false true) = false.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #150)
+Error in step "intros b1 b2 b3.".
+Message: No product even after head-reduction..
+Goal: andb3 true false true = false.
+
+
+TRYING TO PROVE LEMMA
+Lemma andb3_false_middle_0 : andb3 true false true = false.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+Example test_orb5:  false || false || true = true.
+Proof. simpl. reflexivity. Qed.
+
+
+
+
+
+Definition negb' (b:bool) : bool :=
+  if b then false
+  else true.
+
+Definition andb' (b1:bool) (b2:bool) : bool :=
+  if b1 then b2
+  else false.
+
+Definition orb' (b1:bool) (b2:bool) : bool :=
+  if b1 then true
+  else b2.
+
+
+
+
+
+Definition nandb (b1:bool) (b2:bool) : bool
+  := negb (b1 && b2).
+
+Example test_nandb1:               (nandb true false) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb2:               (nandb false false) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb3:               (nandb false true) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb4:               (nandb true true) = false.
+Proof. reflexivity.  Qed.
+
+
+
+
+Definition andb3 (b1:bool) (b2:bool) (b3:bool) : bool
+  := b1 && (b2 && b3).
+
+Example test_andb31:                 (andb3 true true true) = true.
+Proof. reflexivity.  Qed.
+Example test_andb32:                 (andb3 false true true) = false.
+Proof. reflexivity.  Qed.
+
+
+Lemma andb3_false_middle_0 : andb3 true false true = false.
+
+Proof.
+intros.
+simpl.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Inductive day : Type :=
+  | monday
+  | tuesday
+  | wednesday
+  | thursday
+  | friday
+  | saturday
+  | sunday.
+
+
+
+Definition next_weekday (d:day) : day :=
+  match d with
+  | monday    => tuesday
+  | tuesday   => wednesday
+  | wednesday => thursday
+  | thursday  => friday
+  | friday    => monday
+  | saturday  => monday
+  | sunday    => monday
+  end.
+
+
+
+
+
+Compute (next_weekday friday).
+
+
+Compute (next_weekday (next_weekday saturday)).
+
+
+
+
+
+
+Example test_next_weekday:
+  (next_weekday (next_weekday saturday)) = tuesday.
+
+
+
+Proof. simpl. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+From Coq Require Export String.
+
+
+
+
+
+
+Inductive bool : Type :=
+  | true
+  | false.
+
+
+
+Definition negb (b:bool) : bool :=
+  match b with
+  | true => false
+  | false => true
+  end.
+
+Definition andb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => b2
+  | false => false
+  end.
+
+Definition orb (b1:bool) (b2:bool) : bool :=
+  match b1 with
+  | true => true
+  | false => b2
+  end.
+
+
+
+
+
+Example test_orb1:  (orb true  false) = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb2:  (orb false false) = false.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb3:  (orb false true)  = true.
+Proof. simpl. reflexivity.  Qed.
+Example test_orb4:  (orb true  true)  = true.
+Proof. simpl. reflexivity.  Qed.
+
+
+
+Notation "x && y" := (andb x y).
+Notation "x || y" := (orb x y).
+
+Example test_orb5:  false || false || true = true.
+Proof. simpl. reflexivity. Qed.
+
+
+
+
+
+Definition negb' (b:bool) : bool :=
+  if b then false
+  else true.
+
+Definition andb' (b1:bool) (b2:bool) : bool :=
+  if b1 then b2
+  else false.
+
+Definition orb' (b1:bool) (b2:bool) : bool :=
+  if b1 then true
+  else b2.
+
+
+
+
+
+Definition nandb (b1:bool) (b2:bool) : bool
+  := negb (b1 && b2).
+
+Example test_nandb1:               (nandb true false) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb2:               (nandb false false) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb3:               (nandb false true) = true.
+Proof. reflexivity.  Qed.
+Example test_nandb4:               (nandb true true) = false.
+Proof. reflexivity.  Qed.
+
+
+
+
+Definition andb3 (b1:bool) (b2:bool) (b3:bool) : bool
+  := b1 && (b2 && b3).
+
+Example test_andb31:                 (andb3 true true true) = true.
+Proof. reflexivity.  Qed.
+Example test_andb32:                 (andb3 false true true) = false.
+Proof. reflexivity.  Qed.
+
+
+Lemma andb3_false_middle_0 : andb3 true false true = false.
+
+Proof.
+intros.
+simpl.
+reflexivity.
+Qed.
+
+Example test_andb33 : (andb3 true false true) = false.
+
+Proof.
+(* We will prove the theorem by structural induction on b1.
+*)
+  apply (@andb3_false_middle_0 ).
+- (* Case b1 is true.
+*)
+    simpl.
+(* We know that b1 is true, so we can rewrite (b1 && (b2 && b3)) to (true && (b2 && b3)).
+*)
+    rewrite H.
+(* Now we have (true && (b2 && b3)).
+We can rewrite this to (b2 && b3) because true && b = b.
+*)
+    simpl.
+(* Now we have (b2 && b3).
+We can rewrite this to b3 because b2 && true = b2.
+*)
+    simpl.
+(* Now we have b3.
+We can rewrite this to b3 because b2 && false = false.
+*)
+    simpl.
+(* So, we have proven that (andb3 true false true) = false.
+*)
+    reflexivity.
+- (* Case b1 is false.
+*)
+    simpl.
+(* We know that b1 is false, so we can rewrite (b1 && (b2 && b3)) to (false && (b2 && b3)).
+*)
+    rewrite H.
+(* Now we have (false && (b2 && b3)).
+We can rewrite this to false because false && b = false.
+*)
+    simpl.
+(* So, we have proven that (andb3 false false true) = false.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+Outdated contents in ..cache: recomputing
+EXAMPLE PROOF IS VALID
+

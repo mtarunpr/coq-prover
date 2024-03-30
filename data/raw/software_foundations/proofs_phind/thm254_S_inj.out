@@ -1,0 +1,1914 @@
+PROVING S_inj
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Theorem S_inj : forall (n m : nat) (b : bool),
+  ((S n) =? (S m)) = b  ->
+  (n =? m) = b.
+
+Proof.
+(*
+     We will proceed by induction on b.
+If b is true, then we need to prove that S n = S m implies n = m.
+If b is false, then we need to prove that S n <> S m implies n <> m.
+*)
+  intros n m b.
+destruct b as [b_true | b_false].
+- (* b_true case *)
+    (* We know that (S n) =? (S m) = true, so we need to prove n = m.
+*)
+    (* By the injectivity of S, we have S n = S m implies n = m.
+*)
+    apply S_injective.
+assumption.
+- (* b_false case *)
+    (* We know that (S n) =? (S m) = false, so we need to prove n <> m.
+*)
+    (* We can use the discriminate tactic to derive a contradiction from n = m.
+*)
+    intros contra.
+discriminate contra.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #166)
+Error in step "apply S_injective.".
+Message: The variable S_injective was not found in the current
+environment..
+Goal: (S n =? S m) = true -> (n =? m) = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_successor_injective_0 : forall n m : nat, (S n =? S m) = true -> (n =? m) = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_successor_injective_0 : forall n m : nat, (S n =? S m) = true -> (n =? m) = true.
+
+Proof.
+(*
+     We will proceed by induction on m.
+The base case will be when m is 0.
+In this case, we have S n =? S 0.
+Since S 0 is 1, this is the same as S n =? 1.
+But S n can only be 1 if n is 0, so n =? 0 is true.
+For the inductive case, we will assume that the statement holds for some m.
+We will then show that it holds for S m.
+We have S n =? S (S m).
+By the induction hypothesis, this is the same as n =? S m.
+But S n = S (S m) if and only if n = S m.
+Therefore, n =? S m is true.
+*)
+  intros n m.
+induction m as [| m' IHm'].
+- (* base case: m = 0 *)
+    simpl.
+rewrite Heq_refl.
+reflexivity.
+- (* inductive case: m = S m' *)
+    simpl.
+rewrite <- IHm'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #168)
+Error in step "rewrite Heq_refl.".
+Message: The variable Heq_refl was not found in the current
+environment..
+Goal: (n =? 0) = true -> (n =? 0) = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_zero_equality_check_1 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_zero_equality_check_1 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by reflexivity.
+*)
+  intros n.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #162)
+Error in step "reflexivity.".
+Message: In environment
+n : nat
+H : (n =? 0) = true
+Unable to unify "true" with "n =? 0"..
+Goal: (n =? 0) = true -> (n =? 0) = true.
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_zero_equality_check_2 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_zero_equality_check_2 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(*
+     Base case: n = 0
+     Since n = 0, n =? 0 returns true.
+*)
+  - reflexivity.
+(*
+     Inductive case: n = S n'
+     We know that (n' =? 0) = true from the induction hypothesis IHn'.
+We want to prove that (S n' =? 0) = true.
+However, this is not true because S n' is not equal to 0.
+Therefore, we can use the discriminate tactic to generate a contradiction.
+*)
+  - discriminate.
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_zero_equality_check_2 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(*
+     Base case: n = 0
+     Since n = 0, n =? 0 returns true.
+*)
+  - reflexivity.
+(*
+     Inductive case: n = S n'
+     We know that (n' =? 0) = true from the induction hypothesis IHn'.
+We want to prove that (S n' =? 0) = true.
+However, this is not true because S n' is not equal to 0.
+Therefore, we can use the discriminate tactic to generate a contradiction.
+*)
+  - discriminate.
+Qed.
+
+Lemma nat_zero_equality_check_1 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by reflexivity.
+*)
+  intros n.
+apply (@nat_zero_equality_check_2 n).
+Qed.
+
+Outdated contents in ..cache: recomputing
+LEMMA PROOF IS VALID
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_zero_equality_check_2 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(*
+     Base case: n = 0
+     Since n = 0, n =? 0 returns true.
+*)
+  - reflexivity.
+(*
+     Inductive case: n = S n'
+     We know that (n' =? 0) = true from the induction hypothesis IHn'.
+We want to prove that (S n' =? 0) = true.
+However, this is not true because S n' is not equal to 0.
+Therefore, we can use the discriminate tactic to generate a contradiction.
+*)
+  - discriminate.
+Qed.
+
+Lemma nat_zero_equality_check_1 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by reflexivity.
+*)
+  intros n.
+apply (@nat_zero_equality_check_2 n).
+Qed.
+
+Lemma nat_successor_injective_0 : forall n m : nat, (S n =? S m) = true -> (n =? m) = true.
+
+Proof.
+(*
+     We will proceed by induction on m.
+The base case will be when m is 0.
+In this case, we have S n =? S 0.
+Since S 0 is 1, this is the same as S n =? 1.
+But S n can only be 1 if n is 0, so n =? 0 is true.
+For the inductive case, we will assume that the statement holds for some m.
+We will then show that it holds for S m.
+We have S n =? S (S m).
+By the induction hypothesis, this is the same as n =? S m.
+But S n = S (S m) if and only if n = S m.
+Therefore, n =? S m is true.
+*)
+  intros n m.
+induction m as [| m' IHm'].
+- (* base case: m = 0 *)
+    simpl.
+apply (@nat_zero_equality_check_1 n).
+- (* inductive case: m = S m' *)
+    simpl.
+rewrite <- IHm'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #204)
+Error in step "reflexivity.".
+Message: In environment
+n, m' : nat
+IHm' : (S n =? S m') = true -> (n =? m') = true
+H : (n =? S m') = (n =? m')
+Unable to unify "n =? m'" with 
+"n =? S m'"..
+Goal: (n =? S m') = (n =? m') -> (n =? S m') = (n =? m').
+
+
+TRYING TO PROVE LEMMA
+Lemma nat_equality_transitivity_2 : forall n m' : nat, forall IHm' : (S n =? S m') = true -> (n =? m') = true, (n =? S m') = (n =? m') -> (n =? S m') = (n =? m').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_zero_equality_check_2 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(*
+     Base case: n = 0
+     Since n = 0, n =? 0 returns true.
+*)
+  - reflexivity.
+(*
+     Inductive case: n = S n'
+     We know that (n' =? 0) = true from the induction hypothesis IHn'.
+We want to prove that (S n' =? 0) = true.
+However, this is not true because S n' is not equal to 0.
+Therefore, we can use the discriminate tactic to generate a contradiction.
+*)
+  - discriminate.
+Qed.
+
+Lemma nat_zero_equality_check_1 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by reflexivity.
+*)
+  intros n.
+apply (@nat_zero_equality_check_2 n).
+Qed.
+
+Lemma nat_equality_transitivity_2 : forall n m' : nat, forall IHm' : (S n =? S m') = true -> (n =? m') = true, (n =? S m') = (n =? m') -> (n =? S m') = (n =? m').
+
+Proof.
+intros n m' IHm' eq_n_S_m'.
+destruct (n =? m') eqn:eq_n_m' as [|m'_neq_n].
+- (* n = m' *)
+    subst.
+reflexivity.
+- (* n <> m' *)
+    destruct (S n =? S m') eqn:eq_S_n_S_m' as [|S_m'_neq_S_n].
+- (* S n = S m' *)
+      subst.
+apply IHm'.
+reflexivity.
+- (* S n <> S m' *)
+      subst.
+apply eq_n_S_m'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #190)
+Error after step "intros n m' IHm' eq_n_S_m'.".
+Message: There are still unproven goals.
+Goal: (n =? S m') = (n =? m').
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_equality_transitivity_3 : forall n m' : nat, forall IHm' : (S n =? S m') = true -> (n =? m') = true, forall eq_n_S_m' : (n =? S m') = (n =? m'), (n =? S m') = (n =? m').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_zero_equality_check_2 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(*
+     Base case: n = 0
+     Since n = 0, n =? 0 returns true.
+*)
+  - reflexivity.
+(*
+     Inductive case: n = S n'
+     We know that (n' =? 0) = true from the induction hypothesis IHn'.
+We want to prove that (S n' =? 0) = true.
+However, this is not true because S n' is not equal to 0.
+Therefore, we can use the discriminate tactic to generate a contradiction.
+*)
+  - discriminate.
+Qed.
+
+Lemma nat_zero_equality_check_1 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by reflexivity.
+*)
+  intros n.
+apply (@nat_zero_equality_check_2 n).
+Qed.
+
+Lemma lemma_equality_transitivity_3 : forall n m' : nat, forall IHm' : (S n =? S m') = true -> (n =? m') = true, forall eq_n_S_m' : (n =? S m') = (n =? m'), (n =? S m') = (n =? m').
+
+Proof.
+intros n m' IHm' eq_n_S_m'.
+destruct (eq_n_S_m' n (S m')) as [H1 | H2].
+- (* n = S m' *)
+    rewrite H1 in IHm'.
+inversion IHm'.
+subst.
+reflexivity.
+- (* n <> S m' *)
+    rewrite H2 in IHm'.
+inversion IHm'.
+subst.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #190)
+Error in step "destruct (eq_n_S_m' n (S m')) as [H1 | H2].".
+Message: Illegal application (Non-functional construction): 
+The expression "eq_n_S_m'" of type
+ "(n =? S m') = (n =? m')"
+cannot be applied to the term
+ "n" : "nat".
+Goal: (n =? S m') = (n =? m').
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_equality_transitivity_4 : forall n m' : nat, forall IHm' : (S n =? S m') = true -> (n =? m') = true, forall eq_n_S_m' : (n =? S m') = (n =? m'), (n =? S m') = (n =? m').
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export Poly.
+
+
+
+
+
+
+Theorem silly1 : forall (n m : nat),
+  n = m ->
+  n = m.
+Proof.
+  intros n m eq.
+
+
+
+  apply eq.  Qed.
+
+
+
+Theorem silly2 : forall (n m o p : nat),
+  n = m ->
+  (n = m -> [n;o] = [m;p]) ->
+  [n;o] = [m;p].
+Proof.
+  intros n m o p eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+
+Theorem silly2a : forall (n m : nat),
+  (n,n) = (m,m)  ->
+  (forall (q r : nat), (q,q) = (r,r) -> [q] = [r]) ->
+  [n] = [m].
+Proof.
+  intros n m eq1 eq2.
+  apply eq2. apply eq1.  Qed.
+
+
+Theorem silly_ex : forall p,
+  (forall n, even n = true -> even (S n) = false) ->
+  (forall n, even n = false -> odd n = true) ->
+  even p = true ->
+  odd (S p) = true.
+Proof.
+  intros eq1 eq2 eq3 eq4.
+  apply eq3.
+  apply eq2.
+  apply eq4.
+  Qed.
+
+
+
+
+Theorem silly3 : forall (n m : nat),
+  n = m ->
+  m = n.
+Proof.
+  intros n m H.
+
+  
+
+  Fail apply H.
+
+  
+
+  symmetry. apply H.  Qed.
+
+
+
+Theorem rev_exercise1 : forall (l l' : list nat),
+  l = rev l' ->
+  l' = rev l.
+Proof.
+  intros l l' eq.
+  rewrite -> eq.
+  symmetry.
+  apply rev_involutive.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+Example trans_eq_example : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  rewrite -> eq1. rewrite -> eq2. reflexivity.  Qed.
+
+
+
+Theorem trans_eq : forall (X:Type) (n m o : X),
+  n = m -> m = o -> n = o.
+Proof.
+  intros X n m o eq1 eq2. rewrite -> eq1. rewrite -> eq2.
+  reflexivity.  Qed.
+
+
+
+Example trans_eq_example' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+
+
+
+  apply trans_eq with (m:=[c;d]).
+  apply eq1. apply eq2.   Qed.
+
+
+
+
+
+Example trans_eq_example'' : forall (a b c d e f : nat),
+     [a;b] = [c;d] ->
+     [c;d] = [e;f] ->
+     [a;b] = [e;f].
+Proof.
+  intros a b c d e f eq1 eq2.
+  transitivity [c;d].
+  apply eq1. apply eq2.   Qed.
+
+
+Example trans_eq_exercise : forall (n m o p : nat),
+     m = (minustwo o) ->
+     (n + p) = m ->
+     (n + p) = (minustwo o).
+Proof.
+  intros n m o p eq1 eq2.
+  apply trans_eq with m. apply eq2. apply eq1.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lemma nat_zero_equality_check_2 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(*
+     Base case: n = 0
+     Since n = 0, n =? 0 returns true.
+*)
+  - reflexivity.
+(*
+     Inductive case: n = S n'
+     We know that (n' =? 0) = true from the induction hypothesis IHn'.
+We want to prove that (S n' =? 0) = true.
+However, this is not true because S n' is not equal to 0.
+Therefore, we can use the discriminate tactic to generate a contradiction.
+*)
+  - discriminate.
+Qed.
+
+Lemma nat_zero_equality_check_1 : forall n : nat, (n =? 0) = true -> (n =? 0) = true.
+
+Proof.
+(*
+     The goal is to prove that if n is equal to 0, then the equality check
+     function n =? 0 returns true.
+This is a simple proof by reflexivity.
+*)
+  intros n.
+apply (@nat_zero_equality_check_2 n).
+Qed.
+
+Lemma lemma_equality_transitivity_4 : forall n m' : nat, forall IHm' : (S n =? S m') = true -> (n =? m') = true, forall eq_n_S_m' : (n =? S m') = (n =? m'), (n =? S m') = (n =? m').
+
+Proof.
+intros n m' IHm' eq_n_S_m'.
+destruct (eq_n_S_m' n (S m')) as [H1 | H2].
+- (* n =? S m' = true *)
+    rewrite H1 in IHm'.
+inversion IHm'.
+- (* S n =? S m' = true *)
+      apply eq_n_S_m' in H2.
+inversion H2.
+- (* n =? S m' = false *)
+    rewrite H2 in IHm'.
+inversion IHm'.
+- (* S n =? S m' = false *)
+      apply eq_n_S_m' in H1.
+inversion H1.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #190)
+Error in step "destruct (eq_n_S_m' n (S m')) as [H1 | H2].".
+Message: Illegal application (Non-functional construction): 
+The expression "eq_n_S_m'" of type
+ "(n =? S m') = (n =? m')"
+cannot be applied to the term
+ "n" : "nat".
+Goal: (n =? S m') = (n =? m').
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_equality_transitivity_5 : forall n m' : nat, forall IHm' : (S n =? S m') = true -> (n =? m') = true, forall eq_n_S_m' : (n =? S m') = (n =? m'), (n =? S m') = (n =? m').
+
+
+Error proving S_inj
+MAX LEMMA DEPTH REACHED. GIVING UP.

@@ -1,0 +1,1727 @@
+PROVING le_step
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+
+
+Theorem le_step : forall n m p,
+  n < m ->
+  m <= S p ->
+  n <= p.
+
+Proof.
+(* The theorem le_step is to be proven.
+The goal is to prove that if n is less than m and m is less than or equal to S p, then n is less than or equal to p.
+*)
+  intros n m p Hnm Hmp.
+(* We first apply the le_S_n lemma to Hmp to obtain a new hypothesis Hmp' that m <= p.
+*)
+  apply (le_S_n m p Hmp).
+(* Now, we have m <= p and n < m.
+We can now apply the le_Sn_le lemma to Hnm and Hmp' to obtain a new hypothesis Hnp that n <= p.
+*)
+  apply (le_Sn_le n m Hnp).
+(* The goal is now to prove n <= p, which we have done using the le_Sn_le and le_S_n lemmas.
+*)
+  exact Hnp.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #350)
+Error in step "apply (le_S_n m p Hmp).".
+Message: In environment
+n, m, p : nat
+Hnm : n < m
+Hmp : m <= S p
+The term "Hmp" has type "m <= S p"
+while it is expected to have type "S m <= S p"..
+Goal: n <= p.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_n_less_than_or_equal_to_p_0 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+
+
+Lemma lemma_n_less_than_or_equal_to_p_0 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+Proof.
+(* We will proceed by induction on Hmp, the hypothesis that m <= S p.
+*)
+  intros n m p Hnm Hmp.
+(* We will need to use the le_Sn_le lemma, which states that if S n <= m, then n <= m.
+*)
+  (* We will also use the le_S_n lemma, which states that if S n <= S m, then n <= m.
+*)
+
+  (* We will need to consider two cases: one where m = p, and one where m <> p.
+*)
+  destruct (eq_nat_dec m p) as [Hmeq Hmneq].
+- (* Case m = p: *)
+    subst Hmeq.
+(* In this case, we have Hmp: m <= S m, which simplifies to m <= m, which is always true.
+*)
+    (* Therefore, n <= m, by the le_Sn_le lemma.
+*)
+    apply le_Sn_le.
+assumption.
+- (* Case m <> p: *)
+    (* We will need to use the le_S_n lemma, which states that if S n <= S m, then n <= m.
+*)
+    (* We have Hmp: m <= S p, and Hmneq: m <> p.
+*)
+    (* Therefore, we can apply the le_S_n lemma to obtain n <= p.
+*)
+    apply le_S_n.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #350)
+Error in step "destruct (eq_nat_dec m p) as [Hmeq Hmneq].".
+Message: The variable eq_nat_dec was not found in the current
+environment..
+Goal: n <= p.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_n_less_than_or_equal_to_p_1 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+
+
+Lemma lemma_n_less_than_or_equal_to_p_1 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+Proof.
+(* We will proceed by induction on Hmp, the hypothesis that m <= S p.
+*)
+  intros n m p Hnm Hmp.
+(* We will need to use the le_Sn_le lemma, which states that if S n <= m, then n <= m.
+*)
+  (* We will also use the le_S_n lemma, which states that if S n <= S m, then n <= m.
+*)
+
+  (* We will need to consider two cases: one where m = p, and one where m <> p.
+*)
+  destruct (eq_nat_dec m p) as [Hmeq Hmneq].
+- (* Case m = p: *)
+    subst Hmeq.
+(* In this case, we have Hmp: m <= S m, which simplifies to m <= m, which is always true.
+*)
+    (* Therefore, n <= m, by the le_Sn_le lemma.
+*)
+    apply le_Sn_le.
+assumption.
+- (* Case m <> p: *)
+    (* We will need to use the le_S_n lemma, which states that if S n <= S m, then n <= m.
+*)
+    (* We have Hmp: m <= S p, and Hmneq: m <> p.
+*)
+    (* Therefore, we can apply the le_S_n lemma to obtain n <= p.
+*)
+    apply le_S_n.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #350)
+Error in step "destruct (eq_nat_dec m p) as [Hmeq Hmneq].".
+Message: The variable eq_nat_dec was not found in the current
+environment..
+Goal: n <= p.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_n_less_than_or_equal_to_p_2 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+
+
+Lemma lemma_n_less_than_or_equal_to_p_2 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+Proof.
+(* We will proceed by induction on Hmp, the hypothesis that m <= S p.
+*)
+  intros n m p Hnm Hmp.
+(* We will need to use the le_Sn_le lemma, which states that if S n <= m, then n <= m.
+*)
+  (* We will also use the le_S_n lemma, which states that if S n <= S m, then n <= m.
+*)
+
+  (* We will need to consider two cases: one where m = p, and one where m <> p.
+*)
+  destruct (eq_nat_dec m p) as [Hmeq Hmneq].
+- (* Case m = p: *)
+    subst Hmeq.
+(* In this case, we have Hmp: m <= S m, which simplifies to m <= m, which is always true.
+*)
+    (* Therefore, we can apply the le_reflexive lemma to show that n <= m.
+*)
+    apply le_reflexive.
+(* This concludes the proof in this case.
+*)
+
+  - (* Case m <> p: *)
+    (* We will need to use the le_Sn_n lemma, which states that S n <= n is false.
+*)
+    apply le_Sn_n in Hmp.
+(* This gives us a contradiction, because we have both Hnm: S n <= m and Hmp: ~ (S n <= m).
+*)
+    (* Therefore, we can apply the excluded middle principle to derive a contradiction.
+*)
+    apply (em (S n <= m)).
+- (* Subcase: S n <= m *)
+      (* In this case, we have Hnm: S n <= m, which contradicts Hmp: ~ (S n <= m).
+*)
+      contradiction.
+- (* Subcase: ~ (S n <= m) *)
+      (* In this case, we have Hmp: ~ (S n <= m), which contradicts Hnm: S n <= m.
+*)
+      contradiction.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #350)
+Error in step "destruct (eq_nat_dec m p) as [Hmeq Hmneq].".
+Message: The variable eq_nat_dec was not found in the current
+environment..
+Goal: n <= p.
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_n_less_than_or_equal_to_p_3 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+
+
+Lemma lemma_n_less_than_or_equal_to_p_3 : forall n m p : nat, forall Hnm : n < m, forall Hmp : m <= S p, n <= p.
+
+Proof.
+(* We will proceed by induction on Hmp, the hypothesis that m <= S p.
+*)
+  intros n m p Hnm Hmp.
+(* We will need to use the le_Sn_le lemma, which states that if S n <= m, then n <= m.
+*)
+  (* We will also use the le_S_n lemma, which states that if S n <= S m, then n <= m.
+*)
+
+  (* We will need to consider two cases: one where m = p, and one where m <> p.
+*)
+  destruct Hmp as [| Hmp'].
+- (* Case m = p: *)
+    (* In this case, we have Hnm : S n <= m and Hmp : m <= S m, which simplifies to S n <= S m.
+*)
+    (* We can then apply the le_S_n lemma to obtain n <= m.
+*)
+    apply le_S_n in Hmp.
+(* Now we have n <= m, which implies n <= p by transitivity of <=.
+*)
+    apply le_trans.
+assumption.
+- (* Case m <> p: *)
+    (* In this case, we have Hnm : S n <= m and Hmp' : m <= S p.
+*)
+    (* We can apply the le_Sn_le lemma to Hnm to obtain n <= m.
+*)
+    apply le_Sn_le in Hnm.
+(* Now we have n <= m and m <= S p, so by transitivity of <=, we have n <= p.
+*)
+    apply le_trans.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #354)
+Error in step "apply le_S_n in Hmp.".
+Message: No such hypothesis: Hmp.
+Goal: n <= p.
+
+
+TRYING TO PROVE LEMMA
+Lemma less_than_implies_non_greater_or_equal_4 : forall n m p : nat, forall Hnm : n < m, n <= p.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
+From LF Require Export IndProp.
+
+
+
+
+
+
+Definition relation (X: Type) := X -> X -> Prop.
+
+
+
+
+
+Print le.
+
+Check le : nat -> nat -> Prop.
+Check le : relation nat.
+
+
+
+
+
+
+
+
+
+
+
+
+Definition partial_function {X: Type} (R: relation X) :=
+  forall x y1 y2 : X, R x y1 -> R x y2 -> y1 = y2.
+
+
+Inductive next_nat : nat -> nat -> Prop :=
+  | nn n : next_nat n (S n).
+
+Check next_nat : relation nat.
+
+Theorem next_nat_partial_function :
+  partial_function next_nat.
+Proof.
+  unfold partial_function.
+  intros x y1 y2 H1 H2.
+  inversion H1. inversion H2.
+  reflexivity.  Qed.
+
+
+
+Theorem le_not_a_partial_function :
+  ~ (partial_function le).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply Hc with (x := 0).
+    - apply le_n.
+    - apply le_S. apply le_n. }
+  discriminate Nonsense.   Qed.
+
+
+
+
+Inductive total_relation : nat -> nat -> Prop :=
+  | total_rel (n m : nat) : total_relation n m
+.
+
+Theorem total_relation_not_partial_function :
+  ~ (partial_function total_relation).
+Proof.
+  unfold not. unfold partial_function. intros Hc.
+  assert (0 = 1) as Nonsense. {
+    apply (Hc 1 0 1). apply total_rel. apply total_rel.
+  }
+  discriminate Nonsense.
+Qed.
+
+
+
+
+
+Inductive empty_relation : nat -> nat -> Prop :=
+.
+
+Theorem empty_relation_partial_function :
+  partial_function empty_relation.
+Proof.
+  intros x y1 y2 rel. inversion rel.
+Qed.
+
+
+
+
+
+
+
+Definition reflexive {X: Type} (R: relation X) :=
+  forall a : X, R a a.
+
+Theorem le_reflexive :
+  reflexive le.
+Proof.
+  unfold reflexive. intros n. apply le_n.  Qed.
+
+
+
+
+
+
+Definition transitive {X: Type} (R: relation X) :=
+  forall a b c : X, (R a b) -> (R b c) -> (R a c).
+
+Theorem le_trans :
+  transitive le.
+Proof.
+  intros n m o Hnm Hmo.
+  induction Hmo.
+  -  apply Hnm.
+  -  apply le_S. apply IHHmo.  Qed.
+
+Theorem lt_trans:
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  apply le_S in Hnm.
+  apply le_trans with (a := (S n)) (b := (S m)) (c := o).
+  apply Hnm.
+  apply Hmo. Qed.
+
+
+
+Theorem lt_trans' :
+  transitive lt.
+Proof.
+  
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction Hmo as [| m' Hm'o].
+  - apply le_S in Hnm. apply Hnm.
+  - apply le_S in IHHm'o. apply IHHm'o.
+Qed.
+
+
+
+
+Theorem lt_trans'' :
+  transitive lt.
+Proof.
+  unfold lt. unfold transitive.
+  intros n m o Hnm Hmo.
+  induction o as [| o'].
+  - inversion Hmo.
+  - apply le_trans with (S m). apply le_S. apply Hnm. apply Hmo.
+Qed.
+
+
+
+
+Theorem le_Sn_le : forall n m, S n <= m -> n <= m.
+Proof.
+  intros n m H. apply le_trans with (S n).
+  - apply le_S. apply le_n.
+  - apply H.
+Qed.
+
+
+Theorem le_S_n : forall n m,
+  (S n <= S m) -> (n <= m).
+Proof.
+  intros n m H.
+  inversion H as [H1|m' H1 H'].
+  - apply le_n.
+  - apply le_Sn_le. apply H1.
+Qed.
+
+
+
+    
+
+
+Theorem le_Sn_n : forall n,
+  ~ (S n <= n).
+Proof.
+  intros n contra.
+  induction n. inversion contra. apply le_S_n in contra. apply (IHn contra).
+Qed.
+
+
+
+
+
+
+
+
+
+Definition symmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a).
+
+
+Theorem le_not_symmetric :
+  ~ (symmetric le).
+Proof.
+  unfold not. unfold symmetric. intros contra.
+  assert (Nonsense: 1 <= 0). {
+    apply (contra 0 1). apply le_Sn_le. apply le_n.
+  }
+  inversion Nonsense.
+Qed.
+
+
+
+
+Definition antisymmetric {X: Type} (R: relation X) :=
+  forall a b : X, (R a b) -> (R b a) -> a = b.
+
+
+Theorem le_antisymmetric :
+  antisymmetric le.
+Proof.
+  unfold antisymmetric. intros a b H1 H2.
+  inversion H1.
+  - reflexivity.
+  - exfalso.
+    rewrite <- H0 in H2.
+    assert (Nonsense: S m <= m). {
+      apply le_trans with a.
+      apply H2.
+      apply H.
+    }
+    apply (le_Sn_n m Nonsense).
+Qed.
+
+
+
+
+
+Lemma less_than_implies_non_greater_or_equal_4 : forall n m p : nat, forall Hnm : n < m, n <= p.
+
+Proof.
+(* We will proceed by induction on p.
+*)
+  intros n m p Hnm.
+induction p as [| p' IHp'].
+(* Base case: p = 0.
+*)
+  - simpl.
+(* We know n < m, so we can't have n = 0.
+*)
+    intros Hnp.
+(* So, n must be S n' for some n'.
+*)
+    inversion Hnp.
+(* But then, S n' < m, which contradicts our hypothesis Hnm.
+*)
+    contradiction.
+(* Inductive case: p = S p'.
+*)
+  - simpl.
+(* We know n < m, so we can't have n = S p'.
+*)
+    intros Hnp.
+(* So, n must be S n' for some n'.
+*)
+    inversion Hnp.
+(* Then, S n' < S p' implies n' <= p' by le_S_n.
+*)
+    apply IHp'.
+(* And so, S n' <= S p' by transitivity of <=.
+*)
+    apply le_Sn_le.
+assumption.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #356)
+Error in step "intros Hnp.".
+Message: No product even after head-reduction..
+Goal: n <= 0.
+
+
+TRYING TO PROVE LEMMA
+Lemma less_than_implies_non_positive_5 : forall n m : nat, forall Hnm : n < m, n <= 0.
+
+
+Error proving le_step
+MAX LEMMA DEPTH REACHED. GIVING UP.

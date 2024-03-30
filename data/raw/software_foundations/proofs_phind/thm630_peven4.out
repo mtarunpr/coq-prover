@@ -1,0 +1,1616 @@
+PROVING peven4
+ATTEMPTED EXAMPLE PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+
+
+Example peven4 : test_ceval (X !-> 4) peven = Some (0, 0, 0).
+
+Proof.
+intros.
+unfold test_ceval.
+unfold peven.
+unfold pup_to_n.
+unfold pup_to_n_1.
+unfold empty_st.
+unfold ceval_step.
+unfold ceval_step1.
+unfold ceval_step2.
+unfold ceval_step3.
+unfold aeval.
+unfold beval.
+simpl.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN EXAMPLE PROOF (FRAGMENT #94)
+Error in step "unfold pup_to_n_1.".
+Message: pup_to_n_1 is opaque..
+Goal: LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_even_number_check_and_reset_0 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+
+
+Lemma lemma_even_number_check_and_reset_0 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+Proof.
+(* We will first prove that the state after executing the program is as expected.
+*)
+  intros st.
+(* We will then prove that the value of X is 0.
+*)
+  assert (H : st X = 0).
+(* We will use induction on the number of times the loop has executed.
+*)
+    induction 4 as [ | n' IHn'].
+- (* Base case: n' = 0.
+*)
+      (* In this case, the loop has not executed at all.
+*)
+      (* Therefore, X should be 4.
+*)
+      simpl.
+reflexivity.
+- (* Inductive case: n' = S n.
+*)
+      (* We will first show that the value of X after executing the program is n'.
+*)
+      assert (Hn : st X = n').
+(* We will use the IHn' hypothesis, which states that after executing the program for n' iterations, X is equal to n'.
+*)
+        simpl.
+rewrite IHn'.
+reflexivity.
+(* We will then show that the value of Z after executing the program is 0.
+*)
+      assert (HZ : st Z = 0).
+(* We will use the Hn hypothesis, which states that after executing the program for n' iterations, X is equal to n'.
+*)
+        simpl.
+rewrite Hn.
+(* We will also use the H hypothesis, which states that after executing the program, X is equal to 0.
+*)
+        rewrite H.
+reflexivity.
+(* We will then show that the value of Y after executing the program is 0.
+*)
+      assert (HY : st Y = 0).
+(* We will use the HZ hypothesis, which states that after executing the program, Z is equal to 0.
+*)
+        simpl.
+rewrite HZ.
+reflexivity.
+(* We will then show that the final state is as expected.
+*)
+      simpl.
+rewrite Hn, HY, HZ.
+reflexivity.
+(* We will then show that the final state is as expected.
+*)
+  simpl.
+rewrite H.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #86)
+Error in step "intros st.".
+Message: No product even after head-reduction..
+Goal: LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_even_number_check_and_reset_1 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+
+
+Lemma lemma_even_number_check_and_reset_1 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+Proof.
+(* We will first prove that the state after executing the program is as expected.
+*)
+  intros st.
+(* We will then prove that the value of X is 0.
+*)
+  assert (H : st X = 0).
+(* We will use induction on the number of times the loop has executed.
+*)
+    induction 4 as [ | n' IHn'].
+- (* Base case: n' = 0.
+*)
+      simpl.
+rewrite H.
+reflexivity.
+- (* Inductive case: n' = S n.
+*)
+      simpl.
+rewrite H.
+(* We will split into two cases: whether Z is 0 or 1.
+*)
+      destruct (st Z) as [HZ | HZ'].
+- (* Case Z = 0.
+*)
+        simpl.
+rewrite HZ.
+(* We will now use the induction hypothesis.
+*)
+        rewrite IHn'.
+reflexivity.
+- (* Case Z = 1.
+*)
+        simpl.
+rewrite HZ'.
+(* We will now use the induction hypothesis.
+*)
+        rewrite IHn'.
+reflexivity.
+(* We will then prove that the value of Y is 0.
+*)
+  assert (H : st Y = 0).
+reflexivity.
+(* We will then prove that the value of Z is 0.
+*)
+  assert (H : st Z = 0).
+reflexivity.
+(* We will then return the final state.
+*)
+  constructor.
+(* 
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #86)
+Error in step "intros st.".
+Message: No product even after head-reduction..
+Goal: LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_even_number_check_and_reset_2 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+
+
+Lemma lemma_even_number_check_and_reset_2 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+Proof.
+(* We will first prove that the value of X after the execution of the program is 0.
+*)
+  intros st.
+(* We will then prove that the value of Y after the execution of the program is 0.
+*)
+  intros st.
+(* We will finally prove that the value of Z after the execution of the program is 0.
+*)
+  intros st.
+(* We will use induction on the number of steps taken by the program.
+*)
+  induction st as [|n st'].
+- (* Base case: If the program terminates in 0 steps, then X = 0, Y = 0, and Z = 0.
+*)
+    simpl.
+reflexivity.
+- (* Inductive case: If the program terminates in n + 1 steps, then X = 0, Y = 0, and Z = 0.
+*)
+    (* We will consider the different cases for the last step of the program.
+*)
+    destruct (ceval_step st' pup_to_n n) as [|st''].
++ (* If the program does not terminate, then the claim is false.
+*)
+      contradiction.
++ (* If the program terminates, then X = 0, Y = 0, and Z = 0.
+*)
+      (* We will prove this by induction on the number of steps taken by the program.
+*)
+      induction st'' as [|n' st'''].
+- (* Base case: If the program terminates in 0 steps, then X = 0, Y = 0, and Z = 0.
+*)
+        simpl.
+reflexivity.
+- (* Inductive case: If the program terminates in n' + 1 steps, then X = 0, Y = 0, and Z = 0.
+*)
+        (* We will consider the different cases for the last step of the program.
+*)
+        destruct (ceval_step st''' pup_to_n n') as [|st''''].
++ (* If the program does not terminate, then the claim is false.
+*)
+          contradiction.
++ (* If the program terminates, then X = 0, Y = 0, and Z = 0.
+*)
+          simpl.
+ref
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #86)
+Error in step "intros st.".
+Message: No product even after head-reduction..
+Goal: LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_even_number_check_and_reset_3 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+
+
+Lemma lemma_even_number_check_and_reset_3 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+Proof.
+(* We will first prove that the value of X after the execution of the program is 0.
+*)
+  intros st.
+(* We will then prove that the value of Y after the execution of the program is 0.
+*)
+  intros st.
+(* We will finally prove that the value of Z after the execution of the program is 0.
+*)
+  intros st.
+(* We will use induction on the number of steps taken by the program.
+*)
+  induction st as [|n st'].
+- (* Base case: If the program terminates in 0 steps, then X = 0, Y = 0, and Z = 0.
+*)
+    simpl.
+reflexivity.
+- (* Inductive case: If the program terminates in n + 1 steps, then X = 0, Y = 0, and Z = 0.
+*)
+    (* We will consider the different cases for the last step of the program.
+*)
+    destruct (ceval_step st' pup_to_n n) as [|st''].
++ (* If the program does not terminate, then the claim is false.
+*)
+      contradiction.
++ (* If the program terminates, then X = 0, Y = 0, and Z = 0.
+*)
+      (* We will prove this by induction on the number of steps taken by the program.
+*)
+      induction st'' as [|n' st'''].
+- (* Base case: If the program terminates in 0 steps, then X = 0, Y = 0, and Z = 0.
+*)
+        simpl.
+reflexivity.
+- (* Inductive case: If the program terminates in n' + 1 steps, then X = 0, Y = 0, and Z = 0.
+*)
+        (* We will consider the different cases for the last step of the program.
+*)
+        destruct (ceval_step st''' pup_to_n n') as [|st''''].
++ (* If the program does not terminate, then the claim is false.
+*)
+          contradiction.
++ (* If the program terminates, then X = 0, Y = 0, and Z = 0.
+*)
+          simpl.
+ref
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #86)
+Error in step "intros st.".
+Message: No product even after head-reduction..
+Goal: LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_even_number_check_and_reset_4 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+
+From Coq Require Import Lia.
+From Coq Require Import Arith.Arith.
+From Coq Require Import Arith.PeanoNat.
+Import Nat.
+From Coq Require Import Arith.EqNat.
+From LF Require Import Imp Maps.
+
+
+
+Fixpoint ceval_step1 (st : state) (c : com) : state :=
+  match c with
+    | <{ skip }> =>
+        st
+    | <{ l := a1 }> =>
+        (l !-> aeval st a1 ; st)
+    | <{ c1 ; c2 }> =>
+        let st' := ceval_step1 st c1 in
+        ceval_step1 st' c2
+    | <{ if b then c1 else c2 end }> =>
+        if (beval st b)
+          then ceval_step1 st c1
+          else ceval_step1 st c2
+    | <{ while b1 do c1 end }> =>
+        st  
+  end.
+
+
+
+
+
+
+
+
+Fixpoint ceval_step2 (st : state) (c : com) (i : nat) : state :=
+  match i with
+  | O => empty_st
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          st
+      | <{ l := a1 }> =>
+          (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          let st' := ceval_step2 st c1 i' in
+          ceval_step2 st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step2 st c1 i'
+            else ceval_step2 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then let st' := ceval_step2 st c1 i' in
+               ceval_step2 st' c i'
+          else st
+    end
+  end.
+
+
+
+Fixpoint ceval_step3 (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          match (ceval_step3 st c1 i') with
+          | Some st' => ceval_step3 st' c2 i'
+          | None => None
+          end
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step3 st c1 i'
+            else ceval_step3 st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then match (ceval_step3 st c1 i') with
+               | Some st' => ceval_step3 st' c i'
+               | None => None
+               end
+          else Some st
+    end
+  end.
+
+
+
+Notation "'LETOPT' x <== e1 'IN' e2"
+   := (match e1 with
+         | Some x => e2
+         | None => None
+       end)
+   (right associativity, at level 60).
+
+Fixpoint ceval_step (st : state) (c : com) (i : nat)
+                    : option state :=
+  match i with
+  | O => None
+  | S i' =>
+    match c with
+      | <{ skip }> =>
+          Some st
+      | <{ l := a1 }> =>
+          Some (l !-> aeval st a1 ; st)
+      | <{ c1 ; c2 }> =>
+          LETOPT st' <== ceval_step st c1 i' IN
+          ceval_step st' c2 i'
+      | <{ if b then c1 else c2 end }> =>
+          if (beval st b)
+            then ceval_step st c1 i'
+            else ceval_step st c2 i'
+      | <{ while b1 do c1 end }> =>
+          if (beval st b1)
+          then LETOPT st' <== ceval_step st c1 i' IN
+               ceval_step st' c i'
+          else Some st
+    end
+  end.
+
+Definition test_ceval (st:state) (c:com) :=
+  match ceval_step st c 500 with
+  | None    => None
+  | Some st => Some (st X, st Y, st Z)
+  end.
+
+Example example_test_ceval :
+     test_ceval empty_st
+
+     <{ X := 2;
+        if (X <= 1)
+        then Y := 3
+        else Z := 4
+        end }>
+
+     = Some (2, 0, 4).
+Proof. reflexivity. Qed.
+
+
+
+Definition pup_to_n : com
+  := <{ Y := 0;
+        while X > 0 do
+          Y := Y + X;
+          X := X - 1
+        end }>.
+
+Example pup_to_n_1 :
+  test_ceval (X !-> 5) pup_to_n
+  = Some (0, 15, 0).
+Proof. reflexivity. Qed.
+
+
+
+
+Definition peven : com
+  := <{ Z := 0;
+        while X > 0 do
+          if Z = 0 then Z := 1 else Z := 0 end;
+          X := X - 1
+        end }>.
+
+Example peven0 :
+  test_ceval (X !-> 0) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven1 :
+  test_ceval (X !-> 1) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+Example peven2 :
+  test_ceval (X !-> 2) peven = Some (0, 0, 0).
+Proof. reflexivity. Qed.
+
+Example peven3 :
+  test_ceval (X !-> 3) peven = Some (0, 0, 1).
+Proof. reflexivity. Qed.
+
+
+
+Lemma lemma_even_number_check_and_reset_4 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+Proof.
+(* We will first prove that the value of X after the execution of the program is 0.
+*)
+  intros st.
+(* We will then prove that the value of Y after the execution of the program is 0.
+*)
+  intros st.
+(* We will finally prove that the value of Z after the execution of the program is 0.
+*)
+  intros st.
+(* We will use induction on the number of steps taken by the program.
+*)
+  induction st as [|n st'].
+- (* Base case: If the program terminates in 0 steps, then X = 0, Y = 0, and Z = 0.
+*)
+    simpl.
+reflexivity.
+- (* Inductive case: If the program terminates in n + 1 steps, then X = 0, Y = 0, and Z = 0.
+*)
+    (* We will consider the different cases for the last step of the program.
+*)
+    destruct (ceval_step st' pup_to_n n) as [|st''].
+- (* If the program does not terminate, then the claim is false.
+*)
+      simpl.
+contradiction.
+- (* If the program terminates, then X = 0, Y = 0, and Z = 0.
+*)
+      simpl.
+(* We will prove that Y = 0 by induction on the number of times the loop is executed.
+*)
+      induction st'' as [|m st'''].
+- (* Base case: If the loop is executed 0 times, then Y = 0.
+*)
+        simpl.
+reflexivity.
+- (* Inductive case: If the loop is executed m + 1 times, then Y = 0.
+*)
+        simpl.
+(* We will consider the different cases for the last execution of the loop.
+*)
+        destruct (ceval_step st''' pup_to_n m) as [|st''''].
+- (* If the loop does not execute, then the claim is false.
+*)
+          simpl.
+contradiction.
+- (* If the loop executes, then Y = 0.
+*)
+          simpl.
+(* We will prove that Y = 0 by induction on the number of times the inner loop is executed
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #86)
+Error in step "intros st.".
+Message: No product even after head-reduction..
+Goal: LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+TRYING TO PROVE LEMMA
+Lemma lemma_even_number_check_and_reset_5 : LETOPT st <==
+ceval_step (X !-> 4)
+  <{
+  Z := 0;
+  while X > 0
+  do if Z = 0 then Z := 1 else Z := 0 end; X := X - 1
+  end }> 500 IN Some (st X, st Y, st Z) =
+Some (0, 0, 0).
+
+
+Error proving peven4
+MAX LEMMA DEPTH REACHED. GIVING UP.

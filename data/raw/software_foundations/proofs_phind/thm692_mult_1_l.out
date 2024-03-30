@@ -1,0 +1,2163 @@
+PROVING mult_1_l
+ATTEMPTED THEOREM PROOF (LEMMAS USED: 0)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    simpl. rewrite <- plus_n_O. reflexivity.
+  - 
+    simpl. rewrite <- plus_n_Sm. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem add_assoc : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+
+Fixpoint double (n:nat) :=
+  match n with
+  | O => O
+  | S n' => S (S (double n'))
+  end.
+
+
+
+Lemma double_plus : forall n, double n = n + n .
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl.
+    rewrite -> IHn'.
+    rewrite <- plus_n_Sm.
+    reflexivity.
+Qed.
+
+
+
+Theorem eqb_refl : forall n : nat,
+  (n =? n) = true.
+Proof.
+  intros n.
+  induction n.
+  reflexivity.
+  simpl. rewrite <- IHn. reflexivity.
+Qed.
+
+
+
+
+Theorem even_S : forall n : nat,
+  even (S n) = negb (even n).
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    rewrite -> IHn'.
+    rewrite -> negb_involutive.
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem mult_0_plus' : forall n m : nat,
+  (n + 0 + 0) * m = n * m.
+Proof.
+  intros n m.
+  assert (H: n + 0 + 0 = n).
+    { rewrite add_comm. simpl. rewrite add_comm. reflexivity. }
+  rewrite -> H.
+  reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_rearrange_firsttry : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  
+  rewrite add_comm.
+  
+Abort.
+
+
+
+Theorem plus_rearrange : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  assert (H: n + m = m + n).
+  { rewrite add_comm. reflexivity. }
+  rewrite H. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
+  simpl. rewrite IHn'. reflexivity.  Qed.
+
+
+
+Theorem add_assoc'' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite IHn'. reflexivity.   Qed.
+
+
+
+
+
+
+
+
+
+
+Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
+
+
+
+
+
+Definition manual_grade_for_eqb_refl_informal : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem add_shuffle3 : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  assert (H: n + m = m + n).
+  { rewrite -> add_comm. reflexivity. }
+  rewrite -> H. reflexivity.
+Qed.
+
+
+
+Theorem mul_comm : forall m n : nat,
+  m * n = n * m.
+Proof.
+  intros m n.
+  destruct m as [| m'].
+  - simpl. rewrite -> mul_0_r. reflexivity.
+  - induction n as [| n' IHn'].
+    + simpl. rewrite -> mul_0_r. reflexivity.
+    + simpl.
+      rewrite <- IHn'.
+      simpl.
+      rewrite <- mult_n_Sm.
+      assert (H1: m' + (n' + m' * n') = n' + (m' + m' * n')).
+      { rewrite -> add_shuffle3. reflexivity. }
+      assert (H2: m' * n' + m' = m' + m' * n').
+      { rewrite -> add_comm. reflexivity. }
+      rewrite -> H1. rewrite -> H2.
+      reflexivity.
+Qed.
+
+
+
+
+Check leb.
+
+Theorem plus_leb_compat_l : forall n m p : nat,
+  n <=? m = true -> (p + n) <=? (p + m) = true.
+Proof.
+  intros n m p.
+  intros H.
+  induction p as [| p' IHp'].
+  - simpl. rewrite -> H. reflexivity.
+  - simpl. rewrite -> IHp'. reflexivity.
+Qed.
+
+
+
+
+
+Theorem leb_refl : forall n:nat,
+  (n <=? n) = true.
+Proof.
+  induction n as [| n'].
+  - reflexivity.
+  - simpl. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem zero_neqb_S : forall n:nat,
+  0 =? (S n) = false.
+Proof.
+  reflexivity. Qed.
+
+Theorem andb_false_r : forall b : bool,
+  andb b false = false.
+Proof.
+  destruct b.
+  reflexivity. reflexivity. Qed.
+
+Theorem S_neqb_0 : forall n:nat,
+  (S n) =? 0 = false.
+Proof.
+  reflexivity. Qed.
+
+
+
+Theorem mult_1_l : forall n:nat, 1 * n = n.
+
+Proof.
+(* The theorem to be proven is: mult_1_l.
+It states that for all natural numbers n, 1 * n = n.
+*)
+  (* We will proceed by induction on n.
+*)
+  intros n.
+induction n as [|n' IHn'].
+(* Base case: n = 0 *)
+  - simpl.
+reflexivity.
+(* Inductive case: n = S n' *)
+  - simpl.
+(* We now need to prove S (1 * n') = S n'.
+We can use the induction hypothesis IHn' for this.
+*)
+    rewrite IHn'.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN THEOREM PROOF (FRAGMENT #526)
+Error in step "rewrite IHn'.".
+Message: Found no subterm matching 
+"1 * n'" in the current goal..
+Goal: S (n' + 0) = S n'.
+
+
+TRYING TO PROVE LEMMA
+Lemma multiplication_commutativity_for_one_0 : forall n' : nat, forall IHn' : 1 * n' = n', S (n' + 0) = S n'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 1)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    simpl. rewrite <- plus_n_O. reflexivity.
+  - 
+    simpl. rewrite <- plus_n_Sm. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem add_assoc : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+
+Fixpoint double (n:nat) :=
+  match n with
+  | O => O
+  | S n' => S (S (double n'))
+  end.
+
+
+
+Lemma double_plus : forall n, double n = n + n .
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl.
+    rewrite -> IHn'.
+    rewrite <- plus_n_Sm.
+    reflexivity.
+Qed.
+
+
+
+Theorem eqb_refl : forall n : nat,
+  (n =? n) = true.
+Proof.
+  intros n.
+  induction n.
+  reflexivity.
+  simpl. rewrite <- IHn. reflexivity.
+Qed.
+
+
+
+
+Theorem even_S : forall n : nat,
+  even (S n) = negb (even n).
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    rewrite -> IHn'.
+    rewrite -> negb_involutive.
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem mult_0_plus' : forall n m : nat,
+  (n + 0 + 0) * m = n * m.
+Proof.
+  intros n m.
+  assert (H: n + 0 + 0 = n).
+    { rewrite add_comm. simpl. rewrite add_comm. reflexivity. }
+  rewrite -> H.
+  reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_rearrange_firsttry : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  
+  rewrite add_comm.
+  
+Abort.
+
+
+
+Theorem plus_rearrange : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  assert (H: n + m = m + n).
+  { rewrite add_comm. reflexivity. }
+  rewrite H. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
+  simpl. rewrite IHn'. reflexivity.  Qed.
+
+
+
+Theorem add_assoc'' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite IHn'. reflexivity.   Qed.
+
+
+
+
+
+
+
+
+
+
+Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
+
+
+
+
+
+Definition manual_grade_for_eqb_refl_informal : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem add_shuffle3 : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  assert (H: n + m = m + n).
+  { rewrite -> add_comm. reflexivity. }
+  rewrite -> H. reflexivity.
+Qed.
+
+
+
+Theorem mul_comm : forall m n : nat,
+  m * n = n * m.
+Proof.
+  intros m n.
+  destruct m as [| m'].
+  - simpl. rewrite -> mul_0_r. reflexivity.
+  - induction n as [| n' IHn'].
+    + simpl. rewrite -> mul_0_r. reflexivity.
+    + simpl.
+      rewrite <- IHn'.
+      simpl.
+      rewrite <- mult_n_Sm.
+      assert (H1: m' + (n' + m' * n') = n' + (m' + m' * n')).
+      { rewrite -> add_shuffle3. reflexivity. }
+      assert (H2: m' * n' + m' = m' + m' * n').
+      { rewrite -> add_comm. reflexivity. }
+      rewrite -> H1. rewrite -> H2.
+      reflexivity.
+Qed.
+
+
+
+
+Check leb.
+
+Theorem plus_leb_compat_l : forall n m p : nat,
+  n <=? m = true -> (p + n) <=? (p + m) = true.
+Proof.
+  intros n m p.
+  intros H.
+  induction p as [| p' IHp'].
+  - simpl. rewrite -> H. reflexivity.
+  - simpl. rewrite -> IHp'. reflexivity.
+Qed.
+
+
+
+
+
+Theorem leb_refl : forall n:nat,
+  (n <=? n) = true.
+Proof.
+  induction n as [| n'].
+  - reflexivity.
+  - simpl. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem zero_neqb_S : forall n:nat,
+  0 =? (S n) = false.
+Proof.
+  reflexivity. Qed.
+
+Theorem andb_false_r : forall b : bool,
+  andb b false = false.
+Proof.
+  destruct b.
+  reflexivity. reflexivity. Qed.
+
+Theorem S_neqb_0 : forall n:nat,
+  (S n) =? 0 = false.
+Proof.
+  reflexivity. Qed.
+
+
+
+Lemma multiplication_commutativity_for_one_0 : forall n' : nat, forall IHn' : 1 * n' = n', S (n' + 0) = S n'.
+
+Proof.
+(*
+     We will proceed by induction on n'.
+The base case will be when n' = 0.
+The inductive case will be when n' = S n.
+*)
+  intros n' IHn'.
+(*
+     First, we will show that 1 * n' = n' when n' = 0.
+This is true by definition of multiplication.
+*)
+  induction n' as [|n' IHn''].
+- (* n' = 0 *)
+    simpl.
+reflexivity.
+- (* n' = S n *)
+    (*
+       Now, we will use the induction hypothesis IHn''.
+This will give us the equality S (n' + 0) = S n'.
+*)
+    simpl.
+rewrite IHn''.
+(*
+       Now, we will show that S (n' + 0) = S n' implies S (n' + 0) = S n.
+This is true by definition of addition and successor.
+*)
+    reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #530)
+Error in step "Qed.".
+Message:  (in proof multiplication_commutativity_for_one_0): Attempt to save an incomplete proof.
+Goal: 1 * n' = n'.
+
+
+TRYING TO PROVE LEMMA
+Lemma multiplication_commutativity_for_successor_1 : forall n' : nat, forall IHn' : 1 * S n' = S n', forall IHn'' : 1 * n' = n' -> S (n' + 0) = S n', 1 * n' = n'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 2)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    simpl. rewrite <- plus_n_O. reflexivity.
+  - 
+    simpl. rewrite <- plus_n_Sm. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem add_assoc : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+
+Fixpoint double (n:nat) :=
+  match n with
+  | O => O
+  | S n' => S (S (double n'))
+  end.
+
+
+
+Lemma double_plus : forall n, double n = n + n .
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl.
+    rewrite -> IHn'.
+    rewrite <- plus_n_Sm.
+    reflexivity.
+Qed.
+
+
+
+Theorem eqb_refl : forall n : nat,
+  (n =? n) = true.
+Proof.
+  intros n.
+  induction n.
+  reflexivity.
+  simpl. rewrite <- IHn. reflexivity.
+Qed.
+
+
+
+
+Theorem even_S : forall n : nat,
+  even (S n) = negb (even n).
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    rewrite -> IHn'.
+    rewrite -> negb_involutive.
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem mult_0_plus' : forall n m : nat,
+  (n + 0 + 0) * m = n * m.
+Proof.
+  intros n m.
+  assert (H: n + 0 + 0 = n).
+    { rewrite add_comm. simpl. rewrite add_comm. reflexivity. }
+  rewrite -> H.
+  reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_rearrange_firsttry : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  
+  rewrite add_comm.
+  
+Abort.
+
+
+
+Theorem plus_rearrange : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  assert (H: n + m = m + n).
+  { rewrite add_comm. reflexivity. }
+  rewrite H. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
+  simpl. rewrite IHn'. reflexivity.  Qed.
+
+
+
+Theorem add_assoc'' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite IHn'. reflexivity.   Qed.
+
+
+
+
+
+
+
+
+
+
+Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
+
+
+
+
+
+Definition manual_grade_for_eqb_refl_informal : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem add_shuffle3 : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  assert (H: n + m = m + n).
+  { rewrite -> add_comm. reflexivity. }
+  rewrite -> H. reflexivity.
+Qed.
+
+
+
+Theorem mul_comm : forall m n : nat,
+  m * n = n * m.
+Proof.
+  intros m n.
+  destruct m as [| m'].
+  - simpl. rewrite -> mul_0_r. reflexivity.
+  - induction n as [| n' IHn'].
+    + simpl. rewrite -> mul_0_r. reflexivity.
+    + simpl.
+      rewrite <- IHn'.
+      simpl.
+      rewrite <- mult_n_Sm.
+      assert (H1: m' + (n' + m' * n') = n' + (m' + m' * n')).
+      { rewrite -> add_shuffle3. reflexivity. }
+      assert (H2: m' * n' + m' = m' + m' * n').
+      { rewrite -> add_comm. reflexivity. }
+      rewrite -> H1. rewrite -> H2.
+      reflexivity.
+Qed.
+
+
+
+
+Check leb.
+
+Theorem plus_leb_compat_l : forall n m p : nat,
+  n <=? m = true -> (p + n) <=? (p + m) = true.
+Proof.
+  intros n m p.
+  intros H.
+  induction p as [| p' IHp'].
+  - simpl. rewrite -> H. reflexivity.
+  - simpl. rewrite -> IHp'. reflexivity.
+Qed.
+
+
+
+
+
+Theorem leb_refl : forall n:nat,
+  (n <=? n) = true.
+Proof.
+  induction n as [| n'].
+  - reflexivity.
+  - simpl. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem zero_neqb_S : forall n:nat,
+  0 =? (S n) = false.
+Proof.
+  reflexivity. Qed.
+
+Theorem andb_false_r : forall b : bool,
+  andb b false = false.
+Proof.
+  destruct b.
+  reflexivity. reflexivity. Qed.
+
+Theorem S_neqb_0 : forall n:nat,
+  (S n) =? 0 = false.
+Proof.
+  reflexivity. Qed.
+
+
+
+Lemma multiplication_commutativity_for_successor_1 : forall n' : nat, forall IHn' : 1 * S n' = S n', forall IHn'' : 1 * n' = n' -> S (n' + 0) = S n', 1 * n' = n'.
+
+Proof.
+(* We will use induction on n' *)
+  intros n' IHn' IHn''.
+(* Base case: n' = 0 *)
+  destruct n' as [|n'].
+- (* n' = 0 *)
+    simpl.
+reflexivity.
+(* Inductive case: n' = S n'' *)
+  - (* n' = S n'' *)
+    simpl.
+(* We will use the induction hypothesis IHn' and IHn'' *)
+    rewrite IHn'.
+rewrite IHn''.
+reflexivity.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #526)
+Error in step "rewrite IHn'.".
+Message: Found no subterm matching 
+"1 * S (S n')" in the current goal..
+Goal: S (n' + 0) = S n'.
+
+
+TRYING TO PROVE LEMMA
+Lemma induction_step_for_multiplication_by_one_2 : forall n' : nat, forall IHn' : 1 * S (S n') = S (S n'), forall IHn'' : 1 * S n' = S n' -> S (S n' + 0) = S (S n'), S (n' + 0) = S n'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 3)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    simpl. rewrite <- plus_n_O. reflexivity.
+  - 
+    simpl. rewrite <- plus_n_Sm. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem add_assoc : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+
+Fixpoint double (n:nat) :=
+  match n with
+  | O => O
+  | S n' => S (S (double n'))
+  end.
+
+
+
+Lemma double_plus : forall n, double n = n + n .
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl.
+    rewrite -> IHn'.
+    rewrite <- plus_n_Sm.
+    reflexivity.
+Qed.
+
+
+
+Theorem eqb_refl : forall n : nat,
+  (n =? n) = true.
+Proof.
+  intros n.
+  induction n.
+  reflexivity.
+  simpl. rewrite <- IHn. reflexivity.
+Qed.
+
+
+
+
+Theorem even_S : forall n : nat,
+  even (S n) = negb (even n).
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    rewrite -> IHn'.
+    rewrite -> negb_involutive.
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem mult_0_plus' : forall n m : nat,
+  (n + 0 + 0) * m = n * m.
+Proof.
+  intros n m.
+  assert (H: n + 0 + 0 = n).
+    { rewrite add_comm. simpl. rewrite add_comm. reflexivity. }
+  rewrite -> H.
+  reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_rearrange_firsttry : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  
+  rewrite add_comm.
+  
+Abort.
+
+
+
+Theorem plus_rearrange : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  assert (H: n + m = m + n).
+  { rewrite add_comm. reflexivity. }
+  rewrite H. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
+  simpl. rewrite IHn'. reflexivity.  Qed.
+
+
+
+Theorem add_assoc'' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite IHn'. reflexivity.   Qed.
+
+
+
+
+
+
+
+
+
+
+Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
+
+
+
+
+
+Definition manual_grade_for_eqb_refl_informal : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem add_shuffle3 : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  assert (H: n + m = m + n).
+  { rewrite -> add_comm. reflexivity. }
+  rewrite -> H. reflexivity.
+Qed.
+
+
+
+Theorem mul_comm : forall m n : nat,
+  m * n = n * m.
+Proof.
+  intros m n.
+  destruct m as [| m'].
+  - simpl. rewrite -> mul_0_r. reflexivity.
+  - induction n as [| n' IHn'].
+    + simpl. rewrite -> mul_0_r. reflexivity.
+    + simpl.
+      rewrite <- IHn'.
+      simpl.
+      rewrite <- mult_n_Sm.
+      assert (H1: m' + (n' + m' * n') = n' + (m' + m' * n')).
+      { rewrite -> add_shuffle3. reflexivity. }
+      assert (H2: m' * n' + m' = m' + m' * n').
+      { rewrite -> add_comm. reflexivity. }
+      rewrite -> H1. rewrite -> H2.
+      reflexivity.
+Qed.
+
+
+
+
+Check leb.
+
+Theorem plus_leb_compat_l : forall n m p : nat,
+  n <=? m = true -> (p + n) <=? (p + m) = true.
+Proof.
+  intros n m p.
+  intros H.
+  induction p as [| p' IHp'].
+  - simpl. rewrite -> H. reflexivity.
+  - simpl. rewrite -> IHp'. reflexivity.
+Qed.
+
+
+
+
+
+Theorem leb_refl : forall n:nat,
+  (n <=? n) = true.
+Proof.
+  induction n as [| n'].
+  - reflexivity.
+  - simpl. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem zero_neqb_S : forall n:nat,
+  0 =? (S n) = false.
+Proof.
+  reflexivity. Qed.
+
+Theorem andb_false_r : forall b : bool,
+  andb b false = false.
+Proof.
+  destruct b.
+  reflexivity. reflexivity. Qed.
+
+Theorem S_neqb_0 : forall n:nat,
+  (S n) =? 0 = false.
+Proof.
+  reflexivity. Qed.
+
+
+
+Lemma induction_step_for_multiplication_by_one_2 : forall n' : nat, forall IHn' : 1 * S (S n') = S (S n'), forall IHn'' : 1 * S n' = S n' -> S (S n' + 0) = S (S n'), S (n' + 0) = S n'.
+
+Proof.
+(* We will first prove a lemma that will help us in the induction step.
+*)
+  Lemma plus_0_r : forall n:nat,
+    n + 0 = n.
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #512)
+Error after step "Proof.".
+Message: There are still unproven goals.
+Goal: forall n' : nat,
+1 * S (S n') = S (S n') ->
+(1 * S n' = S n' -> S (S n' + 0) = S (S n')) ->
+S (n' + 0) = S n'.
+
+
+TRYING TO PROVE LEMMA
+Lemma multiply_one_right_neutral_implies_addition_right_neutral_3 : forall n' : nat,
+1 * S (S n') = S (S n') ->
+(1 * S n' = S n' -> S (S n' + 0) = S (S n')) ->
+S (n' + 0) = S n'.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 4)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    simpl. rewrite <- plus_n_O. reflexivity.
+  - 
+    simpl. rewrite <- plus_n_Sm. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem add_assoc : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+
+Fixpoint double (n:nat) :=
+  match n with
+  | O => O
+  | S n' => S (S (double n'))
+  end.
+
+
+
+Lemma double_plus : forall n, double n = n + n .
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl.
+    rewrite -> IHn'.
+    rewrite <- plus_n_Sm.
+    reflexivity.
+Qed.
+
+
+
+Theorem eqb_refl : forall n : nat,
+  (n =? n) = true.
+Proof.
+  intros n.
+  induction n.
+  reflexivity.
+  simpl. rewrite <- IHn. reflexivity.
+Qed.
+
+
+
+
+Theorem even_S : forall n : nat,
+  even (S n) = negb (even n).
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    rewrite -> IHn'.
+    rewrite -> negb_involutive.
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem mult_0_plus' : forall n m : nat,
+  (n + 0 + 0) * m = n * m.
+Proof.
+  intros n m.
+  assert (H: n + 0 + 0 = n).
+    { rewrite add_comm. simpl. rewrite add_comm. reflexivity. }
+  rewrite -> H.
+  reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_rearrange_firsttry : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  
+  rewrite add_comm.
+  
+Abort.
+
+
+
+Theorem plus_rearrange : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  assert (H: n + m = m + n).
+  { rewrite add_comm. reflexivity. }
+  rewrite H. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
+  simpl. rewrite IHn'. reflexivity.  Qed.
+
+
+
+Theorem add_assoc'' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite IHn'. reflexivity.   Qed.
+
+
+
+
+
+
+
+
+
+
+Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
+
+
+
+
+
+Definition manual_grade_for_eqb_refl_informal : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem add_shuffle3 : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  assert (H: n + m = m + n).
+  { rewrite -> add_comm. reflexivity. }
+  rewrite -> H. reflexivity.
+Qed.
+
+
+
+Theorem mul_comm : forall m n : nat,
+  m * n = n * m.
+Proof.
+  intros m n.
+  destruct m as [| m'].
+  - simpl. rewrite -> mul_0_r. reflexivity.
+  - induction n as [| n' IHn'].
+    + simpl. rewrite -> mul_0_r. reflexivity.
+    + simpl.
+      rewrite <- IHn'.
+      simpl.
+      rewrite <- mult_n_Sm.
+      assert (H1: m' + (n' + m' * n') = n' + (m' + m' * n')).
+      { rewrite -> add_shuffle3. reflexivity. }
+      assert (H2: m' * n' + m' = m' + m' * n').
+      { rewrite -> add_comm. reflexivity. }
+      rewrite -> H1. rewrite -> H2.
+      reflexivity.
+Qed.
+
+
+
+
+Check leb.
+
+Theorem plus_leb_compat_l : forall n m p : nat,
+  n <=? m = true -> (p + n) <=? (p + m) = true.
+Proof.
+  intros n m p.
+  intros H.
+  induction p as [| p' IHp'].
+  - simpl. rewrite -> H. reflexivity.
+  - simpl. rewrite -> IHp'. reflexivity.
+Qed.
+
+
+
+
+
+Theorem leb_refl : forall n:nat,
+  (n <=? n) = true.
+Proof.
+  induction n as [| n'].
+  - reflexivity.
+  - simpl. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem zero_neqb_S : forall n:nat,
+  0 =? (S n) = false.
+Proof.
+  reflexivity. Qed.
+
+Theorem andb_false_r : forall b : bool,
+  andb b false = false.
+Proof.
+  destruct b.
+  reflexivity. reflexivity. Qed.
+
+Theorem S_neqb_0 : forall n:nat,
+  (S n) =? 0 = false.
+Proof.
+  reflexivity. Qed.
+
+
+
+Lemma multiply_one_right_neutral_implies_addition_right_neutral_3 : forall n' : nat,
+1 * S (S n') = S (S n') ->
+(1 * S n' = S n' -> S (S n' + 0) = S (S n')) ->
+S (n' + 0) = S n'.
+
+Proof.
+(* We will proceed by induction on n'.
+*)
+  intros n' H1 H2.
+(* Base case: n' = 0 *)
+  destruct n' as [|n'].
+- (* n' = 0 *)
+    simpl in H1.
+(* We know that 1 * S 0 = S 0 *)
+    simpl in H1.
+(* So, we have H1: 1 * S 0 = S 0 *)
+    (* And H2: 1 * S 0 = 0 *)
+    (* These two contradict each other, so we have a contradiction *)
+    discriminate H1.
+- (* n' = S n *)
+    (* We will use the induction hypothesis on n' *)
+    induction n' as [|n' IHn'].
+- (* n' = 0 *)
+      (* We know that 1 * S (S 0) = S (S 0) *)
+      simpl in H1.
+(* So, we have H1: 1 * S (S 0) = S (S 0) *)
+      (* And H2: 1 * S 0 = 0 *)
+      (* These two contradict each other, so we have a contradiction *)
+      discriminate H1.
+- (* n' = S n *)
+      (* We know that 1 * S (S (S n')) = S (S (S n')) *)
+      simpl in H1.
+(* So, we have H1: 1 * S (S (S n')) = S (S (S n')) *)
+      (* And H2: 1 * S (S n') = S (S n') *)
+      (* We will use the induction hypothesis on n' *)
+      apply IHn' in H2.
+(* We now have H2: S (S n') = S n' *)
+      (* We can now rewrite H1 using H2 *)
+      rewrite H2 in H1.
+(* So, we have H1: 1 * S (S (S n')) = S (S (S n')) *)
+      (* And H2: S (S n') = S n' *)
+      (* These
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #522)
+Error in step "discriminate H1.".
+Message: Not a discriminable equality..
+Goal: S (0 + 0) = 1.
+
+
+TRYING TO PROVE LEMMA
+Lemma addition_of_zero_and_one_4 : forall H1 : 2 = 2, forall H2 : 1 * 1 = 1 -> S (1 + 0) = 2, S (0 + 0) = 1.
+
+
+ATTEMPTED LEMMA PROOF (LEMMAS USED: 5)
+
+
+
+
+
+
+
+From LF Require Export Basics.
+
+
+
+
+
+
+
+
+Theorem add_0_r_firsttry : forall n:nat,
+  n + 0 = n.
+
+
+
+Proof.
+  intros n.
+  simpl. 
+Abort.
+
+
+
+Theorem add_0_r_secondtry : forall n:nat,
+  n + 0 = n.
+Proof.
+  intros n. destruct n as [| n'] eqn:E.
+  - 
+    reflexivity. 
+  - 
+    simpl.       
+Abort.
+
+
+
+
+
+Theorem add_0_r : forall n:nat, n + 0 = n.
+Proof.
+  intros n. induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+Theorem minus_n_n : forall n,
+  minus n n = 0.
+Proof.
+  
+  intros n. induction n as [| n' IHn'].
+  - 
+    simpl. reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.  Qed.
+
+
+
+
+
+Theorem mul_0_r : forall n:nat,
+  n * 0 = 0.
+Proof.
+  induction n as [| n' IHn'].
+  -     reflexivity.
+  -  simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem plus_n_Sm : forall n m : nat,
+  S (n + m) = n + (S m).
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+Theorem add_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [| n' IHn'].
+  - 
+    simpl. rewrite <- plus_n_O. reflexivity.
+  - 
+    simpl. rewrite <- plus_n_Sm. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem add_assoc : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite -> IHn'. reflexivity.
+Qed.
+
+
+
+
+Fixpoint double (n:nat) :=
+  match n with
+  | O => O
+  | S n' => S (S (double n'))
+  end.
+
+
+
+Lemma double_plus : forall n, double n = n + n .
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl.
+    rewrite -> IHn'.
+    rewrite <- plus_n_Sm.
+    reflexivity.
+Qed.
+
+
+
+Theorem eqb_refl : forall n : nat,
+  (n =? n) = true.
+Proof.
+  intros n.
+  induction n.
+  reflexivity.
+  simpl. rewrite <- IHn. reflexivity.
+Qed.
+
+
+
+
+Theorem even_S : forall n : nat,
+  even (S n) = negb (even n).
+Proof.
+  induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    rewrite -> IHn'.
+    rewrite -> negb_involutive.
+    reflexivity.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Theorem mult_0_plus' : forall n m : nat,
+  (n + 0 + 0) * m = n * m.
+Proof.
+  intros n m.
+  assert (H: n + 0 + 0 = n).
+    { rewrite add_comm. simpl. rewrite add_comm. reflexivity. }
+  rewrite -> H.
+  reflexivity.  Qed.
+
+
+
+
+
+Theorem plus_rearrange_firsttry : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  
+  rewrite add_comm.
+  
+Abort.
+
+
+
+Theorem plus_rearrange : forall n m p q : nat,
+  (n + m) + (p + q) = (m + n) + (p + q).
+Proof.
+  intros n m p q.
+  assert (H: n + m = m + n).
+  { rewrite add_comm. reflexivity. }
+  rewrite H. reflexivity.  Qed.
+
+
+
+
+
+
+
+
+
+
+Theorem add_assoc' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof. intros n m p. induction n as [| n' IHn']. reflexivity.
+  simpl. rewrite IHn'. reflexivity.  Qed.
+
+
+
+Theorem add_assoc'' : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p. induction n as [| n' IHn'].
+  - 
+    reflexivity.
+  - 
+    simpl. rewrite IHn'. reflexivity.   Qed.
+
+
+
+
+
+
+
+
+
+
+Definition manual_grade_for_add_comm_informal : option (nat*string) := None.
+
+
+
+
+
+Definition manual_grade_for_eqb_refl_informal : option (nat*string) := None.
+
+
+
+
+
+
+
+Theorem add_shuffle3 : forall n m p : nat,
+  n + (m + p) = m + (n + p).
+Proof.
+  intros n m p.
+  rewrite -> add_assoc.
+  rewrite -> add_assoc.
+  assert (H: n + m = m + n).
+  { rewrite -> add_comm. reflexivity. }
+  rewrite -> H. reflexivity.
+Qed.
+
+
+
+Theorem mul_comm : forall m n : nat,
+  m * n = n * m.
+Proof.
+  intros m n.
+  destruct m as [| m'].
+  - simpl. rewrite -> mul_0_r. reflexivity.
+  - induction n as [| n' IHn'].
+    + simpl. rewrite -> mul_0_r. reflexivity.
+    + simpl.
+      rewrite <- IHn'.
+      simpl.
+      rewrite <- mult_n_Sm.
+      assert (H1: m' + (n' + m' * n') = n' + (m' + m' * n')).
+      { rewrite -> add_shuffle3. reflexivity. }
+      assert (H2: m' * n' + m' = m' + m' * n').
+      { rewrite -> add_comm. reflexivity. }
+      rewrite -> H1. rewrite -> H2.
+      reflexivity.
+Qed.
+
+
+
+
+Check leb.
+
+Theorem plus_leb_compat_l : forall n m p : nat,
+  n <=? m = true -> (p + n) <=? (p + m) = true.
+Proof.
+  intros n m p.
+  intros H.
+  induction p as [| p' IHp'].
+  - simpl. rewrite -> H. reflexivity.
+  - simpl. rewrite -> IHp'. reflexivity.
+Qed.
+
+
+
+
+
+Theorem leb_refl : forall n:nat,
+  (n <=? n) = true.
+Proof.
+  induction n as [| n'].
+  - reflexivity.
+  - simpl. rewrite <- IHn'. reflexivity.
+Qed.
+
+Theorem zero_neqb_S : forall n:nat,
+  0 =? (S n) = false.
+Proof.
+  reflexivity. Qed.
+
+Theorem andb_false_r : forall b : bool,
+  andb b false = false.
+Proof.
+  destruct b.
+  reflexivity. reflexivity. Qed.
+
+Theorem S_neqb_0 : forall n:nat,
+  (S n) =? 0 = false.
+Proof.
+  reflexivity. Qed.
+
+
+
+Lemma addition_of_zero_and_one_4 : forall H1 : 2 = 2, forall H2 : 1 * 1 = 1 -> S (1 + 0) = 2, S (0 + 0) = 1.
+
+Proof.
+(* We will first prove the lemma addition_of_zero_and_one_4 by applying the theorems and lemmas given.
+*)
+  (* We start by applying the theorem add_0_r_firsttry to prove S (0 + 0) = 1.
+*)
+  apply (add_0_r_firsttry 0).
+(* Now we apply the theorem mul_0_r to prove 1 * 1 = 1 -> 0 * 1 = 0.
+*)
+  apply (mul_0_r 0).
+(* We apply the theorem add_0_r_firsttry again to prove S (1 + 0) = 2.
+*)
+  apply (add_0_r_firsttry 1).
+(* Finally, we apply the theorem eqb_refl to prove S (1 + 0) = 2 -> S (1 + 0) =? 2 = true.
+*)
+  apply (eqb_refl (S (1 + 0))).
+(* We have now proven the lemma addition_of_zero_and_one_4.
+*)
+
+Qed.
+
+Outdated contents in ..cache: recomputing
+ERROR MESSAGE IN LEMMA PROOF (FRAGMENT #512)
+Error in step "apply (add_0_r_firsttry 0).".
+Message: The variable add_0_r_firsttry was not found
+in the current environment..
+Goal: 2 = 2 -> (1 * 1 = 1 -> S (1 + 0) = 2) -> S (0 + 0) = 1.
+
+
+TRYING TO PROVE LEMMA
+Lemma square_of_one_is_one_5 : 2 = 2 -> (1 * 1 = 1 -> S (1 + 0) = 2) -> S (0 + 0) = 1.
+
+
+Error proving mult_1_l
+MAX LEMMA DEPTH REACHED. GIVING UP.

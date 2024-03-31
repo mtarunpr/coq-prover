@@ -13,12 +13,12 @@ load_dotenv()
 from infer import GPT, LocalModel
 
 
-LLM_TYPE = "LocalModel"  # GPT | LocalModel
+LLM_TYPE = "GPT"  # GPT | LocalModel
 GPT_MODEL_NAME = "gpt-4-1106-preview"
 LOCAL_MODEL_NAME = "Phind/Phind-CodeLlama-34B-v2"
 LOCAL_MODEL_CHECKPOINT = None
 MAX_LEMMA_RETRIES = 5
-MAX_LEMMA_DEPTH = 5
+MAX_LEMMA_DEPTH = 10
 MODULE_NAME = "LF"  # for imports, passed to coq through -Q flag
 
 warning_indicators = ["deprecated", "Loading ML file", "(* debug"]

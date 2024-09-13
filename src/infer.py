@@ -60,9 +60,13 @@ class BaseLLM:
                 },
             ]
         response = self.ask(messages)
-        proof_contents = response.split("Proof.")[1].split("Qed.")[0]
-        proof_str = "Proof.\n" + proof_contents + "\nQed."
-        theorem.proof = re.findall(r"(.+?\.)(?:\s+|$)", proof_str, flags=re.DOTALL)
+        proof_split = response.split("Proof.") 
+        if (len(proof_split) >= 2):
+            qed_split = proof_split[1].split("Qed.")
+            if (len(qed_split)):
+                proof_contents = qed_split[0]
+                proof_str = "Proof.\n" + proof_contents + "\nQed."
+                theorem.proof = re.findall(r"(.+?\.)(?:\s+|$)", proof_str, flags=re.DOTALL)
 
     def create_lemma_name(self, lemma_str: str, suffix: str):
         messages = [
